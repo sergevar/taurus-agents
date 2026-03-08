@@ -1,6 +1,6 @@
-import type { ToolResult, ToolContext } from '../core/types.js';
-import { Tool } from './base.js';
-import type { PersistentShell } from '../daemon/persistent-shell.js';
+import type { ToolResult, ToolContext } from '../../core/types.js';
+import { Tool } from '../base.js';
+import type { PersistentShell } from '../../daemon/persistent-shell.js';
 
 export class PersistentBashTool extends Tool {
   readonly name = 'Bash';

@@ -1,18 +1,18 @@
-import type { ToolResult, ToolContext } from '../core/types.js';
-import { Tool } from './base.js';
+import type { ToolResult, ToolContext } from '../../core/types.js';
+import { Tool } from '../base.js';
 
 /**
- * PauseTool — allows a thread to pause itself and wait for human input.
+ * PauseTool — allows an agent to pause itself and wait for human input.
  *
- * When a thread calls this tool, the worker sends a 'paused' message to the
- * parent via IPC and blocks until a 'resume' message arrives. The parent
- * updates the thread status and the web UI shows a resume button.
+ * When an agent calls this tool, the worker sends a 'paused' message to the
+ * Daemon via IPC and blocks until a 'resume' message arrives. The Daemon
+ * updates the agent status and the web UI shows a resume button.
  *
- * The sendPause/waitForResume callbacks are injected by the thread worker.
+ * The sendPause/waitForResume callbacks are injected by the agent worker.
  */
 export class PauseTool extends Tool {
   readonly name = 'Pause';
-  readonly description = 'Pause this thread and wait for human input. Use when you need a decision, approval, or additional information before continuing.';
+  readonly description = 'Pause this agent and wait for human input. Use when you need a decision, approval, or additional information before continuing.';
   readonly requiresApproval = false; // The tool IS the approval mechanism
   readonly inputSchema = {
     type: 'object' as const,

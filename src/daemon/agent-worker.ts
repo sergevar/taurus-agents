@@ -14,9 +14,13 @@ import { InferenceService } from '../inference/service.js';
 import { AnthropicProvider } from '../inference/providers/anthropic.js';
 import { ToolRegistry } from '../tools/registry.js';
 import { PersistentShell } from './persistent-shell.js';
-import { PersistentBashTool } from '../tools/persistent-bash.js';
-import { PauseTool } from '../tools/pause.js';
-import { ShellReadTool, ShellWriteTool, ShellEditTool, ShellGlobTool, ShellGrepTool } from '../tools/shell-tools.js';
+import { PersistentBashTool } from '../tools/shell/bash.js';
+import { PauseTool } from '../tools/control/pause.js';
+import { ShellReadTool } from '../tools/shell/read.js';
+import { ShellWriteTool } from '../tools/shell/write.js';
+import { ShellEditTool } from '../tools/shell/edit.js';
+import { ShellGlobTool } from '../tools/shell/glob.js';
+import { ShellGrepTool } from '../tools/shell/grep.js';
 
 // ── IPC helpers ──
 
