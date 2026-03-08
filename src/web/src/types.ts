@@ -21,7 +21,7 @@ export interface Agent {
   updated_at: string;
 }
 
-export type RunStatus = 'running' | 'completed' | 'error' | 'stopped';
+export type RunStatus = 'running' | 'paused' | 'completed' | 'error' | 'stopped';
 
 export interface Run {
   id: string;

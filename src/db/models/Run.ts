@@ -5,7 +5,7 @@ import { DEFAULT_MODEL } from '../../core/defaults.js';
 
 const sequelize = Database.init();
 
-export type RunStatus = 'running' | 'completed' | 'error' | 'stopped';
+export type RunStatus = 'running' | 'paused' | 'completed' | 'error' | 'stopped';
 
 class Run extends Model {
   declare id: string;

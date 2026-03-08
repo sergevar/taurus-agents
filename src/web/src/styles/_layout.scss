@@ -48,6 +48,7 @@
   flex-shrink: 0;
 
   &--running   { color: $accent; }
+  &--paused    { color: $yellow; }
   &--completed { color: $green; }
   &--error     { color: $red; }
   &--stopped   { color: $text2; }

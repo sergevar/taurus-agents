@@ -348,6 +348,9 @@ export class Daemon {
     const msg: ParentMessage = { type: 'resume', message };
     managed.process.send(msg);
     await this.updateAgentStatus(agentId, 'running');
+    if (managed.currentRunId) {
+      await this.updateRunStatus(agentId, managed.currentRunId, 'running');
+    }
   }
 
   async injectMessage(agentId: string, message: string): Promise<void> {
@@ -460,6 +463,7 @@ export class Daemon {
 
       case 'paused':
         await this.updateAgentStatus(agentId, 'paused');
+        await this.updateRunStatus(agentId, runId, 'paused');
         this.logger('info', `[${managed.agent.name}] Paused: ${msg.reason}`);
         this.sse.broadcast(agentId, {
           type: 'agent_paused',
@@ -535,7 +539,7 @@ export class Daemon {
     this.docker.pauseContainer(managed.agent.container_id).catch(() => {});
   }
 
-  private async updateRunStatus(agentId: string, runId: string, status: 'running' | 'completed' | 'error' | 'stopped'): Promise<void> {
+  private async updateRunStatus(agentId: string, runId: string, status: 'running' | 'paused' | 'completed' | 'error' | 'stopped'): Promise<void> {
     await Run.update({ status }, { where: { id: runId } });
     this.sse.broadcast(agentId, {
       type: 'run_status',

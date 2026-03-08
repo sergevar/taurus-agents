@@ -31,10 +31,13 @@
 Hottest
     [] spin up three *parallel* agents and use it to test the website submission form - parallel executions
     [] i can ask something to an ephemeral, mostly read only session - it shouldn't count as locking (it should know there's a writer already i guess)
+    [] allow to wrap tool calls into e.g. "md-cleaner/html-cleaner" that will clean the returned markdown, to help the agent with the context size (maybe even take the relevance in description field?). but how to properly manage such ephemeral agents?
 
 [] dashboard! that agents can operate on. notion-like! factorio-like!
 
 [] if you miss the deadline because server restarted, do you wait for a new tick or try to catch up by triggering
+
+[] hmm no animation that something is happening... that it's sending something
 
 [] add jina when you get 403
 Let me get more details from the Al Arabiya report:
