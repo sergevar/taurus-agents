@@ -1,6 +1,6 @@
 [] prevent second ./taurus from running and interfering
 [] split types.ts so they're owned by their files
-[] move utils out of index.ts or at least even web server out
+[x] move utils out of index.ts or at least even web server out
 [x] naming: thread->agent. session->run. thread manager -> daemon (or AgentDaemon?).
 [] chatml: token count and HUD managing/partial compactify/collapse/uncollapse
 [] events: agent to agent comms (use inbox/outbox?)
@@ -18,3 +18,5 @@ later
 [] connect e2b/computer use
 [] s3 -> enc -> into remote container
 [] moltbook-like thingy?
+
+[] If it bothers you, you could switch to better-sqlite3 (pure JS bindings, no node-gyp) someday, but that's a different API (synchronous) and would need Sequelize dialect changes.

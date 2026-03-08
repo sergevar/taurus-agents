@@ -8,7 +8,9 @@
     "dev": "tsx src/index.ts",
     "start": "node --loader tsx src/index.ts",
     "daemon": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "makemigration": "tsx node_modules/sequelize-auto-migrations/bin/makemigration.js && for f in src/db/migrations/*.js; do [ -f \"$f\" ] && mv \"$f\" \"${f%.js}.cjs\"; done",
+    "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -16,6 +18,8 @@
     "dotenv": "^17.3.1",
     "fast-glob": "^3.3.2",
     "sequelize": "^6.37.5",
+    "sequelize-auto-migrations": "github:pointnetwork/sequelize-auto-migrations#all-the-changes",
+    "sequelize-cli": "^6.6.5",
     "sqlite3": "^5.1.7",
     "tree-kill": "^1.2.2",
     "uuid": "^11.0.0",

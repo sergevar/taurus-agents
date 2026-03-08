@@ -1,0 +1,10 @@
+{
+  "development": {
+    "username": null,
+    "password": null,
+    "database": "main",
+    "host": "localhost",
+    "dialect": "sqlite",
+    "storage": "../../data/taurus.sqlite"
+  }
+}
