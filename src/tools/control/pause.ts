@@ -12,7 +12,7 @@ import { Tool } from '../base.js';
  */
 export class PauseTool extends Tool {
   readonly name = 'Pause';
-  readonly description = 'Pause this agent and wait for human input. Use when you need a decision, approval, or additional information before continuing.';
+  readonly description = 'Pause this agent and wait for human input. Use ONLY when you need a decision, approval, or additional information from a human before continuing. This will HALT execution until a human responds — do NOT use it for planning, thinking, or organizing your work.';
   readonly requiresApproval = false; // The tool IS the approval mechanism
   readonly inputSchema = {
     type: 'object' as const,

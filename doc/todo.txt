@@ -1,6 +1,7 @@
 [] track mtime and error out on edit without reading first
 
-"Execute your task" where can i change prompt templates??
+[] "Execute your task" where can i change prompt templates??
+    [] Resumed. Human message: Why did you use the pause tool? (from Pause)
 
 
 [] ! CRON
@@ -32,6 +33,9 @@
 [] split types.ts so they're owned by their files
 
 [] why end_turn terminology?
+
+
+
 
 
 
