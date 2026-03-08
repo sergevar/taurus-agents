@@ -26,6 +26,9 @@ import { ShellWriteTool } from '../tools/shell/write.js';
 import { ShellEditTool } from '../tools/shell/edit.js';
 import { ShellGlobTool } from '../tools/shell/glob.js';
 import { ShellGrepTool } from '../tools/shell/grep.js';
+import { WebFetchTool } from '../tools/web/web-fetch.js';
+import { WebSearchTool } from '../tools/web/web-search.js';
+import { BraveSearchProvider } from '../tools/web/brave-search.js';
 
 // ── IPC helpers ──
 
@@ -75,6 +78,13 @@ function registerTools(registry: ToolRegistry, toolNames: string[], shell: Persi
       registry.register(new PersistentBashTool(shell));
     } else if (name === 'Pause') {
       registry.register(new PauseTool(sendPause, waitForResume));
+    } else if (name === 'WebFetch') {
+      registry.register(new WebFetchTool());
+    } else if (name === 'WebSearch') {
+      const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+      if (apiKey) {
+        registry.register(new WebSearchTool(new BraveSearchProvider(apiKey)));
+      }
     } else if (SHELL_TOOLS[name]) {
       registry.register(SHELL_TOOLS[name]());
     }
@@ -247,7 +257,7 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
 
   // 6. Run agent loop
   try {
-    const READ_ONLY_TOOLS = new Set(['Read', 'Glob', 'Grep', 'Pause']);
+    const READ_ONLY_TOOLS = new Set(['Read', 'Glob', 'Grep', 'Pause', 'WebSearch', 'WebFetch']);
 
     // Filter tools sent to the LLM — observers never see mutation tools
     const visibleTools = agent.type === 'observer'
