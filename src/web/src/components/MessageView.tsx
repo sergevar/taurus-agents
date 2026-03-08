@@ -57,13 +57,11 @@ export function MessageView({ messages }: MessageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wasNearBottom = useRef(true);
 
-  // Track scroll position before render
+  // After new messages render, scroll to bottom if we were already near it
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // "Near bottom" = within 150px of the end
-    const isNear = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-    if (isNear) {
+    if (wasNearBottom.current) {
       el.scrollTop = el.scrollHeight;
     }
   }, [messages]);
