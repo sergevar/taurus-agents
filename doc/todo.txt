@@ -1,15 +1,7 @@
-i notice tool use input seems to always be a json object, and it's taking some space for the { } lines. could we perhaps parse it out into a kv table instead? and maybe we could have a universal component that could also do it hierarchically, i.e. if the value is an object, also recursively turn it into a table etc. and yeah let's make sure it's contained properly. again, maybe some util that is specifically making text safe for html injection like that? oh i think react sanitizes it by default right?
-
-[] show thinking summaries
-[] table for tool use?
-
 [] track mtime and error out on edit without reading first
 
 "Execute your task" where can i change prompt templates??
 
-[] secure markdown!
-
-// TODO: route to other agents
 
 [] ! CRON
 
@@ -20,13 +12,18 @@ we should really stop doing that and use migrations instead
 
 [] context length management (proper! brainstorm)
 
+[] on switching agents, run highlighted within is lost
+
+[] different font sizes? monospace and main text
+
 [] prevent second ./taurus from running and interfering
-[] split types.ts so they're owned by their files
 [] chatml: token count and HUD managing/partial compactify/collapse/uncollapse
 [] clean up agent-loop.ts and base-agent.ts
 [] check thread mgr again
 
-toolu_01 kinda useless
+[] toolu_01 kinda useless
+
+[] do we need assistant/user markings?
 
 [] what are the read line limits
 
@@ -35,6 +32,9 @@ toolu_01 kinda useless
 
 [] maybe take containerization options out of the thread table itself?
 
+[] // TODO: route to other agents
+
+[] split types.ts so they're owned by their files
 
 
 later

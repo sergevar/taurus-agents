@@ -496,8 +496,8 @@
 .thinking-block {
   margin: 4px 0;
   border-radius: 4px;
-  border: 1px solid rgba($purple, 0.2);
-  background: rgba($purple, 0.04);
+  border: 1px solid rgba($amber, 0.2);
+  background: rgba($amber, 0.04);
   overflow: hidden;
 
   &__header {
@@ -511,7 +511,7 @@
     color: $text2;
     transition: background 0.1s;
 
-    &:hover { background: rgba($purple, 0.08); }
+    &:hover { background: rgba($amber, 0.08); }
   }
 
   &__toggle {
@@ -522,7 +522,7 @@
   }
 
   &__label {
-    color: $purple;
+    color: $amber;
     font-weight: 500;
     flex-shrink: 0;
   }
@@ -538,7 +538,7 @@
 
   &__content {
     padding: 8px 10px;
-    border-top: 1px solid rgba($purple, 0.1);
+    border-top: 1px solid rgba($amber, 0.1);
     font-size: 12px;
     line-height: 1.5;
     font-family: $font-mono;
@@ -547,6 +547,65 @@
     word-break: break-word;
     max-height: 400px;
     overflow-y: auto;
+  }
+}
+
+// ── JSON Key-Value Table ──
+
+.json-kv {
+  &__table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    font-family: $font-mono;
+
+    td { padding: 2px 0; vertical-align: top; }
+
+    // Nested tables indent
+    .json-kv__table {
+      td:first-child { padding-left: 12px; }
+    }
+  }
+
+  &__key {
+    color: $accent;
+    white-space: nowrap;
+    padding-right: 10px !important;
+    width: 1%;  // shrink-to-fit
+    font-weight: 500;
+
+    &::after {
+      content: ':';
+      color: $text2;
+      margin-left: 2px;
+    }
+  }
+
+  &__val {
+    color: $text;
+    word-break: break-word;
+  }
+
+  &__str    { color: $green; }
+  &__num    { color: $yellow; }
+  &__bool   { color: $yellow; }
+  &__null   { color: $text2; font-style: italic; }
+
+  &__pre {
+    margin: 2px 0;
+    padding: 6px 8px;
+    background: rgba($bg3, 0.5);
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  &__inline-array {
+    color: $text;
   }
 }
 
@@ -566,10 +625,7 @@
 
   &__input {
     padding: 6px 8px;
-    font-size: 12px;
-    font-family: $font-mono;
     background: $bg;
-    margin: 0;
     overflow-x: auto;
     max-height: 300px;
     overflow-y: auto;

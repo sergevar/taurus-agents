@@ -1,0 +1,389 @@
+{
+    "tables": {
+        "Agents": {
+            "tableName": "Agents",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "folder_id": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "00000000-0000-0000-0000-000000000000"
+                    },
+                    "field": "folder_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "name": {
+                    "allowNull": false,
+                    "unique": true,
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "type": {
+                    "allowNull": false,
+                    "field": "type",
+                    "seqType": "Sequelize.STRING"
+                },
+                "status": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "idle"
+                    },
+                    "field": "status",
+                    "seqType": "Sequelize.STRING"
+                },
+                "cwd": {
+                    "allowNull": false,
+                    "field": "cwd",
+                    "seqType": "Sequelize.STRING"
+                },
+                "model": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "claude-sonnet-4-20250514"
+                    },
+                    "field": "model",
+                    "seqType": "Sequelize.STRING"
+                },
+                "system_prompt": {
+                    "allowNull": false,
+                    "field": "system_prompt",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "tools": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "internal": true,
+                        "value": "Sequelize.Array"
+                    },
+                    "field": "tools",
+                    "seqType": "Sequelize.JSON"
+                },
+                "schedule": {
+                    "allowNull": true,
+                    "field": "schedule",
+                    "seqType": "Sequelize.STRING"
+                },
+                "max_turns": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 20
+                    },
+                    "field": "max_turns",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "timeout_ms": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 300000
+                    },
+                    "field": "timeout_ms",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "metadata": {
+                    "allowNull": true,
+                    "field": "metadata",
+                    "seqType": "Sequelize.JSON"
+                },
+                "docker_image": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "ubuntu:22.04"
+                    },
+                    "field": "docker_image",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "AgentLogs": {
+            "tableName": "AgentLogs",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "agent_id": {
+                    "allowNull": false,
+                    "field": "agent_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "run_id": {
+                    "allowNull": true,
+                    "field": "run_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "level": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "info"
+                    },
+                    "field": "level",
+                    "seqType": "Sequelize.STRING"
+                },
+                "event": {
+                    "allowNull": false,
+                    "field": "event",
+                    "seqType": "Sequelize.STRING"
+                },
+                "message": {
+                    "allowNull": false,
+                    "field": "message",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "data": {
+                    "allowNull": true,
+                    "field": "data",
+                    "seqType": "Sequelize.JSON"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "Runs": {
+            "tableName": "Runs",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "name": {
+                    "allowNull": true,
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "cwd": {
+                    "allowNull": false,
+                    "field": "cwd",
+                    "seqType": "Sequelize.STRING"
+                },
+                "model": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": "claude-sonnet-4-20250514"
+                    },
+                    "field": "model",
+                    "seqType": "Sequelize.STRING"
+                },
+                "total_input_tokens": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "total_input_tokens",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "total_output_tokens": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "total_output_tokens",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "total_cost_usd": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "total_cost_usd",
+                    "seqType": "Sequelize.FLOAT"
+                },
+                "agent_id": {
+                    "allowNull": true,
+                    "field": "agent_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "trigger": {
+                    "allowNull": true,
+                    "field": "trigger",
+                    "seqType": "Sequelize.STRING"
+                },
+                "run_summary": {
+                    "allowNull": true,
+                    "field": "run_summary",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "run_error": {
+                    "allowNull": true,
+                    "field": "run_error",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "Messages": {
+            "tableName": "Messages",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "run_id": {
+                    "allowNull": false,
+                    "field": "run_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "role": {
+                    "allowNull": false,
+                    "field": "role",
+                    "seqType": "Sequelize.STRING"
+                },
+                "seq": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "seq",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "content": {
+                    "allowNull": false,
+                    "field": "content",
+                    "seqType": "Sequelize.JSON"
+                },
+                "stop_reason": {
+                    "allowNull": true,
+                    "field": "stop_reason",
+                    "seqType": "Sequelize.STRING"
+                },
+                "input_tokens": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "input_tokens",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "output_tokens": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "output_tokens",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "ToolCalls": {
+            "tableName": "ToolCalls",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "message_id": {
+                    "allowNull": false,
+                    "field": "message_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "tool_name": {
+                    "allowNull": false,
+                    "field": "tool_name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "tool_input": {
+                    "allowNull": false,
+                    "field": "tool_input",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "tool_output": {
+                    "allowNull": false,
+                    "field": "tool_output",
+                    "seqType": "Sequelize.TEXT"
+                },
+                "is_error": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": false
+                    },
+                    "field": "is_error",
+                    "seqType": "Sequelize.BOOLEAN"
+                },
+                "duration_ms": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "value": 0
+                    },
+                    "field": "duration_ms",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "createdAt": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "Folders": {
+            "tableName": "Folders",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "field": "id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "name": {
+                    "allowNull": false,
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "parent_id": {
+                    "allowNull": true,
+                    "field": "parent_id",
+                    "seqType": "Sequelize.UUID"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        }
+    },
+    "revision": 1
+}

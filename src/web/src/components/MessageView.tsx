@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MessageRecord } from '../types';
 import { Markdown } from './Markdown';
+import { JsonKV } from './JsonKV';
 
 // ── Collapsible thinking block ──
 
@@ -48,7 +49,9 @@ function ContentBlockView({ block }: { block: any }) {
     return (
       <div className="msg-tool-use">
         <div className="msg-tool-use__header">Tool: {block.name}</div>
-        <pre className="msg-tool-use__input">{JSON.stringify(block.input, null, 2)}</pre>
+        <div className="msg-tool-use__input">
+          <JsonKV data={block.input} />
+        </div>
       </div>
     );
   }

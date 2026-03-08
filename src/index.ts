@@ -11,7 +11,6 @@ import { Database } from './db/index.js';
 // Import models so Sequelize registers them
 import './db/models/Run.js';
 import './db/models/Message.js';
-import './db/models/ToolCall.js';
 import './db/models/Folder.js';
 import './db/models/Agent.js';
 import './db/models/AgentLog.js';
