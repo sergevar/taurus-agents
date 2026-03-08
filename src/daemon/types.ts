@@ -1,6 +1,5 @@
 // ─── Agent Enums ───
 
-export type AgentType = 'observer' | 'actor';
 export type AgentStatus = 'idle' | 'running' | 'paused' | 'error' | 'disabled';
 export type TriggerType = 'schedule' | 'manual' | `signal:${string}`;
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';

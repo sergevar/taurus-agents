@@ -4,7 +4,6 @@ export interface Agent {
   id: string;
   folder_id: string;
   name: string;
-  type: 'observer' | 'actor';
   status: AgentStatus;
   cwd: string;
   model: string;

@@ -49,11 +49,6 @@ The web UI is at `http://localhost:7777`. The API is at `http://localhost:7777/a
 
 ## Concepts
 
-### Agent types
-
-- **Observer**: read-only tools only (Read, Glob, Grep, Pause, WebSearch, WebFetch). Cannot mutate the filesystem.
-- **Actor**: all tools including Write, Edit, and Bash.
-
 ### Runs
 
 A run is a single execution of an agent. It contains a sequence of messages (user/assistant turns). Runs can be:
@@ -75,6 +70,7 @@ A run is a single execution of an agent. It contains a sequence of messages (use
 | Pause | control | Pause execution, wait for human |
 | WebSearch | web | Brave search API |
 | WebFetch | web | Fetch and extract web pages |
+| Browser | web | Control a headless browser |
 
 ### System prompt templates
 
@@ -125,7 +121,7 @@ curl localhost:7777/api/agents
 # Create agent
 curl -X POST localhost:7777/api/agents \
   -H 'Content-Type: application/json' \
-  -d '{"name": "my-agent", "type": "actor", "system_prompt": "You are helpful."}'
+  -d '{"name": "my-agent", "system_prompt": "You are helpful."}'
 
 # Start a run
 curl -X POST localhost:7777/api/agents/<id>/run \
@@ -188,3 +184,11 @@ doc/
   todo.txt              # Development backlog
   research/             # Claude Code architecture research notes
 ```
+
+## DB Migrations
+
+- Always use `npm run makemigration` to generate migrations — never write them by hand
+- `makemigration` auto-generates `_current.json` which tracks the schema state; hand-written migrations desync it
+- After makemigration, review the generated file — it may pick up unrelated drift if `_current.json` was stale
+- Apply with `npm run migrate`
+- Migration files are `.cjs` (the npm script auto-renames `.js → .cjs`)

@@ -1,0 +1,1 @@
+Note: This folder is what will be copied into a container at /workspace, if a workspace dir isn't set on the agent. Don't delete this note from the Taurus project, so that this directory is never empty. But inside a container, you can safely cull it after reading.

@@ -21,7 +21,6 @@ export const api = {
 
   createAgent(data: {
     name: string;
-    type: string;
     system_prompt: string;
     tools: string[];
     cwd?: string;
@@ -37,7 +36,6 @@ export const api = {
 
   updateAgent(id: string, data: Partial<{
     name: string;
-    type: string;
     system_prompt: string;
     tools: string[];
     cwd: string;
@@ -91,7 +89,7 @@ export const api = {
 
   listTools(): Promise<{
     tools: { name: string; group: string; description: string }[];
-    defaults: { model: string; docker_image: string; tools: string[]; max_turns: number; timeout_ms: number };
+    defaults: { model: string; docker_image: string; tools: string[]; readonly_tools: string[]; max_turns: number; timeout_ms: number };
   }> {
     return request('/api/tools');
   },

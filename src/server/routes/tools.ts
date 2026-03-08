@@ -1,5 +1,5 @@
 import { json, route, type Route } from '../helpers.js';
-import { DEFAULT_MODEL, DEFAULT_DOCKER_IMAGE, DEFAULT_TOOLS, DEFAULT_MAX_TURNS, DEFAULT_TIMEOUT_MS } from '../../core/defaults.js';
+import { DEFAULT_MODEL, DEFAULT_DOCKER_IMAGE, DEFAULT_TOOLS, READ_ONLY_TOOLS, DEFAULT_MAX_TURNS, DEFAULT_TIMEOUT_MS } from '../../core/defaults.js';
 
 const AVAILABLE_TOOLS = [
   { name: 'Read',      group: 'File',   description: 'Read files' },
@@ -10,6 +10,7 @@ const AVAILABLE_TOOLS = [
   { name: 'Bash',      group: 'Exec',   description: 'Run shell commands' },
   { name: 'WebSearch', group: 'Web',    description: 'Search the web' },
   { name: 'WebFetch',  group: 'Web',    description: 'Fetch web pages' },
+  { name: 'Browser',   group: 'Web',    description: 'Control a headless browser' },
 ];
 
 export function toolRoutes(): Route[] {
@@ -21,6 +22,7 @@ export function toolRoutes(): Route[] {
           model: DEFAULT_MODEL,
           docker_image: DEFAULT_DOCKER_IMAGE,
           tools: DEFAULT_TOOLS,
+          readonly_tools: READ_ONLY_TOOLS,
           max_turns: DEFAULT_MAX_TURNS,
           timeout_ms: DEFAULT_TIMEOUT_MS,
         },

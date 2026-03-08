@@ -10,7 +10,6 @@ export function CreateAgentModal({ onClose, onCreated }: CreateAgentModalProps) 
   async function handleSubmit(data: AgentFormData) {
     const result = await api.createAgent({
       name: data.name,
-      type: data.type,
       system_prompt: data.system_prompt,
       tools: data.tools,
       cwd: data.cwd || undefined,

@@ -1,4 +1,34 @@
+[...] browser
+[] } catch { /* corrupt state, start fresh */ }
+    try { unlinkSync(STATE_FILE); } catch { /* ignore */ }
+    what's this?
+        [] also have a task/agent that sweeps through all security issues and works on them and auto-tests!
+[] screenshot captured but can't use
+[] browser tool featureset: Yes, you should definitely expand it! A few approaches:
+[] browser useragent
+
+
+[] pdfs! see how codex does it etc. but also deepseek pdf (skill/agent?)
+
+[] COUNT $ NOW!
+
+[] add openrouter? ah but so many inference nuances then, not like anthropic-cli. hmm
+    on the other hand, useful for quick tests with :free models to not burn $
+
 [] track mtime and error out on edit without reading first
+
+[] create an agent - fetch token count and costs from anthropic? and put on dashboard. wow
+
+[] mount a host directory in docker! so you can continue with stockfish
+
+[] instead of tool list in ui maybe something better in agent list. make it more professional
+
+[] bloody captchas again on browser use...
+
+[] grep tool? ripgrep?
+
+[] telegram/whatsapp connection
+    [] clara/stockfish folder for agents, and then check everything
 
 [] "Execute your task" where can i change prompt templates??
     [] Resumed. Human message: Why did you use the pause tool? (from Pause)
@@ -22,16 +52,52 @@
 [] allow to spawn subtasks just like CC. same container! (so, detether from name=id)
 [] any auth in api? csrf?
 
-[] add tools inside container
-    playwright cli: npm install -g @playwright/cli ; npx playwright install chromium ; playwright-cli install --skills (github.com/playwright/claude/skills/playwright.dev/library.md)
-    other skills
+[] reason for tool call (optional)
+
+[] look into openclaw again and what it has and you don't!
+[] ^ same but for CC
+[] ^ same but for codex. prompts, tools, everything
+[] skill hub! moltskills
+
+[] encourage subagent use to save context - should realize that it gets fresh huge context! (does it work like that? or forks)
+
+[] should highlight at least
+
+[] Bash tool: "<persisted-output>Output too large (56.5KB). Full output saved to: /......../.claude/projects/User-s......./...
+
+[] autobackup! at least the database. as for containers - optional, but could set it up automatic. could be specified in hottest recipes too
+
+[] add tools inside container (maintain docker/Dockerfile)
+    base: bash, git, curl, wget, jq, rg (ripgrep), fd-find, tree, python3
+    node: via mise or nvm (needed for playwright cli, bun also an option)
+    playwright: npm install -g @playwright/mcp && npx playwright install --with-deps chromium
+      - CLI ships with @playwright/mcp: playwright-cli open/snapshot/click/fill/screenshot/close
+      - 4-10x fewer tokens than MCP (27K vs 114K per session)
+      - needs --shm-size=256m docker flag for Chromium (safer than --ipc=host)
+      - NO alpine (needs glibc)
+    alternative: vercel agent-browser (Rust+Node, ~200 tokens/snapshot, 93% less context)
+    codex-universal has: bun, git, curl, wget, jq, rg, python3, go, ruby, java, swift, php — but NO node/npm, NO browsers (25.8GB)
+    skills: playwright-cli install --skills
 
 [] if i just reload backend gracefully (because developing a feature), and this stops the runs, it should just pick them right up, right? unless flag is passed (and should indicate this in any case, that a session was abruptly stopped)
 
-Hottest
+HottestLang
+    https://x.com/karpathy/status/1617979122625712128 (Jan 25, 2023): The hottest new programming language is English
     [] spin up three *parallel* agents and use it to test the website submission form - parallel executions
     [] i can ask something to an ephemeral, mostly read only session - it shouldn't count as locking (it should know there's a writer already i guess)
     [] allow to wrap tool calls into e.g. "md-cleaner/html-cleaner" that will clean the returned markdown, to help the agent with the context size (maybe even take the relevance in description field?). but how to properly manage such ephemeral agents?
+    [] imagine if it solves the situation where browser screenshot is not fed in directly but key info extracted like coords and then piped in clean results or just the previous run discarded, that would be great (well, prefix caching but yeah)
+        yeah in general llms would probably prefer to always extract what's needed from the image and collapse it. esp if can always refetch the image from some turn
+    [] right now we're doing it manually, but imagine smth like "on boot hook: if playwright not installed in container, install it"
+        [] each time it's just a simple command to check if exists
+        [] will also help you think through corner cases like if it crashes during install each time, agent could make a note to adjust behavior
+    [] maybe even exec scripts without llm calls, and then decide on them?
+    [] start developing with a simple program, but useful/real world example. don't get stuck in planning
+    [] a whole company could be run like this. departments etc. business logic! literally!
+    [] hottest[-]lang.org? with recipes?
+    test on
+        [] security-testing recipe: spawn workers that figure out new tests/fuzzes, then run it and see
+        [] remember that article "ai wrote a c compiler" try to replicate
 
 [] dashboard! that agents can operate on. notion-like! factorio-like!
 
@@ -44,8 +110,6 @@ Hottest
 [] deep research runs?
 
 [] context length management (proper! brainstorm)
-
-[...] on switching agents, run highlighted within is lost
 
 [] different font sizes? monospace and main text
 
@@ -70,20 +134,17 @@ also small thing, but when next scheduled run triggers, i don't see it in the ui
 [] what are the read line limits
 
 [] events: agent to agent comms (use inbox/outbox?)
-[] telegram/whatsapp connection
 
-[] maybe take containerization options out of the thread table itself?
+[] maybe take containerization options out of the thread table itself? might have several containers?
 
 [] // TODO: route to other agents
 
 [] split types.ts so they're owned by their files
 
-[] why end_turn terminology?
-
-
 [] if something frustrating allow it to stop and call
+    and leave notes and suggestions and just continue!
 
-
+[] note: https://scrolltest.medium.com/playwright-mcp-burns-114k-tokens-per-test-the-new-cli-uses-27k-heres-when-to-use-each-65dabeaac7a0
 
 later
 
@@ -94,3 +155,15 @@ later
 [] If it bothers you, you could switch to better-sqlite3 (pure JS bindings, no node-gyp) someday, but that's a different API (synchronous) and would need Sequelize dialect changes.
 
 [] rebuild backend too! --watch [] hmm but won't it reload many times while writes are being written
+
+[] medium still 403s (or only for CC?)
+
+[] security/prompt injections!
+
+
+maybe
+[] ephemeral containers? instead of dangling. but what about persistence. container mgmt questions
+[] do we want sometimes *resuming* the session rather than new run? but would not show neatly in the list then. but would preserve previous context. hmm
+[] browser tool: if you want even leaner: Vercel's agent-browser CLI (Rust+Node, ~200 tokens per snapshot), same pattern but more optimized.
+
+[] naming! taurus ai taken? or at least need SEO! well good, agents can do that

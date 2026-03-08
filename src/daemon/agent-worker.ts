@@ -29,6 +29,7 @@ import { ShellGrepTool } from '../tools/shell/grep.js';
 import { WebFetchTool } from '../tools/web/web-fetch.js';
 import { WebSearchTool } from '../tools/web/web-search.js';
 import { BraveSearchProvider } from '../tools/web/brave-search.js';
+import { BrowserTool } from '../tools/web/browser.js';
 
 // ── IPC helpers ──
 
@@ -85,6 +86,8 @@ function registerTools(registry: ToolRegistry, toolNames: string[], shell: Persi
       if (apiKey) {
         registry.register(new WebSearchTool(new BraveSearchProvider(apiKey)));
       }
+    } else if (name === 'Browser') {
+      registry.register(new BrowserTool(shell));
     } else if (SHELL_TOOLS[name]) {
       registry.register(SHELL_TOOLS[name]());
     }
@@ -273,29 +276,12 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
 
   // 6. Run agent loop
   try {
-    const READ_ONLY_TOOLS = new Set(['Read', 'Glob', 'Grep', 'Pause', 'WebSearch', 'WebFetch']);
-
-    // Filter tools sent to the LLM — observers never see mutation tools
-    const visibleTools = agent.type === 'observer'
-      ? toolNames.filter(t => READ_ONLY_TOOLS.has(t))
-      : toolNames;
-
-    // Runtime safety net — deny even if the LLM hallucinates a tool
-    const requestApproval = async (toolName: string, _input: any): Promise<boolean> => {
-      if (agent.type === 'observer' && !READ_ONLY_TOOLS.has(toolName)) {
-        log('warn', 'tool.denied', `Observer agent cannot use mutation tool: ${toolName}`);
-        return false;
-      }
-      return true;
-    };
-
     for await (const event of agentLoop({
       chatml,
       inference,
       tools,
-      allowedTools: visibleTools,
+      allowedTools: toolNames,
       cwd: '/workspace',
-      requestApproval,
       maxTurns: agent.max_turns,
       signal: abortController.signal,
       model: agent.model,

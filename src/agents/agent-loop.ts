@@ -10,8 +10,8 @@ export interface AgentLoopParams {
   allowedTools: string[];
   cwd: string;
 
-  /** Called for every tool invocation. Enforces agent-type policy and interactive approval. */
-  requestApproval: (toolName: string, input: any) => Promise<boolean>;
+  /** Called for every tool invocation. Defaults to allowing all. */
+  requestApproval?: (toolName: string, input: any) => Promise<boolean>;
 
   /** Maximum inference round-trips before stopping. */
   maxTurns?: number;
@@ -33,7 +33,7 @@ export interface AgentLoopParams {
  * Yields AgentEvents that the UI (or any consumer) can render.
  */
 export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentEvent> {
-  const { chatml, inference, tools, allowedTools, cwd, requestApproval, maxTurns = 0, signal, model, getInjectedMessages } = params;
+  const { chatml, inference, tools, allowedTools, cwd, requestApproval = async () => true, maxTurns = 0, signal, model, getInjectedMessages } = params;
   let turns = 0;
 
   while (true) {

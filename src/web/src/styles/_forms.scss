@@ -74,6 +74,37 @@
   margin: -8px 0 12px;
 }
 
+// ── Label with inline action buttons ──
+
+.label-with-actions {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.label-action-btn {
+  padding: 0 5px;
+  font-size: 10px;
+  line-height: 16px;
+  border-radius: 4px;
+  border: 1px solid $border;
+  background: transparent;
+  color: $text2;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    border-color: $accent;
+    color: $text;
+  }
+}
+
 // ── Tool Picker ──
 
 .tool-picker {

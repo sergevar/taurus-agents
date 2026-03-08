@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../index.js';
 import { ROOT_FOLDER_ID } from '../../daemon/types.js';
-import type { AgentType, AgentStatus } from '../../daemon/types.js';
+import type { AgentStatus } from '../../daemon/types.js';
 import { DEFAULT_MODEL, DEFAULT_DOCKER_IMAGE, DEFAULT_MAX_TURNS, DEFAULT_TIMEOUT_MS } from '../../core/defaults.js';
 
 const sequelize = Database.init();
@@ -11,7 +11,6 @@ class Agent extends Model {
   declare id: string;
   declare folder_id: string;
   declare name: string;
-  declare type: AgentType;
   declare status: AgentStatus;
   declare cwd: string;
   declare model: string;
@@ -31,8 +30,8 @@ class Agent extends Model {
   }
 
   toApi() {
-    const { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at } = this;
-    return { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at };
+    const { id, folder_id, name, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at } = this;
+    return { id, folder_id, name, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at };
   }
 }
 
@@ -52,10 +51,6 @@ Agent.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     status: {
       type: DataTypes.STRING,

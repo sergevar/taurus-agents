@@ -16,7 +16,6 @@ export function AgentSettings({ agent, onUpdated }: AgentSettingsProps) {
     try {
       await api.updateAgent(agent.id, {
         name: data.name,
-        type: data.type,
         system_prompt: data.system_prompt,
         tools: data.tools,
         cwd: data.cwd || agent.cwd,
@@ -56,7 +55,6 @@ export function AgentSettings({ agent, onUpdated }: AgentSettingsProps) {
       </div>
       <div className="agent-settings__grid">
         <Row label="Name" value={agent.name} />
-        <Row label="Type" value={agent.type} />
         <Row label="Model" value={agent.model} />
         <Row label="Working Directory" value={agent.cwd} mono />
         <Row label="Docker Image" value={agent.docker_image} mono />

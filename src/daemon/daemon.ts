@@ -128,7 +128,6 @@ export class Daemon {
 
   async createAgent(input: {
     name: string;
-    type: 'observer' | 'actor';
     system_prompt: string;
     tools: string[];
     cwd: string;
@@ -143,7 +142,6 @@ export class Daemon {
   }): Promise<ReturnType<Agent['toApi']>> {
     const agent = await Agent.create({
       name: input.name,
-      type: input.type,
       system_prompt: input.system_prompt,
       tools: input.tools,
       cwd: input.cwd,
@@ -168,7 +166,6 @@ export class Daemon {
 
   async updateAgent(id: string, updates: Partial<{
     name: string;
-    type: 'observer' | 'actor';
     system_prompt: string;
     tools: string[];
     cwd: string;

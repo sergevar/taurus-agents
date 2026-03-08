@@ -71,8 +71,10 @@ export class DockerService {
     }
 
     // Create and start container
+    // Chromium/Playwright needs >64MB /dev/shm; --shm-size is safer than --ipc=host
     await this.docker(
       'create', '--name', container_id,
+      '--shm-size=256m',
       '-v', `${volumeName}:/workspace`,
       '-w', '/workspace',
       docker_image, 'sleep', 'infinity',

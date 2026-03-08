@@ -31,7 +31,7 @@ export function Sidebar({ agents, selectedId, onCreateClick }: SidebarProps) {
               <StatusBadge status={agent.status} />
             </div>
             <div className="agent-item__meta">
-              {agent.type} &middot; {agent.tools.join(', ')}
+              {agent.tools.join(', ')}
             </div>
             {agent.schedule && agent.next_run && agent.status !== 'running' && (
               <div className="agent-item__meta">

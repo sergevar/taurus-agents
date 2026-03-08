@@ -84,13 +84,12 @@ export function agentRoutes(daemon: Daemon): Route[] {
 
     route('POST', '/api/agents', async (req, res) => {
       const body = await parseBody(req);
-      if (!body.name || !body.type || !body.system_prompt) {
-        return error(res, 'name, type, and system_prompt are required');
+      if (!body.name || !body.system_prompt) {
+        return error(res, 'name and system_prompt are required');
       }
       try {
         const agent = await daemon.createAgent({
           name: body.name,
-          type: body.type,
           system_prompt: body.system_prompt,
           tools: body.tools ?? DEFAULT_TOOLS,
           cwd: body.cwd ?? process.cwd(),

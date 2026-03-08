@@ -5,7 +5,6 @@ import type { Agent } from '../types';
 
 export interface AgentFormData {
   name: string;
-  type: 'observer' | 'actor';
   system_prompt: string;
   tools: string[];
   cwd: string;
@@ -27,7 +26,6 @@ interface AgentFormProps {
 
 export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' }: AgentFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [type, setType] = useState<'observer' | 'actor'>(initial?.type ?? 'observer');
   const [systemPrompt, setSystemPrompt] = useState(initial?.system_prompt ?? 'You are a helpful agent. Today\'s date is {{date}}.');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set(initial?.tools ?? []));
   const [cwd, setCwd] = useState(initial?.cwd ?? '');
@@ -38,6 +36,8 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
   const [maxTurns, setMaxTurns] = useState<string>(initial ? String(initial.max_turns) : '');
   const [timeoutMs, setTimeoutMs] = useState<string>(initial ? String(initial.timeout_ms / 1000) : '');
   const [defaults, setDefaults] = useState<{ model: string; docker_image: string; max_turns: number; timeout_ms: number } | null>(null);
+  const [allToolNames, setAllToolNames] = useState<string[]>([]);
+  const [readonlyTools, setReadonlyTools] = useState<string[]>([]);
 
   useEffect(() => {
     api.listTools().then(res => {
@@ -45,6 +45,8 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
         setSelectedTools(new Set(res.defaults.tools));
       }
       setDefaults(res.defaults);
+      setAllToolNames(res.tools.map((t: { name: string }) => t.name));
+      setReadonlyTools(res.defaults.readonly_tools);
     }).catch(() => {});
   }, [initial]);
 
@@ -59,7 +61,6 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
 
     onSubmit({
       name,
-      type,
       system_prompt: systemPrompt,
       tools: [...selectedTools],
       cwd: cwd || '',
@@ -77,16 +78,17 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
       <label>Name</label>
       <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. code-reviewer" />
 
-      <label>Type</label>
-      <select value={type} onChange={e => setType(e.target.value as 'observer' | 'actor')}>
-        <option value="observer">Observer (read-only)</option>
-        <option value="actor">Actor (can mutate)</option>
-      </select>
-
       <label>System Prompt</label>
       <textarea value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)} placeholder="You are a..." />
 
-      <label>Tools</label>
+      <label className="label-with-actions">
+        Tools
+        <span className="label-actions">
+          <button type="button" className="label-action-btn" onClick={() => setSelectedTools(new Set(allToolNames))}>All</button>
+          <button type="button" className="label-action-btn" onClick={() => setSelectedTools(new Set(readonlyTools))}>Read-only</button>
+          <button type="button" className="label-action-btn" onClick={() => setSelectedTools(new Set())}>None</button>
+        </span>
+      </label>
       <ToolPicker selected={selectedTools} onChange={setSelectedTools} />
 
       <label>Working Directory</label>

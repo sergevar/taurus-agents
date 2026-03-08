@@ -22,6 +22,11 @@
                     "field": "name",
                     "seqType": "Sequelize.STRING"
                 },
+                "type": {
+                    "allowNull": false,
+                    "field": "type",
+                    "seqType": "Sequelize.STRING"
+                },
                 "status": {
                     "allowNull": false,
                     "defaultValue": {
@@ -62,18 +67,10 @@
                     "field": "schedule",
                     "seqType": "Sequelize.STRING"
                 },
-                "schedule_overlap": {
-                    "allowNull": false,
-                    "defaultValue": {
-                        "value": "skip"
-                    },
-                    "field": "schedule_overlap",
-                    "seqType": "Sequelize.STRING"
-                },
                 "max_turns": {
                     "allowNull": false,
                     "defaultValue": {
-                        "value": 0
+                        "value": 20
                     },
                     "field": "max_turns",
                     "seqType": "Sequelize.INTEGER"
@@ -94,7 +91,7 @@
                 "docker_image": {
                     "allowNull": false,
                     "defaultValue": {
-                        "value": "taurus-base"
+                        "value": "ubuntu:22.04"
                     },
                     "field": "docker_image",
                     "seqType": "Sequelize.STRING"
@@ -172,14 +169,6 @@
                 "name": {
                     "allowNull": true,
                     "field": "name",
-                    "seqType": "Sequelize.STRING"
-                },
-                "status": {
-                    "allowNull": false,
-                    "defaultValue": {
-                        "value": "running"
-                    },
-                    "field": "status",
                     "seqType": "Sequelize.STRING"
                 },
                 "cwd": {
@@ -344,5 +333,5 @@
             "indexes": []
         }
     },
-    "revision": 2
+    "revision": 1
 }
