@@ -18,6 +18,10 @@
 [] clean up agent-loop.ts and base-agent.ts
 [] check thread mgr again
 
+
+[] create subagents as needed
+[] brainstorm Hottest
+
 [] do we need assistant/user markings?
 
 [] what are the read line limits

@@ -1,0 +1,252 @@
+@use 'variables' as *;
+
+// ── Layout ──
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Status Badge ──
+
+.status-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+
+  &.idle     { background: $bg3; color: $text2; }
+  &.running  { background: $status-running-bg; color: $accent; }
+  &.paused   { background: $status-paused-bg; color: $yellow; }
+  &.error    { background: $status-error-bg; color: $red; }
+  &.disabled { background: $bg3; color: $text2; opacity: 0.5; }
+}
+
+// ── Sidebar ──
+
+.sidebar {
+  width: $sidebar-width;
+  border-right: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  background: $bg2;
+
+  &__header {
+    padding: 16px;
+    border-bottom: 1px solid $border;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
+
+  &__list {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.agent-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid $border;
+  transition: background 0.1s;
+
+  &:hover { background: $bg3; }
+  &.active {
+    background: $bg3;
+    border-left: 2px solid $accent;
+  }
+
+  &__name {
+    font-weight: 500;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__meta {
+    font-size: 12px;
+    color: $text2;
+  }
+}
+
+// ── Panel Header ──
+
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid $border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $bg2;
+
+  h2 {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__meta {
+    font-size: 12px;
+    color: $text2;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+}
+
+// ── Tabs ──
+
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid $border;
+  background: $bg2;
+  padding: 0 16px;
+}
+
+.tab-bar__tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: $text2;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+  transition: color 0.1s;
+
+  &:hover { color: $text; }
+
+  &.active {
+    color: $text;
+    border-bottom-color: $accent;
+  }
+}
+
+// ── Empty State ──
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: $text2;
+  font-size: 14px;
+}
+
+// ── Input Bar ──
+
+.input-bar {
+  padding: 8px 16px;
+  border-top: 1px solid $border;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: $bg2;
+
+  textarea {
+    flex: 1;
+    background: $bg;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: $text;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    resize: none;
+    line-height: 1.4;
+    min-height: 32px;
+    max-height: 200px;
+
+    &:focus { border-color: $accent; }
+  }
+}
+
+// ── Runs List ──
+
+.runs-panel {
+  width: 260px;
+  border-right: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  background: $bg2;
+  flex-shrink: 0;
+
+  &__header {
+    padding: 10px 12px;
+    border-bottom: 1px solid $border;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__list {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.run-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid $border;
+  transition: background 0.1s;
+
+  &:hover { background: $bg3; }
+  &.active {
+    background: $bg3;
+    border-left: 2px solid $accent;
+  }
+
+  &__trigger {
+    font-size: 11px;
+    color: $text2;
+    text-transform: uppercase;
+  }
+
+  &__time {
+    font-size: 12px;
+    color: $text;
+    margin: 2px 0;
+  }
+
+  &__summary {
+    font-size: 11px;
+    color: $text2;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__error {
+    font-size: 11px;
+    color: $red;
+    margin-top: 2px;
+  }
+}

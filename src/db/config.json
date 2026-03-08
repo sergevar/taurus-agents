@@ -5,6 +5,6 @@
     "database": "main",
     "host": "localhost",
     "dialect": "sqlite",
-    "storage": "../../data/taurus.sqlite"
+    "storage": "data/taurus.sqlite"
   }
 }

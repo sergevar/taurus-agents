@@ -7,7 +7,10 @@ import { StatusBadge } from '../components/StatusBadge';
 import { MessageView } from '../components/MessageView';
 import { InputBar } from '../components/InputBar';
 import { CreateAgentModal } from '../components/CreateAgentModal';
+import { AgentSettings } from '../components/AgentSettings';
 import '../styles/components.scss';
+
+type Tab = 'runs' | 'settings';
 
 export function AgentsPage() {
   const { agentId, runId } = useParams();
@@ -19,6 +22,7 @@ export function AgentsPage() {
   const [streamingText, setStreamingText] = useState('');
   const [streamingThinking, setStreamingThinking] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>('runs');
 
   // Refs so SSE callbacks see latest values without re-subscribing
   const agentIdRef = useRef(agentId);
@@ -67,10 +71,16 @@ export function AgentsPage() {
   // ── Auto-select latest run when agent changes ──
 
   useEffect(() => {
-    if (agentId && runs.length > 0 && !runId) {
+    if (agentId && runs.length > 0 && !runId && activeTab === 'runs') {
       navigate(`/agents/${agentId}/runs/${runs[0].id}`, { replace: true });
     }
-  }, [agentId, runs, runId, navigate]);
+  }, [agentId, runs, runId, navigate, activeTab]);
+
+  // ── Reset tab when agent changes ──
+
+  useEffect(() => {
+    setActiveTab('runs');
+  }, [agentId]);
 
   // ── Optimistic user message helper ──
 
@@ -204,6 +214,7 @@ export function AgentsPage() {
     await loadAgents();
     const updatedRuns = await api.listRuns(agentId);
     setRuns(updatedRuns);
+    setActiveTab('runs');
     navigate(`/agents/${agentId}/runs/${result.runId}`);
   }
 
@@ -214,6 +225,7 @@ export function AgentsPage() {
     await loadAgents();
     const updatedRuns = await api.listRuns(agentId);
     setRuns(updatedRuns);
+    setActiveTab('runs');
     navigate(`/agents/${agentId}/runs/${latestRunId}`);
   }
 
@@ -262,6 +274,7 @@ export function AgentsPage() {
     await loadAgents();
     const updatedRuns = await api.listRuns(agentId);
     setRuns(updatedRuns);
+    setActiveTab('runs');
     navigate(`/agents/${agentId}/runs/${result.runId}`);
   }
 
@@ -280,6 +293,7 @@ export function AgentsPage() {
 
   function handleSelectRun(id: string) {
     if (agentId) {
+      setActiveTab('runs');
       navigate(`/agents/${agentId}/runs/${id}`);
     }
   }
@@ -318,6 +332,11 @@ export function AgentsPage() {
                 <h2>{selectedAgent.name}</h2>
                 <StatusBadge status={selectedAgent.status} />
                 <span className="panel-header__meta">{selectedAgent.type} | {selectedAgent.model}</span>
+                {selectedAgent.schedule && selectedAgent.next_run && (
+                  <span className="panel-header__meta">
+                    Next: {new Date(selectedAgent.next_run).toLocaleString()}
+                  </span>
+                )}
               </div>
               <div className="panel-header__actions">
                 {isStopped && <button className="btn primary" onClick={handleStartRun}>Start Run</button>}
@@ -329,47 +348,67 @@ export function AgentsPage() {
               </div>
             </div>
 
-            {/* Content area: runs panel + messages */}
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              {/* Runs list */}
-              <div className="runs-panel">
-                <div className="runs-panel__header">Runs ({runs.length})</div>
-                <div className="runs-panel__list">
-                  {runs.map(run => (
-                    <div
-                      key={run.id}
-                      className={`run-item ${run.id === runId ? 'active' : ''}`}
-                      onClick={() => handleSelectRun(run.id)}
-                    >
-                      <div className="run-item__trigger">{run.trigger ?? 'manual'}</div>
-                      <div className="run-item__time">{new Date(run.created_at).toLocaleString()}</div>
-                      {run.run_error && <div className="run-item__error">{run.run_error}</div>}
-                      {run.run_summary && !run.run_error && (
-                        <div className="run-item__summary" title={run.run_summary}>
-                          {run.run_summary.slice(0, 80)}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {runs.length === 0 && (
-                    <div style={{ padding: '12px', color: '#8b949e', fontSize: '12px' }}>
-                      No runs yet
-                    </div>
+            {/* Tabs */}
+            <div className="tab-bar">
+              <button
+                className={`tab-bar__tab ${activeTab === 'runs' ? 'active' : ''}`}
+                onClick={() => setActiveTab('runs')}
+              >
+                Runs
+              </button>
+              <button
+                className={`tab-bar__tab ${activeTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+              >
+                Settings
+              </button>
+            </div>
+
+            {/* Tab content */}
+            {activeTab === 'runs' ? (
+              <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                {/* Runs list */}
+                <div className="runs-panel">
+                  <div className="runs-panel__header">Runs ({runs.length})</div>
+                  <div className="runs-panel__list">
+                    {runs.map(run => (
+                      <div
+                        key={run.id}
+                        className={`run-item ${run.id === runId ? 'active' : ''}`}
+                        onClick={() => handleSelectRun(run.id)}
+                      >
+                        <div className="run-item__trigger">{run.trigger ?? 'manual'}</div>
+                        <div className="run-item__time">{new Date(run.created_at).toLocaleString()}</div>
+                        {run.run_error && <div className="run-item__error">{run.run_error}</div>}
+                        {run.run_summary && !run.run_error && (
+                          <div className="run-item__summary" title={run.run_summary}>
+                            {run.run_summary.slice(0, 80)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {runs.length === 0 && (
+                      <div style={{ padding: '12px', color: '#8b949e', fontSize: '12px' }}>
+                        No runs yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  {selectedRun ? (
+                    <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} />
+                  ) : (
+                    <div className="empty-state">Select a run to view messages</div>
                   )}
+
+                  <InputBar onSend={handleSend} />
                 </div>
               </div>
-
-              {/* Messages */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {selectedRun ? (
-                  <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} />
-                ) : (
-                  <div className="empty-state">Select a run to view messages</div>
-                )}
-
-                <InputBar onSend={handleSend} />
-              </div>
-            </div>
+            ) : (
+              <AgentSettings agent={selectedAgent} onUpdated={loadAgents} />
+            )}
           </>
         )}
       </div>

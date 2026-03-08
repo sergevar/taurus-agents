@@ -17,6 +17,7 @@ import type {
 import { ROOT_FOLDER_ID } from './types.js';
 import { DockerService } from './docker.js';
 import { SSEBroadcaster } from './sse.js';
+import { Scheduler } from './scheduler.js';
 import { DEFAULT_MODEL, DEFAULT_DOCKER_IMAGE } from '../core/defaults.js';
 import { Op } from 'sequelize';
 import Agent from '../db/models/Agent.js';
@@ -39,6 +40,7 @@ export class Daemon {
   private logger: (level: LogLevel, msg: string) => void;
   readonly docker: DockerService;
   readonly sse: SSEBroadcaster;
+  readonly scheduler: Scheduler;
 
   constructor(logger?: (level: LogLevel, msg: string) => void) {
     this.logger = logger ?? ((level, msg) => {
@@ -48,6 +50,7 @@ export class Daemon {
     });
     this.docker = new DockerService(this.logger);
     this.sse = new SSEBroadcaster();
+    this.scheduler = new Scheduler(this, this.logger);
   }
 
   // ── Lifecycle ──
@@ -63,11 +66,19 @@ export class Daemon {
       this.agents.set(agent.id, { agent, process: null, currentRunId: null });
     }
 
+    // Register scheduled agents
+    for (const agent of agents) {
+      if (agent.schedule) {
+        this.scheduler.register(agent.id, agent.schedule, agent.schedule_overlap);
+      }
+    }
+
     this.logger('info', `Daemon initialized. ${this.agents.size} agent(s) loaded.`);
   }
 
   async shutdown(): Promise<void> {
     this.logger('info', 'Graceful shutdown starting...');
+    this.scheduler.shutdown();
 
     const stopPromises: Promise<void>[] = [];
     for (const [id, managed] of this.agents) {
@@ -111,6 +122,7 @@ export class Daemon {
     folder_id?: string;
     model?: string;
     schedule?: string;
+    schedule_overlap?: 'skip' | 'queue' | 'kill';
     max_turns?: number;
     timeout_ms?: number;
     metadata?: Record<string, unknown>;
@@ -125,6 +137,7 @@ export class Daemon {
       folder_id: input.folder_id ?? ROOT_FOLDER_ID,
       model: input.model ?? DEFAULT_MODEL,
       schedule: input.schedule ?? null,
+      schedule_overlap: input.schedule_overlap ?? 'skip',
       max_turns: input.max_turns ?? 20,
       timeout_ms: input.timeout_ms ?? 300_000,
       metadata: input.metadata ?? null,
@@ -132,6 +145,9 @@ export class Daemon {
     });
 
     this.agents.set(agent.id, { agent, process: null, currentRunId: null });
+    if (agent.schedule) {
+      this.scheduler.register(agent.id, agent.schedule, agent.schedule_overlap);
+    }
     this.logger('info', `Agent created: "${agent.name}" (${agent.id})`);
 
     return agent.toApi();
@@ -146,6 +162,7 @@ export class Daemon {
     folder_id: string;
     model: string;
     schedule: string | null;
+    schedule_overlap: 'skip' | 'queue' | 'kill';
     max_turns: number;
     timeout_ms: number;
     metadata: Record<string, unknown>;
@@ -155,10 +172,17 @@ export class Daemon {
     if (!managed) throw new Error(`Agent not found: ${id}`);
 
     await managed.agent.update(updates);
+
+    // Re-register schedule if schedule or overlap changed
+    if ('schedule' in updates || 'schedule_overlap' in updates) {
+      this.scheduler.register(id, managed.agent.schedule, managed.agent.schedule_overlap);
+    }
+
     return managed.agent.toApi();
   }
 
   async deleteAgent(id: string): Promise<void> {
+    this.scheduler.unregister(id);
     const managed = this.agents.get(id);
     if (managed?.process) {
       await this.stopRun(id, 'agent deleted');
@@ -175,14 +199,24 @@ export class Daemon {
     this.logger('info', `Agent deleted: ${id}`);
   }
 
-  async getAgent(id: string): Promise<ReturnType<Agent['toApi']> | null> {
-    return this.agents.get(id)?.agent.toApi() ?? null;
+  async getAgent(id: string): Promise<ReturnType<Agent['toApi']> & { next_run: string | null } | null> {
+    const managed = this.agents.get(id);
+    if (!managed) return null;
+    const nextRun = this.scheduler.getNextRun(id);
+    return { ...managed.agent.toApi(), next_run: nextRun?.toISOString() ?? null };
   }
 
-  async listAgents(folder_id?: string): Promise<ReturnType<Agent['toApi']>[]> {
+  async listAgents(folder_id?: string): Promise<(ReturnType<Agent['toApi']> & { next_run: string | null })[]> {
     const all = [...this.agents.values()].map(m => m.agent);
     const filtered = folder_id ? all.filter(a => a.folder_id === folder_id) : all;
-    return filtered.map(a => a.toApi());
+    return filtered.map(a => ({
+      ...a.toApi(),
+      next_run: this.scheduler.getNextRun(a.id)?.toISOString() ?? null,
+    }));
+  }
+
+  isRunning(agentId: string): boolean {
+    return this.agents.get(agentId)?.process != null;
   }
 
   // ── Run Management ──
@@ -374,6 +408,7 @@ export class Daemon {
 
       case 'run_complete':
         this.logger('info', `[${managed.agent.name}] Run complete. Tokens: ${msg.tokens.input}in/${msg.tokens.output}out`);
+        this.scheduler.onRunComplete(agentId);
 
         this.sse.broadcast(agentId, {
           type: 'run_complete',

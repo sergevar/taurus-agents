@@ -27,6 +27,7 @@ export function agentRoutes(daemon: Daemon): Route[] {
           folder_id: body.folder_id,
           model: body.model,
           schedule: body.schedule,
+          schedule_overlap: body.schedule_overlap,
           max_turns: body.max_turns,
           timeout_ms: body.timeout_ms,
           metadata: body.metadata,

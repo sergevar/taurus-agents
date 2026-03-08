@@ -1,6 +1,6 @@
 import type { Agent, Run, MessageRecord } from './types';
 
-async function request<T>(path: string, opts: RequestInit & { body?: unknown } = {}): Promise<T> {
+async function request<T>(path: string, opts: Omit<RequestInit, 'body'> & { body?: unknown } = {}): Promise<T> {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
     ...opts,
@@ -27,8 +27,26 @@ export const api = {
     cwd?: string;
     model?: string;
     docker_image?: string;
+    schedule?: string;
+    schedule_overlap?: string;
   }): Promise<Agent & { error?: string }> {
     return request('/api/agents', { method: 'POST', body: data });
+  },
+
+  updateAgent(id: string, data: Partial<{
+    name: string;
+    type: string;
+    system_prompt: string;
+    tools: string[];
+    cwd: string;
+    model: string;
+    docker_image: string;
+    schedule: string | null;
+    schedule_overlap: string;
+    max_turns: number;
+    timeout_ms: number;
+  }>): Promise<Agent> {
+    return request(`/api/agents/${id}`, { method: 'PUT', body: data });
   },
 
   deleteAgent(id: string): Promise<{ ok: boolean }> {

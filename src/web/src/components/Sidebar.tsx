@@ -31,6 +31,11 @@ export function Sidebar({ agents, selectedId, onCreateClick }: SidebarProps) {
             <div className="agent-item__meta">
               {agent.type} &middot; {agent.tools.join(', ')}
             </div>
+            {agent.schedule && agent.next_run && (
+              <div className="agent-item__meta">
+                Next: {new Date(agent.next_run).toLocaleString()}
+              </div>
+            )}
           </div>
         ))}
       </div>

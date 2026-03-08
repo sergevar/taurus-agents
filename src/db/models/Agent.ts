@@ -18,6 +18,7 @@ class Agent extends Model {
   declare system_prompt: string;
   declare tools: string[];
   declare schedule: string | null;
+  declare schedule_overlap: 'skip' | 'queue' | 'kill';
   declare max_turns: number;
   declare timeout_ms: number;
   declare metadata: Record<string, unknown> | null;
@@ -30,8 +31,8 @@ class Agent extends Model {
   }
 
   toApi() {
-    const { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at } = this;
-    return { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at };
+    const { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at } = this;
+    return { id, folder_id, name, type, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at };
   }
 }
 
@@ -82,6 +83,11 @@ Agent.init(
     schedule: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    schedule_overlap: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'skip',
     },
     max_turns: {
       type: DataTypes.INTEGER,
