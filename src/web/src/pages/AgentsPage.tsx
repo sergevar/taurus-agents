@@ -10,6 +10,7 @@ import { CreateAgentModal } from '../components/CreateAgentModal';
 import { AgentSettings } from '../components/AgentSettings';
 import { Countdown } from '../components/Countdown';
 import { RunStatusIcon } from '../components/RunStatusIcon';
+import { Play, RotateCw, Square, PlayCircle, RefreshCw, Trash2 } from 'lucide-react';
 import '../styles/components.scss';
 
 type Tab = 'runs' | 'settings';
@@ -354,12 +355,12 @@ export function AgentsPage() {
                 )}
               </div>
               <div className="panel-header__actions">
-                {isStopped && <button className="btn primary" onClick={handleStartRun}>Start Run</button>}
-                {isStopped && runs.length > 0 && <button className="btn" onClick={handleContinueRun}>Continue</button>}
-                {isRunning && <button className="btn" onClick={handleStopRun}>Stop</button>}
-                {isPaused && <button className="btn" onClick={() => handleResume()}>Resume</button>}
-                <button className="btn" onClick={handleRefreshMessages}>Refresh</button>
-                <button className="btn danger" onClick={handleDelete}>Delete</button>
+                {isStopped && <button className="btn primary" onClick={handleStartRun}><Play size={13} /> Start Run</button>}
+                {isStopped && runs.length > 0 && <button className="btn" onClick={handleContinueRun}><RotateCw size={13} /> Continue</button>}
+                {isRunning && <button className="btn" onClick={handleStopRun}><Square size={13} /> Stop</button>}
+                {isPaused && <button className="btn" onClick={() => handleResume()}><PlayCircle size={13} /> Resume</button>}
+                <button className="btn" onClick={handleRefreshMessages}><RefreshCw size={13} /></button>
+                <button className="btn danger" onClick={handleDelete}><Trash2 size={13} /></button>
               </div>
             </div>
 
