@@ -65,13 +65,16 @@ export function agentRoutes(daemon: Daemon): Route[] {
     // ── Run Management ──
     route('POST', '/api/agents/:id/run', async (req, res, params) => {
       const body = await parseBody(req);
+      console.log('[POST /run] body:', JSON.stringify(body));
       try {
         if (body.run_id) {
           // Continue an existing run
+          console.log('[POST /run] → continueRun', params.id, body.run_id);
           await daemon.continueRun(params.id, body.run_id, body.input);
           json(res, { runId: body.run_id });
         } else {
           // Start a new run
+          console.log('[POST /run] → startRun (new)');
           const runId = await daemon.startRun(
             params.id,
             body.trigger ?? 'manual',

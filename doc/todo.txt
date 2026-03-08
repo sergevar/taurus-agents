@@ -1,4 +1,12 @@
+[] streaming again
+
 // TODO: route to other agents
+
+[] rebuild backend too! --watch [] hmm but won't it reload many times while writes are being written
+
+[] show thinking summaries
+
+why do i see so many polls in network tab, are we not using websockets?
 
 why end_turn terminology?
 
@@ -30,3 +38,4 @@ later
 [] moltbook-like thingy?
 
 [] If it bothers you, you could switch to better-sqlite3 (pure JS bindings, no node-gyp) someday, but that's a different API (synchronous) and would need Sequelize dialect changes.
+

@@ -161,25 +161,46 @@ export function AgentsPage() {
   async function handleSend(message: string) {
     if (!agentId) return;
 
+    console.log('[handleSend]', {
+      status: selectedAgent?.status,
+      runsCount: runs.length,
+      latestRunId: runs[0]?.id,
+      currentRunId: runId,
+    });
+
     if (selectedAgent?.status === 'paused') {
+      console.log('[handleSend] → resume');
       await handleResume(message);
       return;
     }
 
     if (selectedAgent?.status === 'running') {
-      await api.injectMessage(agentId, message);
-      return;
+      try {
+        console.log('[handleSend] → inject');
+        await api.injectMessage(agentId, message);
+        return;
+      } catch (err) {
+        console.log('[handleSend] inject failed, falling through:', err);
+      }
     }
 
     // Idle — continue latest run with this message, or start fresh if no runs exist
     const latestRunId = runs[0]?.id;
-    const result = await api.startRun(agentId, {
+    const body = {
       input: message,
       ...(latestRunId ? { run_id: latestRunId } : {}),
-    });
+    };
+    console.log('[handleSend] → startRun', body);
+    const result = await api.startRun(agentId, body);
+    console.log('[handleSend] startRun result:', result);
     await loadAgents();
     const updatedRuns = await api.listRuns(agentId);
     setRuns(updatedRuns);
+    // If continuing the same run, re-fetch messages since runId won't change
+    if (result.runId === runId) {
+      const msgs = await api.getRunMessages(agentId, runId);
+      setMessages(msgs);
+    }
     navigate(`/agents/${agentId}/runs/${result.runId}`);
   }
 

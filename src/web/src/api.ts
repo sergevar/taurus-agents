@@ -6,6 +6,10 @@ async function request<T>(path: string, opts: RequestInit & { body?: unknown } =
     ...opts,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 

@@ -403,11 +403,7 @@ export class Daemon {
 
     if (managed.agent.status === 'running') {
       const newStatus: AgentStatus = code === 0 ? 'idle' : 'error';
-      managed.agent.status = newStatus;
-      Agent.update(
-        { status: newStatus },
-        { where: { id: agentId } },
-      ).catch(() => {});
+      this.updateAgentStatus(agentId, newStatus).catch(() => {});
     }
 
     if (code !== 0 && code !== null) {

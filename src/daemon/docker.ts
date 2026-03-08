@@ -29,8 +29,10 @@ export class DockerService {
 
   async isContainerRunning(container_id: string): Promise<boolean> {
     try {
-      const state = await this.docker('inspect', '--format', '{{.State.Running}}', container_id);
-      return state === 'true';
+      // Use State.Status instead of State.Running — a paused container has
+      // Running=true but Status='paused', and we can't docker exec into it.
+      const status = await this.docker('inspect', '--format', '{{.State.Status}}', container_id);
+      return status === 'running';
     } catch {
       return false;
     }
@@ -91,8 +93,11 @@ export class DockerService {
 
   async pauseContainer(container_id: string): Promise<void> {
     try {
-      await this.docker('pause', container_id);
-      this.logger('info', `Container paused: ${container_id}`);
+      const status = await this.docker('inspect', '--format', '{{.State.Status}}', container_id);
+      if (status === 'running') {
+        await this.docker('pause', container_id);
+        this.logger('info', `Container paused: ${container_id}`);
+      }
     } catch (err: any) {
       this.logger('warn', `Failed to pause container ${container_id}: ${err.message}`);
     }
