@@ -9,7 +9,6 @@ var Sequelize = require('sequelize');
  * createTable "AgentLogs", deps: []
  * createTable "Runs", deps: []
  * createTable "Messages", deps: []
- * createTable "ToolCalls", deps: []
  * createTable "Folders", deps: []
  *
  **/
@@ -17,7 +16,7 @@ var Sequelize = require('sequelize');
 var info = {
     "revision": 1,
     "name": "noname",
-    "created": "2026-03-08T08:51:18.154Z",
+    "created": "2026-03-08T08:52:49.732Z",
     "comment": ""
 };
 
@@ -315,59 +314,6 @@ var migrationCommands = function(transaction) {
         {
             fn: "createTable",
             params: [
-                "ToolCalls",
-                {
-                    "id": {
-                        "type": Sequelize.UUID,
-                        "field": "id",
-                        "primaryKey": true
-                    },
-                    "message_id": {
-                        "type": Sequelize.UUID,
-                        "field": "message_id",
-                        "allowNull": false
-                    },
-                    "tool_name": {
-                        "type": Sequelize.STRING,
-                        "field": "tool_name",
-                        "allowNull": false
-                    },
-                    "tool_input": {
-                        "type": Sequelize.TEXT,
-                        "field": "tool_input",
-                        "allowNull": false
-                    },
-                    "tool_output": {
-                        "type": Sequelize.TEXT,
-                        "field": "tool_output",
-                        "allowNull": false
-                    },
-                    "is_error": {
-                        "type": Sequelize.BOOLEAN,
-                        "field": "is_error",
-                        "defaultValue": false,
-                        "allowNull": false
-                    },
-                    "duration_ms": {
-                        "type": Sequelize.INTEGER,
-                        "field": "duration_ms",
-                        "defaultValue": 0,
-                        "allowNull": false
-                    },
-                    "createdAt": {
-                        "type": Sequelize.DATE,
-                        "field": "created_at",
-                        "allowNull": false
-                    }
-                },
-                {
-                    "transaction": transaction
-                }
-            ]
-        },
-        {
-            fn: "createTable",
-            params: [
                 "Folders",
                 {
                     "id": {
@@ -425,12 +371,6 @@ var rollbackCommands = function(transaction) {
         {
             fn: "dropTable",
             params: ["Messages", {
-                transaction: transaction
-            }]
-        },
-        {
-            fn: "dropTable",
-            params: ["ToolCalls", {
                 transaction: transaction
             }]
         },

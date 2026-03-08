@@ -301,58 +301,6 @@
             },
             "indexes": []
         },
-        "ToolCalls": {
-            "tableName": "ToolCalls",
-            "schema": {
-                "id": {
-                    "primaryKey": true,
-                    "field": "id",
-                    "seqType": "Sequelize.UUID"
-                },
-                "message_id": {
-                    "allowNull": false,
-                    "field": "message_id",
-                    "seqType": "Sequelize.UUID"
-                },
-                "tool_name": {
-                    "allowNull": false,
-                    "field": "tool_name",
-                    "seqType": "Sequelize.STRING"
-                },
-                "tool_input": {
-                    "allowNull": false,
-                    "field": "tool_input",
-                    "seqType": "Sequelize.TEXT"
-                },
-                "tool_output": {
-                    "allowNull": false,
-                    "field": "tool_output",
-                    "seqType": "Sequelize.TEXT"
-                },
-                "is_error": {
-                    "allowNull": false,
-                    "defaultValue": {
-                        "value": false
-                    },
-                    "field": "is_error",
-                    "seqType": "Sequelize.BOOLEAN"
-                },
-                "duration_ms": {
-                    "allowNull": false,
-                    "defaultValue": {
-                        "value": 0
-                    },
-                    "field": "duration_ms",
-                    "seqType": "Sequelize.INTEGER"
-                },
-                "createdAt": {
-                    "allowNull": false,
-                    "field": "created_at",
-                    "seqType": "Sequelize.DATE"
-                }
-            },
-            "indexes": []
-        },
         "Folders": {
             "tableName": "Folders",
             "schema": {

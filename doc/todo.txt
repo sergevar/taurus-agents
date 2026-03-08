@@ -5,11 +5,6 @@
 
 [] ! CRON
 
-> Good news: sync({ alter: true }) means new columns auto-add
-we should really stop doing that and use migrations instead
-
-[] why end_turn terminology?
-
 [] context length management (proper! brainstorm)
 
 [] on switching agents, run highlighted within is lost
@@ -35,6 +30,9 @@ we should really stop doing that and use migrations instead
 [] // TODO: route to other agents
 
 [] split types.ts so they're owned by their files
+
+[] why end_turn terminology?
+
 
 
 later
