@@ -2,9 +2,10 @@
 
 export type ThinkingBlock = { type: 'thinking'; thinking: string; signature?: string };
 export type TextBlock = { type: 'text'; text: string };
+export type ImageBlock = { type: 'image'; source: { type: 'base64'; media_type: string; data: string } };
 export type ToolUseBlock = { type: 'tool_use'; id: string; name: string; input: any };
-export type ToolResultBlock = { type: 'tool_result'; tool_use_id: string; content: string; is_error?: boolean };
-export type ContentBlock = ThinkingBlock | TextBlock | ToolUseBlock | ToolResultBlock;
+export type ToolResultBlock = { type: 'tool_result'; tool_use_id: string; content: string | (TextBlock | ImageBlock)[]; is_error?: boolean };
+export type ContentBlock = ThinkingBlock | TextBlock | ImageBlock | ToolUseBlock | ToolResultBlock;
 
 export type ChatMessage = {
   role: 'user' | 'assistant';
@@ -44,6 +45,11 @@ export type TokenUsage = {
 
 // ─── Tool Types ───
 
+export type ImageData = {
+  base64: string;
+  mediaType: 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp';
+};
+
 export type ToolDef = {
   name: string;
   description: string;
@@ -54,6 +60,7 @@ export type ToolResult = {
   output: string;
   isError: boolean;
   durationMs: number;
+  images?: ImageData[];
 };
 
 export type ToolContext = {

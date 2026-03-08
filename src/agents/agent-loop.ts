@@ -114,7 +114,7 @@ export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentE
 
       // ── Observe: execute and feed result back ──
       const result = await tools.execute(toolUse.name, toolUse.input, { cwd });
-      chatml.addToolResult(toolUse.id, result.output, result.isError);
+      chatml.addToolResult(toolUse.id, result.output, result.isError, result.images);
 
       yield { type: 'tool_end', name: toolUse.name, result };
     }

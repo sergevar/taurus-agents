@@ -19,7 +19,7 @@ export class BrowserTool extends Tool {
     '- "type": Type text into an input. Params: `selector` (required), `text` (required). Clears existing value first.\n' +
     '- "select": Select an option from a dropdown. Params: `selector` (required), `values` (required) — array of values.\n' +
     '- "hover": Hover over an element. Params: `selector` (required).\n' +
-    '- "screenshot": Take a screenshot (metadata only, no image data returned).\n' +
+    '- "screenshot": Take a screenshot of the visible viewport. The image is sent to you for visual analysis.\n' +
     '- "scroll": Scroll the page. Params: `direction` ("up" or "down"), `amount` (pixels, default 300).\n' +
     '- "back"/"forward": Navigate browser history.\n' +
     '- "wait": Wait for a duration. Params: `ms` (default 1000).\n' +
@@ -95,6 +95,22 @@ export class BrowserTool extends Tool {
     try {
       const result = await this.shell.exec(command, { timeout: DEFAULT_TIMEOUT });
       const output = result.stdout || `(exit code ${result.exitCode})`;
+
+      // Parse structured screenshot response
+      if (input.action === 'screenshot' && result.exitCode === 0) {
+        try {
+          const parsed = JSON.parse(output);
+          if (parsed.__type === 'screenshot') {
+            return {
+              output: parsed.text,
+              isError: false,
+              durationMs: result.durationMs,
+              images: [{ base64: parsed.base64, mediaType: parsed.mediaType }],
+            };
+          }
+        } catch { /* not JSON, fall through */ }
+      }
+
       return {
         output: truncate(output),
         isError: result.exitCode !== 0,

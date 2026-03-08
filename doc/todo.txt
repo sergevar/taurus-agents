@@ -1,17 +1,16 @@
 [...] browser
-[] } catch { /* corrupt state, start fresh */ }
-    try { unlinkSync(STATE_FILE); } catch { /* ignore */ }
-    what's this?
-        [] also have a task/agent that sweeps through all security issues and works on them and auto-tests!
 [] screenshot captured but can't use
 [] browser tool featureset: Yes, you should definitely expand it! A few approaches:
-[x] browser useragent
 [] what is https://www.google.com/search?q=Stealth+Mode+Playwright&oq=Stealth+Mode+Playwright - not needed for now
-
 
 [] pdfs! see how codex does it etc. but also deepseek pdf (skill/agent?)
 
+
+[] different placeholders and templates stored somewhere
+
 [] COUNT $ NOW!
+
+[] TG/WHATSAPP NOW!
 
 [] add openrouter? ah but so many inference nuances then, not like anthropic-cli. hmm
     on the other hand, useful for quick tests with :free models to not burn $

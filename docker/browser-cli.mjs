@@ -154,7 +154,14 @@ async function handleAction(input) {
 
       case 'screenshot': {
         const buffer = await page.screenshot({ fullPage: false });
-        return `Screenshot captured (${buffer.length} bytes).\nUse snapshot for page structure instead.`;
+        const title = await page.title();
+        const url = page.url();
+        return JSON.stringify({
+          __type: 'screenshot',
+          text: `Screenshot of "${title}" (${url})\nViewport: 1280x720, ${buffer.length} bytes`,
+          base64: buffer.toString('base64'),
+          mediaType: 'image/png',
+        });
       }
 
       case 'scroll': {

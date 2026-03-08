@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { MessageRecord } from '../types';
 import { Markdown } from './Markdown';
 import { JsonKV } from './JsonKV';
+import { ScreenshotImage } from './ScreenshotImage';
 
 // ── Collapsible thinking block ──
 
@@ -63,11 +64,27 @@ function ContentBlockView({ block }: { block: any }) {
           Result
           {isError && <span className="msg-tool-result__error"> ERROR</span>}
         </div>
-        <pre className="msg-tool-result__content">
-          {typeof block.content === 'string'
-            ? block.content
-            : JSON.stringify(block.content, null, 2)}
-        </pre>
+        {typeof block.content === 'string' ? (
+          <pre className="msg-tool-result__content">{block.content}</pre>
+        ) : Array.isArray(block.content) ? (
+          <div className="msg-tool-result__content">
+            {block.content.map((sub: any, i: number) => {
+              if (sub.type === 'text') return <pre key={i} style={{ margin: 0 }}>{sub.text}</pre>;
+              if (sub.type === 'image' && sub.source?.type === 'base64') {
+                return (
+                  <ScreenshotImage
+                    key={i}
+                    src={`data:${sub.source.media_type};base64,${sub.source.data}`}
+                    alt="Screenshot"
+                  />
+                );
+              }
+              return <pre key={i} style={{ margin: 0 }}>{JSON.stringify(sub, null, 2)}</pre>;
+            })}
+          </div>
+        ) : (
+          <pre className="msg-tool-result__content">{JSON.stringify(block.content, null, 2)}</pre>
+        )}
       </div>
     );
   }

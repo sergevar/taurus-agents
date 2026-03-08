@@ -1,4 +1,4 @@
-import type { ChatMessage, ContentBlock, ToolUseBlock } from './types.js';
+import type { ChatMessage, ContentBlock, ToolUseBlock, ImageData, TextBlock, ImageBlock } from './types.js';
 
 /**
  * ChatML — the fundamental conversation primitive.
@@ -27,14 +27,29 @@ export class ChatML {
     return this;
   }
 
-  addToolResult(toolUseId: string, output: string, isError: boolean = false): this {
+  addToolResult(toolUseId: string, output: string, isError: boolean = false, images?: ImageData[]): this {
     // Tool results are user messages containing tool_result blocks.
     // If the last message is already a user message with tool results, append to it.
     const last = this.messages[this.messages.length - 1];
+
+    // Build content: plain string if no images, rich array if images present
+    let content: string | (TextBlock | ImageBlock)[];
+    if (images && images.length > 0) {
+      content = [
+        { type: 'text' as const, text: output },
+        ...images.map(img => ({
+          type: 'image' as const,
+          source: { type: 'base64' as const, media_type: img.mediaType, data: img.base64 },
+        })),
+      ];
+    } else {
+      content = output;
+    }
+
     const resultBlock: ContentBlock = {
       type: 'tool_result',
       tool_use_id: toolUseId,
-      content: output,
+      content,
       is_error: isError || undefined,
     };
 
@@ -98,7 +113,16 @@ export class ChatML {
         for (const block of msg.content) {
           if (block.type === 'text') chars += block.text.length;
           else if (block.type === 'tool_use') chars += JSON.stringify(block.input).length;
-          else if (block.type === 'tool_result') chars += block.content.length;
+          else if (block.type === 'tool_result') {
+            if (typeof block.content === 'string') {
+              chars += block.content.length;
+            } else {
+              for (const sub of block.content) {
+                if (sub.type === 'text') chars += sub.text.length;
+                else if (sub.type === 'image') chars += 6400; // ~1600 tokens * 4 chars/token
+              }
+            }
+          }
         }
       }
     }
