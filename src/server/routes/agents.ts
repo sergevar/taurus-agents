@@ -211,7 +211,7 @@ export function agentRoutes(daemon: Daemon): Route[] {
 
     // ── Blocking ask ──
 
-    // By name: POST /api/ask { agent: "war updates", message: "..." }
+    // By name: POST /api/ask { agent: "my-agent", message: "..." }
     route('POST', '/api/ask', async (req, res) => {
       const body = await parseBody(req);
       if (!body.agent) return error(res, 'agent (name) is required');
