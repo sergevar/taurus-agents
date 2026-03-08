@@ -1,17 +1,22 @@
+// TODO: route to other agents
+
+
 [] prevent second ./taurus from running and interfering
 [] split types.ts so they're owned by their files
 [x] move utils out of index.ts or at least even web server out
 [x] naming: thread->agent. session->run. thread manager -> daemon (or AgentDaemon?).
 [] chatml: token count and HUD managing/partial compactify/collapse/uncollapse
-[] events: agent to agent comms (use inbox/outbox?)
 [] proper ui with build step and everything
 [x] no coding-agent.ts : make it in Hottest instead
 [] clean up agent-loop.ts and base-agent.ts
+[] check thread mgr again
+[x] use json fields instead of manually stringifying and parsing
+
+[] events: agent to agent comms (use inbox/outbox?)
 [] telegram/whatsapp connection
+
 [] maybe take containerization options out of the thread table itself?
-[] thread mgr:
-    - code repetition in thread creation and update
-[] use json fields instead of manually stringifying and parsing
+
 
 later
 

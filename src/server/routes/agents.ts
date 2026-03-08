@@ -6,30 +6,30 @@ export function agentRoutes(daemon: Daemon): Route[] {
     // ── CRUD ──
     route('GET', '/api/agents', async (req, res) => {
       const url = new URL(req.url!, `http://localhost`);
-      const folderId = url.searchParams.get('folderId') ?? undefined;
-      const agents = await daemon.listAgents(folderId);
+      const folder_id = url.searchParams.get('folder_id') ?? undefined;
+      const agents = await daemon.listAgents(folder_id);
       json(res, agents);
     }),
 
     route('POST', '/api/agents', async (req, res) => {
       const body = await parseBody(req);
-      if (!body.name || !body.type || !body.systemPrompt) {
-        return error(res, 'name, type, and systemPrompt are required');
+      if (!body.name || !body.type || !body.system_prompt) {
+        return error(res, 'name, type, and system_prompt are required');
       }
       try {
         const agent = await daemon.createAgent({
           name: body.name,
           type: body.type,
-          systemPrompt: body.systemPrompt,
+          system_prompt: body.system_prompt,
           tools: body.tools ?? ['Read', 'Glob', 'Grep'],
           cwd: body.cwd ?? process.cwd(),
-          folderId: body.folderId,
+          folder_id: body.folder_id,
           model: body.model,
           schedule: body.schedule,
-          maxTurns: body.maxTurns,
-          timeoutMs: body.timeoutMs,
+          max_turns: body.max_turns,
+          timeout_ms: body.timeout_ms,
           metadata: body.metadata,
-          dockerImage: body.dockerImage,
+          docker_image: body.docker_image,
         });
         json(res, agent, 201);
       } catch (err: any) {
@@ -70,7 +70,7 @@ export function agentRoutes(daemon: Daemon): Route[] {
           params.id,
           body.trigger ?? 'manual',
           body.input,
-          body.continueRun ?? false,
+          body.continue_run ?? false,
         );
         json(res, { runId }, 201);
       } catch (err: any) {

@@ -420,17 +420,17 @@ function hideCreateModal() {
 async function createThread() {
   const name = document.getElementById('newName').value.trim();
   const type = document.getElementById('newType').value;
-  const systemPrompt = document.getElementById('newPrompt').value.trim();
+  const system_prompt = document.getElementById('newPrompt').value.trim();
   const tools = document.getElementById('newTools').value.split(',').map(s => s.trim()).filter(Boolean);
   const cwd = document.getElementById('newCwd').value.trim() || undefined;
   const model = document.getElementById('newModel').value.trim() || undefined;
-  const dockerImage = document.getElementById('newDockerImage').value.trim() || undefined;
+  const docker_image = document.getElementById('newDockerImage').value.trim() || undefined;
 
-  if (!name || !systemPrompt) { alert('Name and system prompt are required'); return; }
+  if (!name || !system_prompt) { alert('Name and system prompt are required'); return; }
 
-  const result = await api('/api/threads', {
+  const result = await api('/api/agents', {
     method: 'POST',
-    body: { name, type, systemPrompt, tools, cwd, model, dockerImage },
+    body: { name, type, system_prompt, tools, cwd, model, docker_image },
   });
 
   if (result.error) { alert(result.error); return; }

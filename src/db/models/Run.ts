@@ -9,73 +9,41 @@ class Run extends Model {
   declare name: string | null;
   declare cwd: string;
   declare model: string;
-  declare totalInputTokens: number;
-  declare totalOutputTokens: number;
-  declare totalCostUsd: number;
-  declare thread_id: string | null;
+  declare total_input_tokens: number;
+  declare total_output_tokens: number;
+  declare total_cost_usd: number;
+  declare agent_id: string | null;
   declare trigger: string | null;
   declare run_summary: string | null;
   declare run_error: string | null;
   declare created_at: Date;
   declare updated_at: Date;
 
-  // ─── Static methods ───
-
-  static async findLast(): Promise<Run | null> {
-    return Run.findOne({ order: [['created_at', 'DESC']] });
-  }
-
-  static async createNew(cwd: string, model: string = 'claude-sonnet-4-20250514'): Promise<Run> {
-    return Run.create({ cwd, model });
-  }
-
   // ─── Instance methods ───
 
   async getMessages() {
     const { default: Message } = await import('./Message.js');
     return Message.findAll({
-      where: { session_id: this.id },
+      where: { run_id: this.id },
       order: [['created_at', 'ASC']],
     });
   }
 
   async addMessage(role: string, content: any, opts?: { stopReason?: string; inputTokens?: number; outputTokens?: number }) {
     const { default: Message } = await import('./Message.js');
-    const msg = await Message.create({
-      session_id: this.id,
+    return Message.create({
+      run_id: this.id,
       role,
-      content: typeof content === 'string' ? content : JSON.stringify(content),
+      content,
       stop_reason: opts?.stopReason ?? null,
       input_tokens: opts?.inputTokens ?? 0,
       output_tokens: opts?.outputTokens ?? 0,
     });
-
-    // Update run token totals
-    if (opts?.inputTokens || opts?.outputTokens) {
-      this.totalInputTokens += opts?.inputTokens ?? 0;
-      this.totalOutputTokens += opts?.outputTokens ?? 0;
-      await this.save();
-    }
-
-    return msg;
   }
 
   toApi() {
-    return {
-      id: this.id,
-      name: this.name,
-      cwd: this.cwd,
-      model: this.model,
-      totalInputTokens: this.totalInputTokens,
-      totalOutputTokens: this.totalOutputTokens,
-      totalCostUsd: this.totalCostUsd,
-      agentId: this.thread_id,
-      trigger: this.trigger,
-      runSummary: this.run_summary,
-      runError: this.run_error,
-      createdAt: this.created_at,
-      updatedAt: this.updated_at,
-    };
+    const { id, name, cwd, model, total_input_tokens, total_output_tokens, total_cost_usd, agent_id, trigger, run_summary, run_error, created_at, updated_at } = this;
+    return { id, name, cwd, model, total_input_tokens, total_output_tokens, total_cost_usd, agent_id, trigger, run_summary, run_error, created_at, updated_at };
   }
 }
 
@@ -99,25 +67,22 @@ Run.init(
       allowNull: false,
       defaultValue: 'claude-sonnet-4-20250514',
     },
-    totalInputTokens: {
+    total_input_tokens: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      field: 'total_input_tokens',
     },
-    totalOutputTokens: {
+    total_output_tokens: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      field: 'total_output_tokens',
     },
-    totalCostUsd: {
+    total_cost_usd: {
       type: DataTypes.FLOAT,
       allowNull: false,
       defaultValue: 0,
-      field: 'total_cost_usd',
     },
-    thread_id: {
+    agent_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -136,7 +101,7 @@ Run.init(
   },
   {
     sequelize,
-    tableName: 'Sessions', // keep existing table name
+    tableName: 'Runs',
     timestamps: true,
     underscored: true,
   }

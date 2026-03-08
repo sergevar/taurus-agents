@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 
 export interface PersistentShellOpts {
   mode: 'host' | 'docker';
-  containerId?: string;
+  container_id?: string;
   cwd?: string;
   env?: Record<string, string>;
   outputLimit?: number;
@@ -33,7 +33,7 @@ export class PersistentShell {
   private pending = new Map<string, PendingCommand>();
   private buffer = '';
   private readonly mode: PersistentShellOpts['mode'];
-  private readonly containerId?: string;
+  private readonly container_id?: string;
   private readonly cwd?: string;
   private readonly env?: Record<string, string>;
   private readonly outputLimit: number;
@@ -41,14 +41,14 @@ export class PersistentShell {
 
   constructor(opts: PersistentShellOpts) {
     this.mode = opts.mode;
-    this.containerId = opts.containerId;
+    this.container_id = opts.container_id;
     this.cwd = opts.cwd;
     this.env = opts.env;
     this.outputLimit = opts.outputLimit ?? DEFAULT_OUTPUT_LIMIT;
     this.defaultTimeout = opts.defaultTimeout ?? DEFAULT_TIMEOUT;
 
-    if (this.mode === 'docker' && !this.containerId) {
-      throw new Error('containerId required for docker mode');
+    if (this.mode === 'docker' && !this.container_id) {
+      throw new Error('container_id required for docker mode');
     }
   }
 
@@ -56,7 +56,7 @@ export class PersistentShell {
     if (this.alive) return;
 
     const args = this.mode === 'docker'
-      ? ['exec', '-i', this.containerId!, 'bash', '--norc', '--noprofile']
+      ? ['exec', '-i', this.container_id!, 'bash', '--norc', '--noprofile']
       : ['--norc', '--noprofile'];
 
     const cmd = this.mode === 'docker' ? 'docker' : 'bash';

@@ -123,6 +123,13 @@ export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentE
       yield { type: 'tool_end', name: toolUse.name, result };
     }
 
+    // Yield the user message (tool results) that was just built so it can be persisted
+    const allMessages = chatml.getMessages();
+    const lastMsg = allMessages[allMessages.length - 1];
+    if (lastMsg?.role === 'user') {
+      yield { type: 'user_message', message: lastMsg };
+    }
+
     turns++;
     // Loop back → Think again with tool results in context
   }

@@ -2,12 +2,16 @@
  * agent-worker.ts — Universal child process entry point.
  *
  * Spawned via child_process.fork() by Daemon.
- * Receives AgentConfig via IPC, runs the agent loop, sends events back.
- * All DB writes go through parent via IPC messages.
+ * Reads its own Agent row from DB, handles message persistence directly.
+ * IPC is used only for coordination signals (status, logs for SSE, completion).
  */
 
 import 'dotenv/config';
-import type { ParentMessage, ChildMessage, AgentConfig, TriggerType, LogLevel } from './types.js';
+import type { ParentMessage, ChildMessage, TriggerType, LogLevel } from './types.js';
+import Agent from '../db/models/Agent.js';
+import Run from '../db/models/Run.js';
+import Message from '../db/models/Message.js';
+import AgentLog from '../db/models/AgentLog.js';
 import { agentLoop } from '../agents/agent-loop.js';
 import { ChatML } from '../core/chatml.js';
 import { InferenceService } from '../inference/service.js';
@@ -57,7 +61,6 @@ const injectQueue: string[] = [];
 // ── Tool registration ──
 
 function registerTools(registry: ToolRegistry, toolNames: string[], shell: PersistentShell): void {
-  // All tools execute through PersistentShell (which uses docker exec in Docker mode)
   const SHELL_TOOLS: Record<string, () => import('../tools/base.js').Tool> = {
     Read: () => new ShellReadTool(shell),
     Write: () => new ShellWriteTool(shell),
@@ -76,7 +79,6 @@ function registerTools(registry: ToolRegistry, toolNames: string[], shell: Persi
     }
   }
 
-  // Always register Pause even if not in the list — agents need it
   if (!toolNames.includes('Pause')) {
     registry.register(new PauseTool(sendPause, waitForResume));
   }
@@ -99,80 +101,112 @@ function buildInputMessage(trigger: TriggerType, input?: string): string {
   return 'Execute your task.';
 }
 
+// ── Persist a message to the DB ──
+
+async function persistMessage(run: Run, role: string, content: any, opts?: {
+  stopReason?: string; inputTokens?: number; outputTokens?: number;
+}): Promise<void> {
+  await run.addMessage(role, content, opts);
+}
+
+// ── Load history from previous run ──
+
+async function loadHistory(agentId: string): Promise<Array<{ role: string; content: any }> | undefined> {
+  const prevRun = await Run.findOne({
+    where: { agent_id: agentId },
+    order: [['created_at', 'DESC']],
+  });
+  if (!prevRun) return undefined;
+
+  const messages = await Message.findAll({
+    where: { run_id: prevRun.id },
+    order: [['created_at', 'ASC']],
+  });
+  if (messages.length === 0) return undefined;
+
+  return messages.map(m => ({ role: m.role, content: m.content }));
+}
+
 // ── Main run function ──
 
-async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType, input?: string, history?: Array<{ role: string; content: any }>): Promise<void> {
-  log('info', 'run.started', `Agent "${config.name}" started (trigger: ${trigger})`);
+async function runAgent(agentId: string, runId: string, trigger: TriggerType, input?: string, continueRun?: boolean): Promise<void> {
+  // 0. Load agent and run from DB
+  const agent = await Agent.findByPk(agentId);
+  if (!agent) throw new Error(`Agent not found: ${agentId}`);
+
+  const run = await Run.findByPk(runId);
+  if (!run) throw new Error(`Run not found: ${runId}`);
+
+  log('info', 'run.started', `Agent "${agent.name}" started (trigger: ${trigger})`);
   send({ type: 'status', status: 'running' });
 
   // 1. Initialize inference
   const provider = new AnthropicProvider();
   const inference = new InferenceService(provider);
 
-  // 2. Initialize persistent shell (Docker mode — all tools execute inside container)
+  // 2. Initialize persistent shell
   const shell = new PersistentShell({
     mode: 'docker',
-    containerId: config.containerId,
+    container_id: agent.container_id,
     cwd: '/workspace',
   });
   await shell.spawn();
 
   // 3. Register tools
   const tools = new ToolRegistry();
-  // Ensure Pause is always available
-  const toolNames = [...new Set([...config.tools, 'Pause'])];
+  const toolNames = [...new Set([...agent.tools, 'Pause'])];
   registerTools(tools, toolNames, shell);
 
   // 4. Build ChatML
   const chatml = new ChatML();
-  chatml.setSystem(config.systemPrompt);
+  chatml.setSystem(agent.system_prompt);
 
-  if (history && history.length > 0) {
-    // Continuing a previous run — replay prior messages
-    // Trim trailing incomplete tool calls: if last assistant message has tool_use
-    // blocks without matching tool_result in a following user message, drop it
-    const trimmed = [...history];
-    while (trimmed.length > 0) {
-      const last = trimmed[trimmed.length - 1];
-      if (last.role === 'assistant' && Array.isArray(last.content)) {
-        const hasToolUse = last.content.some((b: any) => b.type === 'tool_use');
-        if (hasToolUse) {
-          // No following user message with tool_result — incomplete, drop it
-          trimmed.pop();
-          continue;
+  if (continueRun) {
+    const history = await loadHistory(agentId);
+    if (history && history.length > 0) {
+      // Trim trailing incomplete tool calls
+      const trimmed = [...history];
+      while (trimmed.length > 0) {
+        const last = trimmed[trimmed.length - 1];
+        if (last.role === 'assistant' && Array.isArray(last.content)) {
+          const hasToolUse = last.content.some((b: any) => b.type === 'tool_use');
+          if (hasToolUse) { trimmed.pop(); continue; }
         }
+        break;
       }
-      break;
-    }
+      while (trimmed.length > 0 && trimmed[trimmed.length - 1].role === 'user') {
+        trimmed.pop();
+      }
 
-    // Ensure history ends with an assistant message (API requires user→assistant alternation)
-    // If it ends with user, drop the trailing user message
-    while (trimmed.length > 0 && trimmed[trimmed.length - 1].role === 'user') {
-      trimmed.pop();
-    }
+      for (const msg of trimmed) {
+        if (msg.role === 'user') chatml.addUser(msg.content);
+        else if (msg.role === 'assistant') chatml.addAssistant(msg.content);
+      }
 
-    for (const msg of trimmed) {
-      if (msg.role === 'user') chatml.addUser(msg.content);
-      else if (msg.role === 'assistant') chatml.addAssistant(msg.content);
+      const contMsg = input || 'Continue from where you left off.';
+      chatml.addUser(contMsg);
+      log('info', 'run.continued', `Replayed ${trimmed.length} messages from previous run (${history.length} total)`);
+    } else {
+      chatml.addUser(buildInputMessage(trigger, input));
     }
-
-    // Add the continuation prompt (or injected input)
-    const contMsg = input || 'Continue from where you left off.';
-    chatml.addUser(contMsg);
-    log('info', 'run.continued', `Replayed ${trimmed.length} messages from previous run (${history.length} total)`);
   } else {
     chatml.addUser(buildInputMessage(trigger, input));
   }
 
-  // 5. Run agent loop
+  // 5. Persist the initial user message
+  const initialMessages = chatml.getMessages();
+  const initialUserMsg = initialMessages[initialMessages.length - 1];
+  if (initialUserMsg?.role === 'user') {
+    await persistMessage(run, 'user', initialUserMsg.content);
+  }
+
+  // 6. Run agent loop
   try {
     const requestApproval = async (toolName: string, _input: any): Promise<boolean> => {
-      // Observers can't use mutation tools
-      if (config.type === 'observer') {
+      if (agent.type === 'observer') {
         log('warn', 'tool.denied', `Observer agent cannot use mutation tool: ${toolName}`);
         return false;
       }
-      // Actors auto-approve for now (agents are autonomous)
       return true;
     };
 
@@ -183,9 +217,9 @@ async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType
       allowedTools: toolNames,
       cwd: '/workspace',
       requestApproval,
-      maxTurns: config.maxTurns,
+      maxTurns: agent.max_turns,
       signal: abortController.signal,
-      model: config.model,
+      model: agent.model,
       getInjectedMessages: () => injectQueue.splice(0),
     })) {
       switch (event.type) {
@@ -194,11 +228,7 @@ async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType
             log('debug', 'llm.text', event.event.text);
           }
           if (event.event.type === 'message_complete') {
-            send({
-              type: 'message_persist',
-              sessionId: runId,
-              role: 'assistant',
-              content: event.event.message.content,
+            await persistMessage(run, 'assistant', event.event.message.content, {
               stopReason: event.event.stopReason,
               inputTokens: event.event.usage.inputTokens,
               outputTokens: event.event.usage.outputTokens,
@@ -222,8 +252,12 @@ async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType
           log('warn', 'tool.denied', `Tool denied: ${event.name}`);
           break;
 
+        case 'user_message':
+          await persistMessage(run, 'user', event.message.content);
+          break;
+
         case 'max_turns_reached':
-          log('warn', 'run.max_turns', `Max turns (${config.maxTurns}) reached`);
+          log('warn', 'run.max_turns', `Max turns (${agent.max_turns}) reached`);
           break;
 
         case 'done':
@@ -235,7 +269,7 @@ async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType
     await shell.close();
   }
 
-  // 6. Get final text from ChatML as summary
+  // 7. Get final text from ChatML as summary
   const messages = chatml.getMessages();
   const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
   let summary = 'Run completed.';
@@ -250,18 +284,28 @@ async function runAgent(config: AgentConfig, runId: string, trigger: TriggerType
     }
   }
 
-  // 7. Report completion
+  // 8. Update run record and log completion
   const usage = inference.getUsage();
-  send({
-    type: 'run_complete',
-    sessionId: runId,
-    summary,
-    tokens: {
-      input: usage.inputTokens,
-      output: usage.outputTokens,
-      cost: 0, // TODO: calculate from model pricing
-    },
+  const tokens = { input: usage.inputTokens, output: usage.outputTokens, cost: 0 };
+
+  await run.update({
+    run_summary: summary,
+    run_error: null,
+    total_input_tokens: tokens.input,
+    total_output_tokens: tokens.output,
   });
+
+  await AgentLog.create({
+    agent_id: agentId,
+    run_id: runId,
+    level: 'info',
+    event: 'run.complete',
+    message: summary,
+    data: { tokens },
+  });
+
+  // 9. Notify parent (for SSE broadcast)
+  send({ type: 'run_complete', summary, tokens });
 }
 
 // ── IPC message handling ──
@@ -270,18 +314,16 @@ process.on('message', async (msg: ParentMessage) => {
   switch (msg.type) {
     case 'start':
       try {
-        await runAgent(msg.config, msg.sessionId, msg.trigger, msg.input, msg.history);
+        await runAgent(msg.agentId, msg.runId, msg.trigger, msg.input, msg.continueRun);
       } catch (err: any) {
         send({ type: 'error', error: err.message, stack: err.stack });
       }
-      // Exit cleanly after run completes
       process.exit(0);
       break;
 
     case 'stop':
       log('info', 'agent.stopping', `Stopping: ${msg.reason}`);
       abortController.abort();
-      // Give agent loop time to notice the signal
       setTimeout(() => process.exit(0), 5000);
       break;
 
@@ -306,7 +348,6 @@ process.on('message', async (msg: ParentMessage) => {
 // ── Process lifecycle ──
 
 process.on('disconnect', () => {
-  // Parent died
   abortController.abort();
   process.exit(1);
 });

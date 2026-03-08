@@ -27,6 +27,7 @@ export type AgentEvent =
   | { type: 'tool_start'; name: string; input: any }
   | { type: 'tool_end'; name: string; result: ToolResult }
   | { type: 'tool_denied'; name: string }
+  | { type: 'user_message'; message: ChatMessage }
   | { type: 'max_turns_reached' }
   | { type: 'done' };
 

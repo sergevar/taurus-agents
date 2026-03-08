@@ -7,25 +7,17 @@ const sequelize = Database.init();
 
 class AgentLog extends Model {
   declare id: string;
-  declare thread_id: string;
-  declare session_id: string | null;
+  declare agent_id: string;
+  declare run_id: string | null;
   declare level: LogLevel;
   declare event: string;
   declare message: string;
-  declare data: string | null; // JSON blob
+  declare data: unknown;
   declare created_at: Date;
 
   toApi() {
-    return {
-      id: this.id,
-      agentId: this.thread_id,
-      runId: this.session_id,
-      level: this.level,
-      event: this.event,
-      message: this.message,
-      data: this.data ? JSON.parse(this.data) : null,
-      createdAt: this.created_at,
-    };
+    const { id, agent_id, run_id, level, event, message, data, created_at } = this;
+    return { id, agent_id, run_id, level, event, message, data, created_at };
   }
 }
 
@@ -36,11 +28,11 @@ AgentLog.init(
       defaultValue: uuidv4,
       primaryKey: true,
     },
-    thread_id: {
+    agent_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-    session_id: {
+    run_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -58,13 +50,13 @@ AgentLog.init(
       allowNull: false,
     },
     data: {
-      type: DataTypes.TEXT,
+      type: DataTypes.JSON,
       allowNull: true,
     },
   },
   {
     sequelize,
-    tableName: 'ThreadLogs', // keep existing table name
+    tableName: 'AgentLogs',
     timestamps: true,
     underscored: true,
     updatedAt: false,

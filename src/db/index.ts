@@ -2,10 +2,6 @@ import { Sequelize } from 'sequelize';
 import path from 'node:path';
 import fs from 'node:fs';
 
-/**
- * Database singleton — same pattern as novelchat.
- * Uses SQLite for local persistence of sessions, messages, tool calls.
- */
 export class Database {
   static client: Sequelize;
 
@@ -13,7 +9,6 @@ export class Database {
     if (!Database.client) {
       const storage = dbPath ?? path.join(process.cwd(), 'data', 'taurus.sqlite');
 
-      // Ensure data directory exists
       const dir = path.dirname(storage);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });

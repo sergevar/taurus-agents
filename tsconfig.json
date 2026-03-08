@@ -3,7 +3,6 @@
     "target": "es2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -20,9 +19,7 @@
       "#inference/*": ["./src/inference/*"],
       "#tools/*": ["./src/tools/*"],
       "#agents/*": ["./src/agents/*"],
-      "#db/*": ["./src/db/*"],
-      "#ui/*": ["./src/ui/*"],
-      "#threads/*": ["./src/threads/*"]
+      "#db/*": ["./src/db/*"]
     }
   },
   "include": ["src/**/*"],

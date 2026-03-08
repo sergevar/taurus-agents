@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 export function createServer(daemon: Daemon, port: number): http.Server {
   const routes: Route[] = [
-    ...folderRoutes(daemon),
+    ...folderRoutes(),
     ...agentRoutes(daemon),
     ...healthRoutes(),
   ];

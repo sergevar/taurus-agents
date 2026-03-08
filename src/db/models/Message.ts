@@ -1,47 +1,30 @@
 import { DataTypes, Model } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../index.js';
-import type { ChatMessage, ContentBlock } from '../../core/types.js';
+import type { ChatMessage } from '../../core/types.js';
 
 const sequelize = Database.init();
 
 class Message extends Model {
   declare id: string;
-  declare session_id: string;
+  declare run_id: string;
   declare role: string;
-  declare content: string; // JSON-stringified content blocks
+  declare content: any;
   declare stop_reason: string | null;
   declare input_tokens: number;
   declare output_tokens: number;
   declare created_at: Date;
 
-  /**
-   * Convert to Anthropic API message format for ChatML reconstruction.
-   */
   toChatMLMessage(): ChatMessage {
-    let content: string | ContentBlock[];
-    try {
-      content = JSON.parse(this.content);
-    } catch {
-      content = this.content; // plain string
-    }
     return {
       role: this.role as 'user' | 'assistant',
-      content,
+      content: this.content,
     };
   }
 
   toApi() {
-    return {
-      id: this.id,
-      sessionId: this.session_id,
-      role: this.role,
-      content: this.content,
-      stopReason: this.stop_reason,
-      inputTokens: this.input_tokens,
-      outputTokens: this.output_tokens,
-      createdAt: this.created_at,
-    };
+    const { id, run_id, role, content, stop_reason, input_tokens, output_tokens, created_at } = this;
+    return { id, run_id, role, content, stop_reason, input_tokens, output_tokens, created_at };
   }
 }
 
@@ -52,7 +35,7 @@ Message.init(
       defaultValue: uuidv4,
       primaryKey: true,
     },
-    session_id: {
+    run_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },
@@ -61,7 +44,7 @@ Message.init(
       allowNull: false,
     },
     content: {
-      type: DataTypes.TEXT,
+      type: DataTypes.JSON,
       allowNull: false,
     },
     stop_reason: {
@@ -84,7 +67,7 @@ Message.init(
     tableName: 'Messages',
     timestamps: true,
     underscored: true,
-    updatedAt: false, // messages are immutable
+    updatedAt: false,
   }
 );
 
