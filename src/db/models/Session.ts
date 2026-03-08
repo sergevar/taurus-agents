@@ -12,6 +12,10 @@ class Session extends Model {
   declare totalInputTokens: number;
   declare totalOutputTokens: number;
   declare totalCostUsd: number;
+  declare thread_id: string | null;
+  declare trigger: string | null;
+  declare run_summary: string | null;
+  declare run_error: string | null;
   declare created_at: Date;
   declare updated_at: Date;
 
@@ -65,6 +69,10 @@ class Session extends Model {
       totalInputTokens: this.totalInputTokens,
       totalOutputTokens: this.totalOutputTokens,
       totalCostUsd: this.totalCostUsd,
+      threadId: this.thread_id,
+      trigger: this.trigger,
+      runSummary: this.run_summary,
+      runError: this.run_error,
       createdAt: this.created_at,
       updatedAt: this.updated_at,
     };
@@ -108,6 +116,22 @@ Session.init(
       allowNull: false,
       defaultValue: 0,
       field: 'total_cost_usd',
+    },
+    thread_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    trigger: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    run_summary: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    run_error: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {

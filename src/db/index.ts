@@ -31,6 +31,7 @@ export class Database {
 
   static async sync() {
     const sequelize = Database.init();
+    await sequelize.query('PRAGMA journal_mode=WAL');
     await sequelize.sync({ alter: true });
   }
 

@@ -15,6 +15,15 @@ export interface AgentLoopParams {
 
   /** Maximum inference round-trips before stopping. */
   maxTurns?: number;
+
+  /** Optional signal for graceful cancellation. */
+  signal?: AbortSignal;
+
+  /** Model override (passed to inference provider per-request). */
+  model?: string;
+
+  /** Returns queued injected messages (drains the queue). Used for mid-run user messages. */
+  getInjectedMessages?: () => string[];
 }
 
 /**
@@ -24,20 +33,50 @@ export interface AgentLoopParams {
  * Yields AgentEvents that the UI (or any consumer) can render.
  */
 export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentEvent> {
-  const { chatml, inference, tools, allowedTools, cwd, requestApproval, maxTurns = 50 } = params;
+  const { chatml, inference, tools, allowedTools, cwd, requestApproval, maxTurns = 50, signal, model, getInjectedMessages } = params;
   let turns = 0;
 
   while (true) {
+    if (signal?.aborted) {
+      yield { type: 'done' };
+      return;
+    }
+
     if (turns >= maxTurns) {
       yield { type: 'max_turns_reached' };
       break;
+    }
+
+    // ── Check for injected user messages ──
+    const injected = getInjectedMessages?.() ?? [];
+    if (injected.length > 0) {
+      const combined = injected.join('\n\n');
+      const messages = chatml.getMessages();
+      const last = messages[messages.length - 1];
+
+      if (last?.role === 'user' && Array.isArray(last.content)) {
+        // Last message is user with content blocks (e.g. tool_results) — append text block
+        (last.content as import('../core/types.js').ContentBlock[]).push({
+          type: 'text',
+          text: `[User message]: ${combined}`,
+        });
+      } else {
+        // Between turns or first turn — add as user message
+        // But we need to ensure alternation. If last is user (string), we can't add another user.
+        // In that case, we modify the existing string content.
+        if (last?.role === 'user' && typeof last.content === 'string') {
+          last.content += `\n\n[User message]: ${combined}`;
+        } else {
+          chatml.addUser(`[User message]: ${combined}`);
+        }
+      }
     }
 
     // ── Think: stream inference ──
     const toolDefs = tools.getToolDefinitions(allowedTools);
     let stopReason = '';
 
-    for await (const event of inference.complete(chatml, toolDefs)) {
+    for await (const event of inference.complete(chatml, toolDefs, model ? { model } : undefined)) {
       yield { type: 'stream', event };
 
       if (event.type === 'message_complete') {
@@ -58,6 +97,11 @@ export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentE
     const toolUseBlocks = chatml.getToolUseBlocks();
 
     for (const toolUse of toolUseBlocks) {
+      if (signal?.aborted) {
+        yield { type: 'done' };
+        return;
+      }
+
       const tool = tools.get(toolUse.name);
 
       // Check approval for mutation tools

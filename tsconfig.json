@@ -21,7 +21,8 @@
       "#tools/*": ["./src/tools/*"],
       "#agents/*": ["./src/agents/*"],
       "#db/*": ["./src/db/*"],
-      "#ui/*": ["./src/ui/*"]
+      "#ui/*": ["./src/ui/*"],
+      "#threads/*": ["./src/threads/*"]
     }
   },
   "include": ["src/**/*"],
