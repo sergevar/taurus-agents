@@ -30,6 +30,7 @@ export const api = {
     schedule_overlap?: string;
     max_turns?: number;
     timeout_ms?: number;
+    mounts?: { host: string; container: string; readonly?: boolean }[];
   }): Promise<Agent & { error?: string }> {
     return request('/api/agents', { method: 'POST', body: data });
   },
@@ -45,6 +46,7 @@ export const api = {
     schedule_overlap: string;
     max_turns: number;
     timeout_ms: number;
+    mounts: { host: string; container: string; readonly?: boolean }[];
   }>): Promise<Agent> {
     return request(`/api/agents/${id}`, { method: 'PUT', body: data });
   },

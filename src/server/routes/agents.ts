@@ -92,7 +92,7 @@ export function agentRoutes(daemon: Daemon): Route[] {
           name: body.name,
           system_prompt: body.system_prompt,
           tools: body.tools ?? DEFAULT_TOOLS,
-          cwd: body.cwd ?? process.cwd(),
+          cwd: body.cwd ?? '/workspace',
           folder_id: body.folder_id,
           model: body.model,
           schedule: body.schedule,
@@ -101,6 +101,7 @@ export function agentRoutes(daemon: Daemon): Route[] {
           timeout_ms: body.timeout_ms,
           metadata: body.metadata,
           docker_image: body.docker_image,
+          mounts: body.mounts,
         });
         json(res, agent, 201);
       } catch (err: any) {

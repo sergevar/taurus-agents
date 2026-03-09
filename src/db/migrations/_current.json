@@ -99,6 +99,15 @@
                     "field": "docker_image",
                     "seqType": "Sequelize.STRING"
                 },
+                "mounts": {
+                    "allowNull": false,
+                    "defaultValue": {
+                        "internal": true,
+                        "value": "Sequelize.Array"
+                    },
+                    "field": "mounts",
+                    "seqType": "Sequelize.JSON"
+                },
                 "created_at": {
                     "allowNull": false,
                     "field": "created_at",
@@ -344,5 +353,5 @@
             "indexes": []
         }
     },
-    "revision": 2
+    "revision": 5
 }

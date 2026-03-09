@@ -139,6 +139,7 @@ export class Daemon {
     timeout_ms?: number;
     metadata?: Record<string, unknown>;
     docker_image?: string;
+    mounts?: { host: string; container: string; readonly?: boolean }[];
   }): Promise<ReturnType<Agent['toApi']>> {
     const agent = await Agent.create({
       name: input.name,
@@ -153,6 +154,7 @@ export class Daemon {
       timeout_ms: input.timeout_ms ?? DEFAULT_TIMEOUT_MS,
       metadata: input.metadata ?? null,
       docker_image: input.docker_image ?? DEFAULT_DOCKER_IMAGE,
+      mounts: input.mounts ?? [],
     });
 
     this.agents.set(agent.id, { agent, process: null, currentRunId: null });
@@ -176,16 +178,26 @@ export class Daemon {
     max_turns: number;
     timeout_ms: number;
     metadata: Record<string, unknown>;
+    docker_image: string;
+    mounts: { host: string; container: string; readonly?: boolean }[];
     status: AgentStatus;
   }>): Promise<ReturnType<Agent['toApi']>> {
     const managed = this.agents.get(id);
     if (!managed) throw new Error(`Agent not found: ${id}`);
+
+    // If mounts or docker_image changed, destroy the container so it's
+    // recreated with the new config on the next run (volume is preserved).
+    const needsRecreate = 'mounts' in updates || 'docker_image' in updates;
 
     await managed.agent.update(updates);
 
     // Re-register schedule if schedule or overlap changed
     if ('schedule' in updates || 'schedule_overlap' in updates) {
       this.scheduler.register(id, managed.agent.schedule, managed.agent.schedule_overlap);
+    }
+
+    if (needsRecreate && !managed.process) {
+      await this.docker.destroyContainer(managed.agent.container_id);
     }
 
     return managed.agent.toApi();

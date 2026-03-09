@@ -348,6 +348,47 @@
   }
 }
 
+// ── Toast Notifications ──
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.toast {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.2s, transform 0.2s;
+  word-break: break-word;
+
+  &--visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &--error {
+    background: $status-error-bg;
+    border: 1px solid $red;
+    color: $red;
+  }
+
+  &--info {
+    background: $bg3;
+    border: 1px solid $border;
+    color: $text;
+  }
+}
+
 // ── Runs List ──
 
 .runs-panel {

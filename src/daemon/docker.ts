@@ -72,13 +72,23 @@ export class DockerService {
 
     // Create and start container
     // Chromium/Playwright needs >64MB /dev/shm; --shm-size is safer than --ipc=host
-    await this.docker(
+    const createArgs = [
       'create', '--name', container_id,
       '--shm-size=256m',
       '-v', `${volumeName}:/workspace`,
-      '-w', '/workspace',
-      docker_image, 'sleep', 'infinity',
-    );
+    ];
+
+    // Add bind mounts (validate paths are absolute)
+    const mounts = typeof agent.mounts === 'string' ? JSON.parse(agent.mounts) : (agent.mounts ?? []);
+    for (const m of mounts) {
+      if (!m.host.startsWith('/')) throw new Error(`Bind mount host path must be absolute: ${m.host}`);
+      if (!m.container.startsWith('/')) throw new Error(`Bind mount container path must be absolute: ${m.container}`);
+      const spec = m.readonly ? `${m.host}:${m.container}:ro` : `${m.host}:${m.container}`;
+      createArgs.push('-v', spec);
+    }
+
+    createArgs.push('-w', '/workspace', docker_image, 'sleep', 'infinity');
+    await this.docker(...createArgs);
     await this.docker('start', container_id);
 
     // Copy scaffold into /workspace
@@ -126,6 +136,12 @@ export class DockerService {
         this.logger('warn', `Failed to stop container ${container_id}: ${err.message}`);
       }
     }
+  }
+
+  /** Remove container only (keep volume). Will be recreated on next ensureContainer. */
+  async destroyContainer(container_id: string): Promise<void> {
+    try { await this.docker('rm', '-f', container_id); } catch { /* ignore */ }
+    this.logger('info', `Container destroyed (volume preserved): ${container_id}`);
   }
 
   async removeContainer(container_id: string): Promise<void> {

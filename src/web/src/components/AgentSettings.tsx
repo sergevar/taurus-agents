@@ -25,6 +25,7 @@ export function AgentSettings({ agent, onUpdated }: AgentSettingsProps) {
         schedule_overlap: data.schedule_overlap,
         max_turns: data.max_turns,
         timeout_ms: data.timeout_ms,
+        mounts: data.mounts,
       });
       setEditing(false);
       onUpdated();
@@ -58,6 +59,11 @@ export function AgentSettings({ agent, onUpdated }: AgentSettingsProps) {
         <Row label="Model" value={agent.model} />
         <Row label="Working Directory" value={agent.cwd} mono />
         <Row label="Docker Image" value={agent.docker_image} mono />
+        <Row label="Bind Mounts" value={
+          agent.mounts?.length > 0
+            ? agent.mounts.map(m => `${m.host} -> ${m.container}${m.readonly ? ' (ro)' : ''}`).join('\n')
+            : 'None'
+        } pre={agent.mounts?.length > 0} />
         <Row label="Tools" value={agent.tools.join(', ')} />
         <Row label="Schedule" value={agent.schedule ?? 'None'} />
         {agent.schedule && (

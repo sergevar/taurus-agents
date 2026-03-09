@@ -105,6 +105,38 @@
   }
 }
 
+// ── Bind Mounts Editor ──
+
+.mount-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+
+  input[type="text"] {
+    flex: 1;
+    margin-bottom: 0;
+    font-family: $font-mono;
+    font-size: 12px;
+  }
+
+  .mount-ro {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: $text2;
+    margin-bottom: 0;
+    white-space: nowrap;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+  }
+}
+
 // ── Tool Picker ──
 
 .tool-picker {

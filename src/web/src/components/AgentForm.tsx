@@ -3,6 +3,8 @@ import { api } from '../api';
 import { ToolPicker } from './ToolPicker';
 import type { Agent } from '../types';
 
+export type MountEntry = { host: string; container: string; readonly?: boolean };
+
 export interface AgentFormData {
   name: string;
   system_prompt: string;
@@ -14,6 +16,7 @@ export interface AgentFormData {
   schedule_overlap: 'skip' | 'queue' | 'kill';
   max_turns: number;
   timeout_ms: number;
+  mounts: MountEntry[];
 }
 
 interface AgentFormProps {
@@ -35,6 +38,7 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
   const [scheduleOverlap, setScheduleOverlap] = useState<'skip' | 'queue' | 'kill'>(initial?.schedule_overlap ?? 'skip');
   const [maxTurns, setMaxTurns] = useState<string>(initial ? String(initial.max_turns) : '');
   const [timeoutMs, setTimeoutMs] = useState<string>(initial ? String(initial.timeout_ms / 1000) : '');
+  const [mounts, setMounts] = useState<MountEntry[]>(initial?.mounts ?? []);
   const [defaults, setDefaults] = useState<{ model: string; docker_image: string; max_turns: number; timeout_ms: number } | null>(null);
   const [allToolNames, setAllToolNames] = useState<string[]>([]);
   const [readonlyTools, setReadonlyTools] = useState<string[]>([]);
@@ -70,6 +74,7 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
       schedule_overlap: scheduleOverlap,
       max_turns: resolvedMaxTurns,
       timeout_ms: resolvedTimeoutS * 1000,
+      mounts: mounts.filter(m => m.host && m.container),
     });
   }
 
@@ -99,6 +104,41 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
 
       <label>Docker Image (optional)</label>
       <input type="text" value={dockerImage} onChange={e => setDockerImage(e.target.value)} placeholder={defaults?.docker_image ?? ''} />
+
+      <label className="label-with-actions">
+        Bind Mounts
+        <span className="label-actions">
+          <button type="button" className="label-action-btn" onClick={() => setMounts([...mounts, { host: '', container: '', readonly: false }])}>+ Add</button>
+        </span>
+      </label>
+      {mounts.length === 0 && (
+        <div className="field-hint">No host directories mounted</div>
+      )}
+      {mounts.map((m, i) => (
+        <div key={i} className="mount-row">
+          <input
+            type="text"
+            value={m.host}
+            onChange={e => { const next = [...mounts]; next[i] = { ...m, host: e.target.value }; setMounts(next); }}
+            placeholder="Host path"
+          />
+          <input
+            type="text"
+            value={m.container}
+            onChange={e => { const next = [...mounts]; next[i] = { ...m, container: e.target.value }; setMounts(next); }}
+            placeholder="Container path"
+          />
+          <label className="mount-ro">
+            <input
+              type="checkbox"
+              checked={m.readonly ?? false}
+              onChange={e => { const next = [...mounts]; next[i] = { ...m, readonly: e.target.checked }; setMounts(next); }}
+            />
+            ro
+          </label>
+          <button type="button" className="label-action-btn" onClick={() => setMounts(mounts.filter((_, j) => j !== i))}>x</button>
+        </div>
+      ))}
 
       <label>Max Turns</label>
       <input

@@ -22,6 +22,7 @@ class Agent extends Model {
   declare timeout_ms: number;
   declare metadata: Record<string, unknown> | null;
   declare docker_image: string;
+  declare mounts: { host: string; container: string; readonly?: boolean }[];
   declare created_at: Date;
   declare updated_at: Date;
 
@@ -31,7 +32,9 @@ class Agent extends Model {
 
   toApi() {
     const { id, folder_id, name, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at } = this;
-    return { id, folder_id, name, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, created_at, updated_at };
+    // SQLite may store JSON default as a raw string — ensure mounts is always an array
+    const mounts = typeof this.mounts === 'string' ? JSON.parse(this.mounts) : (this.mounts ?? []);
+    return { id, folder_id, name, status, cwd, model, system_prompt, tools, schedule, schedule_overlap, max_turns, timeout_ms, metadata, docker_image, mounts, created_at, updated_at };
   }
 }
 
@@ -102,6 +105,11 @@ Agent.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: DEFAULT_DOCKER_IMAGE,
+    },
+    mounts: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
     },
   },
   {

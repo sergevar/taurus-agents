@@ -19,6 +19,7 @@ export function CreateAgentModal({ onClose, onCreated }: CreateAgentModalProps) 
       schedule_overlap: data.schedule_overlap,
       max_turns: data.max_turns,
       timeout_ms: data.timeout_ms,
+      mounts: data.mounts,
     });
 
     if (result.error) {

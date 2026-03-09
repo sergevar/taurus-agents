@@ -16,6 +16,7 @@ export interface Agent {
   timeout_ms: number;
   metadata: Record<string, unknown> | null;
   docker_image: string;
+  mounts: { host: string; container: string; readonly?: boolean }[];
   created_at: string;
   updated_at: string;
 }

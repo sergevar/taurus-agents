@@ -1,3 +1,8 @@
+[] make it to parity with CC already and you can do it there
+    - mysticeti
+    - stockfish transplant
+[] show diff instead of old string new string
+
 [...] browser
 [] browser tool featureset: Yes, you should definitely expand it! A few approaches:
 
@@ -35,8 +40,6 @@
 
 [] create an agent - fetch token count and costs from anthropic? and put on dashboard. wow
 
-[] mount a host directory in docker! so you can continue with stockfish
-
 [] instead of tool list in ui maybe something better in agent list. make it more professional
 
 [] bloody captchas again on browser use...
@@ -44,6 +47,8 @@
     [] brainstorm
 
 [] grep tool? ripgrep?
+
+[] model selector, like in novelchat
 
 [] telegram/whatsapp connection
     [] clara/stockfish folder for agents, and then check everything
@@ -116,6 +121,7 @@ HottestLang
         [] karpathy evolution notes - write in hottest. maybe generalize even
         [] see in apple notes
         [] well basically all your projects _vibe
+    [] eventually you'll need ACL stuff
 
 [] sophisticated cron triggers: e.g. by a new email arriving or a calendar event being close, and need to think through whether to remind the user (also self-schedule/self-snooze!)
     [] in prod could go through supervisor agent, when requesting to run? if by some chance asks to run * * * * * - why. resource mgmt
@@ -197,3 +203,25 @@ maybe
 [] browser tool: if you want even leaner: Vercel's agent-browser CLI (Rust+Node, ~200 tokens per snapshot), same pattern but more optimized.
 
 [] naming! taurus ai taken? or at least need SEO! well good, agents can do that
+
+
+
+When you use ChatGPT or Claude in a browser, there are several limitations:
+
+It's stateless. Every conversation starts from zero. It doesn't know your name, your preferences, what you asked yesterday, or what project you're working on. You're constantly re-explaining context.
+
+It's passive. You go to it. It never comes to you. It can't wake up at 7am and brief you on your calendar, monitor your email, or run a recurring task. It only works when you're sitting in front of it.
+
+It's isolated. It can't run commands on your machine, browse the web for you, control your apps, or send messages on your behalf. It lives in a text box with no hands.
+
+It's single-channel. Your real life happens across WhatsApp, Telegram, Discord, Slack, iMessage - but the AI lives in its own separate tab. There's no way to text it where you already are, let alone have it maintain one continuous memory across all those surfaces.
+
+What if instead, you had an AI that:
+
+Lived in the messaging apps you already use - all of them, with shared memory
+Remembered your preferences, your projects, and your past conversations across sessions
+Could run commands on your computer, browse the web, and control a real browser
+Woke up on a schedule to handle recurring tasks without being asked
+Ran on your own hardware - your laptop, a VPS, a Mac Mini - always on, under your control
+This is what OpenClaw does. It's not a chatbot - it's a personal AI assistant with a persistent identity, tools, and presence across every channel you use.
+

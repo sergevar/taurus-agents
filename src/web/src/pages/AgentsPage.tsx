@@ -10,6 +10,7 @@ import { CreateAgentModal } from '../components/CreateAgentModal';
 import { AgentSettings } from '../components/AgentSettings';
 import { Countdown } from '../components/Countdown';
 import { RunStatusIcon } from '../components/RunStatusIcon';
+import { useToast, ToastContainer } from '../components/Toast';
 import { Play, RotateCw, Square, PlayCircle, RefreshCw, Trash2 } from 'lucide-react';
 import '../styles/components.scss';
 
@@ -26,6 +27,7 @@ export function AgentsPage() {
   const [streamingThinking, setStreamingThinking] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('runs');
+  const { toasts, showToast, dismiss } = useToast();
 
   // Remember last selected run per agent so switching back restores it
   const lastRunByAgent = useRef<Record<string, string>>({});
@@ -246,39 +248,55 @@ export function AgentsPage() {
 
   async function handleStartRun() {
     if (!agentId) return;
-    const result = await api.startRun(agentId);
-    await loadAgents();
-    const updatedRuns = await api.listRuns(agentId);
-    setRuns(updatedRuns);
-    setActiveTab('runs');
-    navigate(`/agents/${agentId}/runs/${result.runId}`);
+    try {
+      const result = await api.startRun(agentId);
+      await loadAgents();
+      const updatedRuns = await api.listRuns(agentId);
+      setRuns(updatedRuns);
+      setActiveTab('runs');
+      navigate(`/agents/${agentId}/runs/${result.runId}`);
+    } catch (err: any) {
+      showToast(err.message);
+    }
   }
 
   async function handleContinueRun() {
     if (!agentId || runs.length === 0) return;
-    const latestRunId = runs[0].id;
-    await api.startRun(agentId, { run_id: latestRunId });
-    await loadAgents();
-    const updatedRuns = await api.listRuns(agentId);
-    setRuns(updatedRuns);
-    setActiveTab('runs');
-    navigate(`/agents/${agentId}/runs/${latestRunId}`);
+    try {
+      const latestRunId = runs[0].id;
+      await api.startRun(agentId, { run_id: latestRunId });
+      await loadAgents();
+      const updatedRuns = await api.listRuns(agentId);
+      setRuns(updatedRuns);
+      setActiveTab('runs');
+      navigate(`/agents/${agentId}/runs/${latestRunId}`);
+    } catch (err: any) {
+      showToast(err.message);
+    }
   }
 
   async function handleStopRun() {
     if (!agentId) return;
-    await api.stopRun(agentId);
-    await loadAgents();
-    if (runId) {
-      const msgs = await api.getRunMessages(agentId, runId);
-      setMessages(msgs);
+    try {
+      await api.stopRun(agentId);
+      await loadAgents();
+      if (runId) {
+        const msgs = await api.getRunMessages(agentId, runId);
+        setMessages(msgs);
+      }
+    } catch (err: any) {
+      showToast(err.message);
     }
   }
 
   async function handleResume(message?: string) {
     if (!agentId) return;
-    await api.resumeAgent(agentId, message || undefined);
-    await loadAgents();
+    try {
+      await api.resumeAgent(agentId, message || undefined);
+      await loadAgents();
+    } catch (err: any) {
+      showToast(err.message);
+    }
   }
 
   async function handleSend(message: string, images?: import('../components/InputBar').ImageAttachment[]) {
@@ -290,39 +308,47 @@ export function AgentsPage() {
     // Show the message instantly
     appendOptimisticUserMessage(message, images);
 
-    if (selectedAgent?.status === 'paused') {
-      await handleResume(message);
-      return;
-    }
-
-    if (selectedAgent?.status === 'running') {
-      try {
-        await api.injectMessage(agentId, message, apiImages);
+    try {
+      if (selectedAgent?.status === 'paused') {
+        await handleResume(message);
         return;
-      } catch {
-        // Agent may have just stopped — fall through to start/continue
       }
-    }
 
-    // Idle — continue latest run with this message, or start fresh if no runs exist
-    const latestRunId = runs[0]?.id;
-    const result = await api.startRun(agentId, {
-      input: message,
-      images: apiImages,
-      ...(latestRunId ? { run_id: latestRunId } : {}),
-    });
-    await loadAgents();
-    const updatedRuns = await api.listRuns(agentId);
-    setRuns(updatedRuns);
-    setActiveTab('runs');
-    navigate(`/agents/${agentId}/runs/${result.runId}`);
+      if (selectedAgent?.status === 'running') {
+        try {
+          await api.injectMessage(agentId, message, apiImages);
+          return;
+        } catch {
+          // Agent may have just stopped — fall through to start/continue
+        }
+      }
+
+      // Idle — continue latest run with this message, or start fresh if no runs exist
+      const latestRunId = runs[0]?.id;
+      const result = await api.startRun(agentId, {
+        input: message,
+        images: apiImages,
+        ...(latestRunId ? { run_id: latestRunId } : {}),
+      });
+      await loadAgents();
+      const updatedRuns = await api.listRuns(agentId);
+      setRuns(updatedRuns);
+      setActiveTab('runs');
+      navigate(`/agents/${agentId}/runs/${result.runId}`);
+    } catch (err: any) {
+      showToast(err.message);
+    }
   }
 
   async function handleDelete() {
     if (!agentId || !confirm('Delete this agent?')) return;
-    await api.deleteAgent(agentId);
-    navigate('/');
-    await loadAgents();
+    try {
+      await api.deleteAgent(agentId);
+      navigate('/');
+      await loadAgents();
+    } catch (err: any) {
+      showToast(err.message);
+    }
   }
 
   async function handleCreated(newId: string) {
@@ -455,6 +481,8 @@ export function AgentsPage() {
           </>
         )}
       </div>
+
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
 
       {showCreateModal && (
         <CreateAgentModal

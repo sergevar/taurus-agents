@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc --noEmit --pretty)"
+      "Bash(npx tsc --noEmit --pretty)",
+      "Bash(npm run makemigration)",
+      "Bash(npm run migrate)",
+      "Bash(npm run build:web)",
+      "Bash(sqlite3 data/taurus.db \"SELECT name, mounts FROM Agents ORDER BY created_at DESC LIMIT 3;\")",
+      "Bash(curl -s localhost:7777/api/agents)",
+      "Bash(python3 -c \"import sys,json; agents=json.load\\(sys.stdin\\); a=agents[-1]; print\\(a[''name''], type\\(a[''mounts'']\\).__name__, repr\\(a[''mounts'']\\)\\)\")"
     ]
   }
 }
