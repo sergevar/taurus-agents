@@ -24,7 +24,7 @@ export function Sidebar({ agents, selectedId, onCreateClick }: SidebarProps) {
           <div
             key={agent.id}
             className={`agent-item ${agent.id === selectedId ? 'active' : ''}`}
-            onClick={() => navigate(`/agents/${agent.id}`)}
+            onClick={() => { if (agent.id !== selectedId) navigate(`/agents/${agent.id}`); }}
           >
             <div className="agent-item__name">
               {agent.name}

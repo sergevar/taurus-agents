@@ -1,10 +1,15 @@
 [] make it to parity with CC already and you can do it there
     - mysticeti
     - stockfish transplant
-[] show diff instead of old string new string
+    what's left?
+        [] compaction / ctx len control
+        [] subagents/tasks!
+        that's it, wow. can do it
 
 [...] browser
 [] browser tool featureset: Yes, you should definitely expand it! A few approaches:
+
+[] diffs/tool call areas not showing full paths?
 
 [] pdfs! see how codex does it etc. but also deepseek pdf (skill/agent?)
 
@@ -28,8 +33,6 @@
     skills: playwright-cli install --skills
 
 [] different placeholders and templates stored somewhere
-
-[] COUNT $ NOW!
 
 [] TG/WHATSAPP NOW!
 
@@ -126,6 +129,9 @@ HottestLang
 
 [] sophisticated cron triggers: e.g. by a new email arriving or a calendar event being close, and need to think through whether to remind the user (also self-schedule/self-snooze!)
     [] in prod could go through supervisor agent, when requesting to run? if by some chance asks to run * * * * * - why. resource mgmt
+
+
+[] COUNT $ somewhere
 
 [] dashboard! that agents can operate on. notion-like! factorio-like!
 

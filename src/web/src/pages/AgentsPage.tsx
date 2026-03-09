@@ -58,7 +58,7 @@ export function AgentsPage() {
     return () => clearInterval(interval);
   }, [loadAgents]);
 
-  // ── Load runs when agent changes ──
+  // ── Load runs when agent changes + auto-select latest ──
 
   useEffect(() => {
     if (!agentId) {
@@ -66,8 +66,18 @@ export function AgentsPage() {
       setMessages([]);
       return;
     }
-    api.listRuns(agentId).then(setRuns);
-  }, [agentId]);
+    const aid = agentId;
+    api.listRuns(aid).then(loadedRuns => {
+      if (agentIdRef.current !== aid) return; // stale response
+      setRuns(loadedRuns);
+      setMessages([]); // clear stale messages from previous agent
+      if (loadedRuns.length > 0 && !runIdRef.current) {
+        const remembered = lastRunByAgent.current[aid];
+        const targetId = remembered && loadedRuns.some(r => r.id === remembered) ? remembered : loadedRuns[0].id;
+        navigate(`/agents/${aid}/runs/${targetId}`, { replace: true });
+      }
+    });
+  }, [agentId, navigate]);
 
   // ── Load messages when run changes ──
 
@@ -78,16 +88,6 @@ export function AgentsPage() {
     }
     api.getRunMessages(agentId, runId).then(setMessages);
   }, [agentId, runId]);
-
-  // ── Auto-select run when agent changes (restore last or pick latest) ──
-
-  useEffect(() => {
-    if (agentId && runs.length > 0 && !runId && activeTab === 'runs') {
-      const remembered = lastRunByAgent.current[agentId];
-      const targetId = remembered && runs.some(r => r.id === remembered) ? remembered : runs[0].id;
-      navigate(`/agents/${agentId}/runs/${targetId}`, { replace: true });
-    }
-  }, [agentId, runs, runId, navigate, activeTab]);
 
   // ── Reset tab when agent changes ──
 
@@ -397,7 +397,7 @@ export function AgentsPage() {
               <div className="panel-header__info">
                 <h2>{selectedAgent.name}</h2>
                 <StatusBadge status={selectedAgent.status} />
-                <span className="panel-header__meta">{selectedAgent.type} | {selectedAgent.model}</span>
+                <span className="panel-header__meta">{selectedAgent.model}</span>
                 {selectedAgent.schedule && selectedAgent.next_run && !isRunning && (
                   <span className="panel-header__meta">
                     Next: <Countdown targetDate={selectedAgent.next_run} />
