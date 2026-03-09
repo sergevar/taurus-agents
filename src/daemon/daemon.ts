@@ -246,6 +246,12 @@ export class Daemon {
   async startRun(agentId: string, trigger: TriggerType = 'manual', input?: string, images?: { base64: string; mediaType: string }[]): Promise<string> {
     const managed = this.agents.get(agentId);
     if (!managed) throw new Error(`Agent not found: ${agentId}`);
+
+    // If paused, stop the current run first so we can start fresh
+    if (managed.process && managed.agent.status === 'paused') {
+      await this.stopRun(agentId);
+    }
+
     if (managed.process) throw new Error(`Agent "${managed.agent.name}" is already running`);
 
     await this.docker.ensureContainer(managed.agent);

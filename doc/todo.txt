@@ -1,3 +1,8 @@
+[] do spawn
+    [] first decide
+    [] then do
+    [] +share resources
+
 [] make it to parity with CC already and you can do it there
     - mysticeti
     - stockfish transplant
@@ -6,14 +11,23 @@
         [] subagents/tasks!
         that's it, wow. can do it
 
-[] browser tool featureset: Yes, you should definitely expand it! A few approaches:
-
 [] diffs/tool call areas not showing full paths?
 
 [] pdfs! see how codex does it etc. but also deepseek pdf (skill/agent?)
 
 [] claude has its own web search. and so does openai api? could use their backends?
 [] whisper backend. and what about tts?
+[]       requestBody.reasoning = { effort: 'high' }; - need to control that
+
+[] show model name in run (should save there in db if changes on agent)
+[] "starting container" state, otherwise just waiting now
+
+[] Result ERROR 0 sed: read error on /workspace/src: Is a directory <- intercept this
+
+
+choices i'm unsure about:
+[] default backend - anthropic? should just error out, "no such backend"
+[] if new run is created, all paused runs are just stopped
 
 [] switch to lighter models for tests [] there's even free api on claude on openrouter? no wait maybe that was deepseek?
 [] integrate CC SDK? for some subagents? free inference, basically [] could you pass it the tools instead of using its own?
@@ -80,7 +94,7 @@
 [] allow to spawn subtasks just like CC. same container! (so, detether from name=id)
 [] any auth in api? csrf?
 
-[] reason for tool call (optional)
+[] add reason for all tool calls (optional)
 
 [] look into openclaw again and what it has and you don't!
 [] ^ same but for CC
@@ -178,6 +192,12 @@ also small thing, but when next scheduled run triggers, i don't see it in the ui
 
 [] if something frustrating allow it to stop and call
     and leave notes and suggestions and just continue!
+
+
+[] why this happened in cc
+    find /Users/serge/Projects/_LLMFrameworks/taurus-agents -type f -name "*.ts" -o -name "*.tsx" | head -40
+    OUT
+    <tool_use_error>Cancelled: parallel tool call Read(/Users/serge/Projects/_LLMFrameworks/tau…) errored</tool_use_error>
 
 [] note: https://scrolltest.medium.com/playwright-mcp-burns-114k-tokens-per-test-the-new-cli-uses-27k-heres-when-to-use-each-65dabeaac7a0
 

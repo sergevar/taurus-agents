@@ -90,13 +90,6 @@ Agents can have a `schedule` (cron expression). Overlap behavior when a schedule
 - `queue` — queue it, run after current finishes
 - `kill` — stop current run, start new
 
-## Environment variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `TAURUS_PORT` | `7777` | HTTP server port |
-| `ANTHROPIC_API_KEY` | — | Required. Anthropic API key |
-| `BRAVE_SEARCH_API_KEY` | — | Optional. Enables WebSearch tool |
 
 ## CLI
 

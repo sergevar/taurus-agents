@@ -110,9 +110,13 @@ export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentE
         }
         break; // success
       } catch (err: any) {
+        // OpenAI SDK buries details in err.error; Anthropic uses err.message directly
+        const errMsg = err?.error?.message || err?.message || String(err);
+        const errDetail = err?.status ? `[${err.status}] ${errMsg}` : errMsg;
+
         if (attempt < MAX_RETRIES && isTransientError(err) && !signal?.aborted) {
           const delay = BASE_DELAY_MS * 2 ** attempt;
-          yield { type: 'retry', attempt: attempt + 1, maxRetries: MAX_RETRIES, error: err.message, delayMs: delay };
+          yield { type: 'retry', attempt: attempt + 1, maxRetries: MAX_RETRIES, error: errDetail, delayMs: delay };
           await new Promise(r => {
             const timer = setTimeout(r, delay);
             signal?.addEventListener('abort', () => { clearTimeout(timer); r(undefined); }, { once: true });
@@ -120,7 +124,7 @@ export async function* agentLoop(params: AgentLoopParams): AsyncGenerator<AgentE
           if (signal?.aborted) throw err;
           continue;
         }
-        throw err;
+        throw new Error(errDetail);
       }
     }
 

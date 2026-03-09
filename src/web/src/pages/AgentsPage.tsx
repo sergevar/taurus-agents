@@ -409,6 +409,7 @@ export function AgentsPage() {
                 {isStopped && runs.length > 0 && <button className="btn" onClick={handleContinueRun}><RotateCw size={13} /> Continue</button>}
                 {isRunning && <button className="btn" onClick={handleStopRun}><Square size={13} /> Stop</button>}
                 {isPaused && <button className="btn" onClick={() => handleResume()}><PlayCircle size={13} /> Resume</button>}
+                {isPaused && <button className="btn primary" onClick={handleStartRun}><Play size={13} /> New Run</button>}
                 <button className="btn" onClick={handleRefreshMessages}><RefreshCw size={13} /></button>
                 <button className="btn danger" onClick={handleDelete}><Trash2 size={13} /></button>
               </div>

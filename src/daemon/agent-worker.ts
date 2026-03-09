@@ -16,7 +16,7 @@ import type { ChatMessage, ContentBlock } from '../core/types.js';
 import { agentLoop } from '../agents/agent-loop.js';
 import { ChatML } from '../core/chatml.js';
 import { InferenceService } from '../inference/service.js';
-import { AnthropicProvider } from '../inference/providers/anthropic.js';
+import { resolveProvider } from '../inference/providers/factory.js';
 import { ToolRegistry } from '../tools/registry.js';
 import { PersistentShell } from './persistent-shell.js';
 import { PersistentBashTool } from '../tools/shell/bash.js';
@@ -209,8 +209,8 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
   log('info', 'run.started', `Agent "${agent.name}" started (trigger: ${trigger})`);
   send({ type: 'status', status: 'running' });
 
-  // 1. Initialize inference
-  const provider = new AnthropicProvider();
+  // 1. Initialize inference — resolve provider from model string
+  const { provider, model: resolvedModel } = resolveProvider(agent.model);
   const inference = new InferenceService(provider);
 
   // 2. Initialize persistent shell
@@ -303,7 +303,7 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
       cwd: '/workspace',
       maxTurns: agent.max_turns,
       signal: abortController.signal,
-      model: agent.model,
+      model: resolvedModel,
       getInjectedMessages: () => injectQueue.splice(0),
     })) {
       switch (event.type) {

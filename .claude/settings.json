@@ -9,7 +9,8 @@
       "Bash(curl -s localhost:7777/api/agents)",
       "Bash(python3 -c \"import sys,json; agents=json.load\\(sys.stdin\\); a=agents[-1]; print\\(a[''name''], type\\(a[''mounts'']\\).__name__, repr\\(a[''mounts'']\\)\\)\")",
       "Bash(npm install diff)",
-      "Bash(npm install -D @types/diff)"
+      "Bash(npm install -D @types/diff)",
+      "Bash(npm install openai)"
     ]
   }
 }
