@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { MessageRecord } from '../types';
 import { Markdown } from './Markdown';
 import { JsonKV } from './JsonKV';
+import { DiffView } from './DiffView';
 import { Lightbox } from './Lightbox';
 
 // ── Collapsible thinking block ──
@@ -56,6 +57,21 @@ function ContentBlockView({ block }: { block: any }) {
     );
   }
   if (block.type === 'tool_use') {
+    if (block.name === 'Edit' && block.input?.old_string != null && block.input?.new_string != null) {
+      return (
+        <div className="msg-tool-use">
+          <div className="msg-tool-use__header">Tool: {block.name}</div>
+          <div className="msg-tool-use__input msg-tool-use__input--diff">
+            <DiffView
+              filePath={block.input.file_path ?? ''}
+              oldString={block.input.old_string}
+              newString={block.input.new_string}
+              replaceAll={block.input.replace_all}
+            />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="msg-tool-use">
         <div className="msg-tool-use__header">Tool: {block.name}</div>

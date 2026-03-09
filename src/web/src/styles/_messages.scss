@@ -433,6 +433,93 @@
   }
 }
 
+// ── Diff View ──
+
+.diff-view {
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    font-family: $font-mono;
+  }
+
+  &__file {
+    color: $accent;
+    font-weight: 500;
+  }
+
+  &__badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    background: rgba($yellow, 0.15);
+    color: $yellow;
+    font-weight: 500;
+  }
+
+  &__content {
+    margin: 0;
+    font-size: 12px;
+    font-family: $font-mono;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  &__line {
+    display: flex;
+    min-height: 1.5em;
+
+    &--added {
+      background: rgba($green, 0.12);
+      color: $green;
+    }
+
+    &--removed {
+      background: rgba($red, 0.12);
+      color: $red;
+    }
+
+    &--context {
+      color: $text2;
+    }
+  }
+
+  &__lns {
+    flex-shrink: 0;
+    display: inline-flex;
+    border-right: 1px solid rgba($border, 0.5);
+    margin-right: 4px;
+    padding-right: 4px;
+  }
+
+  &__ln {
+    text-align: right;
+    color: $text2;
+    opacity: 0.4;
+    user-select: none;
+    font-size: 11px;
+  }
+
+  &__sign {
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+    user-select: none;
+    opacity: 0.7;
+  }
+
+  &__text {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.msg-tool-use__input--diff {
+  padding: 4px 8px;
+}
+
 .msg-tool-result {
   margin: 4px 0;
   border: 1px solid $border;

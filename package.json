@@ -20,6 +20,7 @@
     "@vscode/ripgrep": "^1.15.9",
     "croner": "^10.0.1",
     "cronstrue": "^3.13.0",
+    "diff": "^8.0.3",
     "dotenv": "^17.3.1",
     "fast-glob": "^3.3.2",
     "linkedom": "^0.18.12",
@@ -40,6 +41,7 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@types/diff": "^7.0.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/turndown": "^5.0.6",
