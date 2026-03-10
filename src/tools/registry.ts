@@ -33,11 +33,23 @@ export class ToolRegistry {
       ? filter.map(name => this.tools.get(name)).filter((t): t is Tool => !!t)
       : this.getAll();
 
-    return tools.map(t => ({
-      name: t.name,
-      description: t.description,
-      input_schema: t.inputSchema,
-    }));
+    return tools.map(t => {
+      const schema = t.inputSchema as Record<string, any>;
+      return {
+        name: t.name,
+        description: t.description,
+        input_schema: {
+          ...schema,
+          properties: {
+            description: {
+              type: 'string',
+              description: 'Brief reason for this tool call (shown to the user)',
+            },
+            ...schema.properties,
+          },
+        },
+      };
+    });
   }
 
   /**

@@ -1,25 +1,52 @@
 NEXT
 [] TG/WHATSAPP NOW!
+    [] telegram/whatsapp connection
+        [] clara/stockfish folder for agents, and then check everything
+        [] after that, tts/stt
+[] HOTTEST BRAINSTORM see below
 
 LEFT UNTIL PARITY WITH CC
 [] compaction / ctx len control
 [] see the files (vscode)
+    [] show/visualize kb, view/edit/download/upload files
+        [] is vscode embeddable? would be great. yeah i think we can connect it remotely by having a vscode server in the docker and rendering it... in an iframe? need to ask claude how that works
+    [] add console page - log into the container and run commands as needed
+        actually vscode would expose terminal to you i guess?
+
 then you can do: - mysticeti - stockfish transplant
 
 [] factorio use case:
     create an agent - fetch token count and costs from anthropic? and put on dashboard. wow
 
 WHEN YOU HAVE TIME: IMPORTANT FEATURE ASKS
+[] Bash tool: "<persisted-output>Output too large (56.5KB). Full output saved to: /......../.claude/projects/User-s......./...
+    [] what are the read line limits
+    [] are there line numbers to read partially
+[] refactor code look manually
+[] kb/wiki/proper memory
+[] chatml: token count and HUD managing/partial compactify/
+    collapse/uncollapse
+[] context length management (proper! brainstorm)
+[] prevent second ./taurus from running and interfering
+[] COUNT $ somewhere
+[] (hottest) let the agent see its runs. and then you could use like odd/even tasks in Hottest, or any metadata attached if needed
+    let it see the schedule period
 [] track mtime and error out on edit without reading first
 [] pdfs! see how codex does it etc. but also deepseek pdf (skill/agent?)
 [] claude has its own web search. and so does openai api? could use their backends?
 [] whisper backend. and what about tts?
 [] integrate CC SDK? for some subagents? free inference, basically, on max plan [] could you pass it the tools instead of using its own?
 [] how to store credentials in a smart way. secrets, basically, like gh. need to investigate. there's also onepass vault skill or something in openclaw
+[] if i just reload backend gracefully (because developing a feature), and this stops the runs, it should just pick them right up, right? unless flag is passed (and should indicate this in any case, that a session was abruptly stopped)
+[] look into openclaw again and what it has and you don't!
+    [] ^ same but for CC
+    [] ^ same but for codex. prompts, tools, everything
+    [] skill hub! moltskills
 LATER/NOT URGENT
 [] more tests
 [] timeout for spawns if they go in their own direction or if too many turns - should be some budget to check if useful
 [] next: parallel spawn
+[] I stopped the run with a stop button but nowhere does it mention that i stopped it. just shows gray status dot
 [] think about dot on the agent itself. how is its status computed even?
 [] agent says there's no python installed? let's install some environments like python, node... ah wait it says `python` not available but `python3` is... still, we need to have one image with things like panda/numpy etc
 [] later: maybe combine tool calls visually IN / OUT like in CC? and maybe don't show Read?
@@ -27,6 +54,7 @@ LATER/NOT URGENT
 [] save metadata info on each message like what model produced it etc
 [] show model name in run (should save there in db if changes on agent)
 [] model selector, like in novelchat
+[] button to temporarily disable some agents
 [] choices i'm unsure about:
     [] default backend - anthropic? should just error out, "no such backend"
     [] Result ERROR 0 sed: read error on /workspace/src: Is a directory <- intercept this
@@ -50,47 +78,38 @@ LATER/NOT URGENT
     [] You have been triggered by your scheduled run. Current time: 2026-03-08T10:25:00.515Z. Execute your task
     [] does the syntax of the tools output make sense? maybe compact?
     [] Edited /workspace/experiment.json: replaced 1 occurrence(s) (26 → 24 chars)
-
-
+[] autobackup! at least the database. as for containers - optional, but could set it up automatic. could be specified in hottest recipes too
+    could also instruct to use git if needed and backup important state offsite idk
+[] encourage subagent use to save context - should realize that it gets fresh huge context! (does it work like that? or forks)
 [] bloody captchas again on browser use...
     [] what is https://www.google.com/search?q=Stealth+Mode+Playwright&oq=Stealth+Mode+Playwright - not needed for now
     [] brainstorm
-
-
-[] telegram/whatsapp connection
-    [] clara/stockfish folder for agents, and then check everything
-    [] after that, tts/stt
-
-[] show/visualize kb, view/edit/download/upload files
-    [] is vscode embeddable? would be great. yeah i think we can connect it remotely by having a vscode server in the docker and rendering it... in an iframe? need to ask claude how that works
-[] add console page - log into the container and run commands as needed
-    actually vscode would expose terminal to you i guess?
-
-[] let the agent see its runs. and then you could use like odd/even tasks in Hottest, or any metadata attached if needed
-    let it see the schedule period
-
-[] allow to spawn subtasks just like CC. same container! (so, detether from name=id)
 [] any auth in api? csrf?
-
-[] add reason for all tool calls (optional)
-
-[] look into openclaw again and what it has and you don't!
-[] ^ same but for CC
-[] ^ same but for codex. prompts, tools, everything
-[] skill hub! moltskills
-
-[] Thinking (306 tokens) <- i don't need this count that prominently displayed... maybe do an icon and generalize for everything
-
-[] encourage subagent use to save context - should realize that it gets fresh huge context! (does it work like that? or forks)
-
-[] should highlight at least
-
-[] Bash tool: "<persisted-output>Output too large (56.5KB). Full output saved to: /......../.claude/projects/User-s......./...
-
-[] autobackup! at least the database. as for containers - optional, but could set it up automatic. could be specified in hottest recipes too
-    could also instruct to use git if needed and backup important state offsite idk
-
-[] if i just reload backend gracefully (because developing a feature), and this stops the runs, it should just pick them right up, right? unless flag is passed (and should indicate this in any case, that a session was abruptly stopped)
+[] if you miss the deadline because server restarted, do you wait for a new tick or try to catch up by triggering
+[] more ingestion pipelines
+    [] grok to search on x and look if something is fake or not
+    [] perplexity search? more search tools?
+    [] deep research runs?
+[] when you restart after e.g. all shutdown, does it need the agent to look at the session and try to recover? 
+    [] oh wow it auto-resumes and then everything errors out!
+        http://localhost:7777/agents/73665a54-a2db-4e28-9943-8968fa8d081a/runs/c35c55e3-8b44-44be-9528-785b380ab87a
+[] in the future: copy turn as markdown
+[] in the future: copy the whole conversation as markdown or as rich text? don't include pills like end_turn? should be configurable? idk
+[] do we even need assistant/user markings? especially on tools?
+[] maybe take containerization options out of the thread table itself? might have several containers?
+[] split types.ts so they're owned by their files
+[] why this happened in cc
+    find /Users/serge/Projects/_LLMFrameworks/taurus-agents -type f -name "*.ts" -o -name "*.tsx" | head -40
+    OUT
+    <tool_use_error>Cancelled: parallel tool call Read(/Users/serge/Projects/_LLMFrameworks/tau…) errored</tool_use_error>
+[] note: https://scrolltest.medium.com/playwright-mcp-burns-114k-tokens-per-test-the-new-cli-uses-27k-heres-when-to-use-each-65dabeaac7a0
+[] connect e2b/computer use
+[] s3 -> enc -> into remote container
+[] moltbook-like thingy?
+[] If it bothers you, you could switch to better-sqlite3 (pure JS bindings, no node-gyp) someday, but that's a different API (synchronous) and would need Sequelize dialect changes.
+[] rebuild backend too! --watch [] hmm but won't it reload many times while writes are being written
+[] security/prompt injections!
+[] track run time? actually computable on the fly if needed
 
 HottestLang
     https://x.com/karpathy/status/1617979122625712128 (Jan 25, 2023): The hottest new programming language is English
@@ -117,95 +136,17 @@ HottestLang
         [] see in apple notes
         [] well basically all your projects _vibe
     [] eventually you'll need ACL stuff
-
 [] sophisticated cron triggers: e.g. by a new email arriving or a calendar event being close, and need to think through whether to remind the user (also self-schedule/self-snooze!)
     [] in prod could go through supervisor agent, when requesting to run? if by some chance asks to run * * * * * - why. resource mgmt
-
-
-[] COUNT $ somewhere
-
 [] dashboard! that agents can operate on. notion-like! factorio-like!
-
-[] button to temporarily disable some agents
-
-[] if you miss the deadline because server restarted, do you wait for a new tick or try to catch up by triggering
-
-[] hmm no animation that something is happening... that it's sending something
-
-[] grok to search on x and look if something is fake or not
-[] perplexity search? more search tools?
-[] deep research runs?
-
-[] context length management (proper! brainstorm)
-
-[] different font sizes? monospace and main text
-
-[] prevent second ./taurus from running and interfering
-[] chatml: token count and HUD managing/partial compactify/
-    collapse/uncollapse
-[] clean up agent-loop.ts and base-agent.ts
-[] check thread mgr again
-
-[] when you restart after e.g. all shutdown, does it need the agent to look at the session and try to recover? 
-    [] oh wow it auto-resumes and then everything errors out!
-        http://localhost:7777/agents/73665a54-a2db-4e28-9943-8968fa8d081a/runs/c35c55e3-8b44-44be-9528-785b380ab87a
-
-
-[] in the future: copy turn as markdown
-[] in the future: copy the whole conversation as markdown or as rich text? don't include pills like end_turn? should be configurable? idk
-
-
-[] create subagents as needed
-[] brainstorm Hottest
-
-[] do we need assistant/user markings?
-
-[] what are the read line limits
-
 [] events: agent to agent comms (use inbox/outbox?)
-
-[] maybe take containerization options out of the thread table itself? might have several containers?
-
-[] // TODO: route to other agents
-
-[] split types.ts so they're owned by their files
-
+    [] // TODO: route to other agents
 [] if something frustrating allow it to stop and call
     and leave notes and suggestions and just continue!
 
 
-[] why this happened in cc
-    find /Users/serge/Projects/_LLMFrameworks/taurus-agents -type f -name "*.ts" -o -name "*.tsx" | head -40
-    OUT
-    <tool_use_error>Cancelled: parallel tool call Read(/Users/serge/Projects/_LLMFrameworks/tau…) errored</tool_use_error>
-
-[] note: https://scrolltest.medium.com/playwright-mcp-burns-114k-tokens-per-test-the-new-cli-uses-27k-heres-when-to-use-each-65dabeaac7a0
-
-later
-
-[] connect e2b/computer use
-[] s3 -> enc -> into remote container
-[] moltbook-like thingy?
-
-[] If it bothers you, you could switch to better-sqlite3 (pure JS bindings, no node-gyp) someday, but that's a different API (synchronous) and would need Sequelize dialect changes.
-
-[] rebuild backend too! --watch [] hmm but won't it reload many times while writes are being written
-
-[] medium still 403s (or only for CC?)
-
-[] security/prompt injections!
-
-
-[] track run time? actually computable on the fly if needed
-
-[] kb/wiki/proper memory!
-[] compactify step, for now
-
-[] why even different routes? -> "The full image pipeline now works for both paths: inject (sending images to a running agent) and start/continue (sending images when starting or continuing a run from idle)."
-
 maybe
 [] ephemeral containers? instead of dangling. but what about persistence. container mgmt questions
-[] do we want sometimes *resuming* the session rather than new run? but would not show neatly in the list then. but would preserve previous context. hmm
 [] browser tool: if you want even leaner: Vercel's agent-browser CLI (Rust+Node, ~200 tokens per snapshot), same pattern but more optimized.
 
 [] naming! taurus ai taken? or at least need SEO! well good, agents can do that

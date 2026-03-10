@@ -515,16 +515,6 @@ export function AgentsPage() {
                       if (run.last_message) return <span>{run.last_message.text.slice(0, 80)}</span>;
                       return null;
                     }}
-                    renderActions={(run) =>
-                      isLive(run) ? (
-                        <button
-                          className="btn btn--sm"
-                          onClick={() => agentId && api.stopSpecificRun(agentId, run.id).then(() => { loadAgents(); api.listRuns(agentId).then(setRuns); })}
-                        >
-                          <Square size={10} />
-                        </button>
-                      ) : null
-                    }
                   />
                 </div>
 

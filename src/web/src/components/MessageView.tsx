@@ -23,12 +23,13 @@ const TOOL_ICONS: Record<string, typeof Terminal> = {
   Browser: MonitorPlay,
 };
 
-function ToolHeader({ name }: { name: string }) {
+function ToolHeader({ name, description }: { name: string; description?: string }) {
   const Icon = TOOL_ICONS[name] ?? Wrench;
   return (
     <div className="msg-tool-use__header">
       <Icon size={12} />
-      {name}
+      <span>{name}</span>
+      {description && <span className="msg-tool-use__desc">{description}</span>}
     </div>
   );
 }
@@ -85,33 +86,34 @@ function ContentBlockView({ block }: { block: any }) {
     );
   }
   if (block.type === 'tool_use') {
-    if (block.name === 'Edit' && block.input?.old_string != null && block.input?.new_string != null) {
+    const { description, ...inputRest } = block.input ?? {};
+    if (block.name === 'Edit' && inputRest.old_string != null && inputRest.new_string != null) {
       return (
         <div className="msg-tool-use">
-          <ToolHeader name={block.name} />
+          <ToolHeader name={block.name} description={description} />
           <div className="msg-tool-use__input msg-tool-use__input--diff">
             <DiffView
-              filePath={block.input.file_path ?? ''}
-              oldString={block.input.old_string}
-              newString={block.input.new_string}
-              replaceAll={block.input.replace_all}
+              filePath={inputRest.file_path ?? ''}
+              oldString={inputRest.old_string}
+              newString={inputRest.new_string}
+              replaceAll={inputRest.replace_all}
             />
           </div>
         </div>
       );
     }
-    if (block.name === 'Bash' && block.input?.command) {
-      const { command, ...rest } = block.input;
-      const hasExtra = Object.keys(rest).length > 0;
+    if (block.name === 'Bash' && inputRest.command) {
+      const { command, ...bashRest } = inputRest;
+      const hasExtra = Object.keys(bashRest).length > 0;
       return (
         <div className="msg-tool-use">
-          <ToolHeader name={block.name} />
+          <ToolHeader name={block.name} description={description} />
           <div className="msg-tool-use__cmd">
             <code>{command}</code>
           </div>
           {hasExtra && (
             <div className="msg-tool-use__input">
-              <JsonKV data={rest} />
+              <JsonKV data={bashRest} />
             </div>
           )}
         </div>
@@ -119,9 +121,9 @@ function ContentBlockView({ block }: { block: any }) {
     }
     return (
       <div className="msg-tool-use">
-        <ToolHeader name={block.name} />
+        <ToolHeader name={block.name} description={description} />
         <div className="msg-tool-use__input">
-          <JsonKV data={block.input} />
+          <JsonKV data={inputRest} />
         </div>
       </div>
     );

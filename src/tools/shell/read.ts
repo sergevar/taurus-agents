@@ -35,9 +35,11 @@ export class ShellReadTool extends Tool {
     const totalLines = parseInt(lines[0].trim(), 10) || 0;
     const contentLines = lines.slice(1);
 
-    // Add line numbers
+    // Add line numbers — pad width adapts to the largest line number
+    const maxNum = offset + contentLines.length - 1;
+    const padWidth = String(maxNum).length;
     const numbered = contentLines.map((line, i) => {
-      const lineNum = String(offset + i).padStart(6, ' ');
+      const lineNum = String(offset + i).padStart(padWidth, ' ');
       return `${lineNum}\t${line}`;
     }).join('\n');
 
