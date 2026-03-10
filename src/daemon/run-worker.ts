@@ -178,6 +178,18 @@ function patchIncompleteToolCalls(messages: ChatMessage[]): void {
           is_error: true,
         });
       }
+    } else if (next?.role === 'user' && typeof next.content === 'string') {
+      // Next is a plain text user message — convert to content blocks and prepend tool_results
+      const errorResult = 'Tool execution was interrupted when the run was stopped.';
+      next.content = [
+        ...[...neededIds].map(id => ({
+          type: 'tool_result' as const,
+          tool_use_id: id,
+          content: errorResult,
+          is_error: true as const,
+        })),
+        { type: 'text' as const, text: next.content },
+      ];
     } else if (neededIds.size > 0) {
       // No following user message — insert one
       messages.splice(i + 1, 0, {
@@ -190,7 +202,7 @@ function patchIncompleteToolCalls(messages: ChatMessage[]): void {
         })),
       });
     }
-    break; // Only fix the last occurrence
+    // Don't break — check ALL messages for incomplete tool calls
   }
 }
 
