@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { FileTree } from './FileTree';
 import { FileEditor } from './FileEditor';
 import './file-browser.scss';
@@ -9,6 +9,15 @@ interface Props {
 
 export function FileBrowser({ agentId }: Props) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [dirtyPaths, setDirtyPaths] = useState<Set<string>>(new Set());
+
+  const handleDirtyChange = useCallback((path: string, dirty: boolean) => {
+    setDirtyPaths(prev => {
+      const next = new Set(prev);
+      if (dirty) next.add(path); else next.delete(path);
+      return next.size !== prev.size ? next : prev;
+    });
+  }, []);
 
   return (
     <div className="fb">
@@ -18,6 +27,7 @@ export function FileBrowser({ agentId }: Props) {
         <FileTree
           agentId={agentId}
           selectedPath={selectedFile ?? undefined}
+          dirtyPaths={dirtyPaths}
           onSelect={(path) => setSelectedFile(path)}
         />
       </div>
@@ -26,7 +36,7 @@ export function FileBrowser({ agentId }: Props) {
       <div className="fb__right-pane">
         <div className="fb__content">
           {selectedFile ? (
-            <FileEditor agentId={agentId} filePath={selectedFile} />
+            <FileEditor agentId={agentId} filePath={selectedFile} onDirtyChange={handleDirtyChange} />
           ) : (
             <div className="fb__empty">Select a file to edit</div>
           )}

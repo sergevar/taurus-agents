@@ -13,10 +13,11 @@ interface TreeNode extends FileEntry {
 interface Props {
   agentId: string;
   selectedPath?: string;
+  dirtyPaths?: Set<string>;
   onSelect: (path: string) => void;
 }
 
-export function FileTree({ agentId, selectedPath, onSelect }: Props) {
+export function FileTree({ agentId, selectedPath, dirtyPaths, onSelect }: Props) {
   const [roots, setRoots] = useState<TreeNode[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,6 +71,7 @@ export function FileTree({ agentId, selectedPath, onSelect }: Props) {
             node={node}
             depth={0}
             selectedPath={selectedPath}
+            dirtyPaths={dirtyPaths}
             onSelect={onSelect}
             onToggle={toggleDir}
           />
@@ -83,13 +85,15 @@ interface TreeNodeRowProps {
   node: TreeNode;
   depth: number;
   selectedPath?: string;
+  dirtyPaths?: Set<string>;
   onSelect: (path: string) => void;
   onToggle: (node: TreeNode) => void;
 }
 
-function TreeNodeRow({ node, depth, selectedPath, onSelect, onToggle }: TreeNodeRowProps) {
+function TreeNodeRow({ node, depth, selectedPath, dirtyPaths, onSelect, onToggle }: TreeNodeRowProps) {
   const isDir = node.type === 'dir';
   const isSelected = node.path === selectedPath;
+  const isDirty = !isDir && dirtyPaths?.has(node.path);
 
   const handleClick = () => {
     if (isDir) {
@@ -122,7 +126,7 @@ function TreeNodeRow({ node, depth, selectedPath, onSelect, onToggle }: TreeNode
             <File size={14} />
           )}
         </span>
-        <span className="fb-tree__name">{node.name}</span>
+        <span className={`fb-tree__name${isDirty ? ' fb-tree__name--dirty' : ''}`}>{node.name}</span>
       </li>
       {isDir && node.expanded && node.children?.map(child => (
         <TreeNodeRow
@@ -130,6 +134,7 @@ function TreeNodeRow({ node, depth, selectedPath, onSelect, onToggle }: TreeNode
           node={child}
           depth={depth + 1}
           selectedPath={selectedPath}
+          dirtyPaths={dirtyPaths}
           onSelect={onSelect}
           onToggle={onToggle}
         />

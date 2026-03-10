@@ -5,6 +5,7 @@ import { fileApi } from './api';
 interface Props {
   agentId: string;
   filePath: string;
+  onDirtyChange?: (path: string, dirty: boolean) => void;
 }
 
 // Map file extensions to Monaco language IDs
@@ -45,7 +46,7 @@ function detectLanguage(filePath: string): string {
   return EXT_TO_LANG[ext] || 'plaintext';
 }
 
-export function FileEditor({ agentId, filePath }: Props) {
+export function FileEditor({ agentId, filePath, onDirtyChange }: Props) {
   const [content, setContent] = useState<string | null>(null);
   const [savedContent, setSavedContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +91,10 @@ export function FileEditor({ agentId, filePath }: Props) {
   };
 
   const isDirty = content !== savedContent;
+
+  useEffect(() => {
+    onDirtyChange?.(filePath, isDirty);
+  }, [filePath, isDirty, onDirtyChange]);
 
   if (loading) {
     return <div className="fb-editor__status">Loading...</div>;
