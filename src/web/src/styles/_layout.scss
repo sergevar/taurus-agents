@@ -197,6 +197,45 @@
   }
 }
 
+// ── Tab Bar ──
+
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-bg2);
+  flex-shrink: 0;
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: none;
+    background: none;
+    color: var(--c-muted);
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.1s;
+
+    &:hover { color: var(--c-text); }
+
+    &--active {
+      color: var(--c-text);
+      border-bottom-color: var(--c-accent);
+    }
+  }
+}
+
+// ── Terminal (full pane, no file tree) ──
+
+.terminal-fullpane {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
 // ── Empty State ──
 
 .empty-state {

@@ -29,43 +29,13 @@
     flex-shrink: 0;
   }
 
-  // ── Right pane (editor/terminal) ──
+  // ── Right pane (editor) ──
   &__right-pane {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-  }
-
-  &__tabs {
-    display: flex;
-    border-bottom: 1px solid var(--c-border);
-    background: var(--c-bg2);
-    flex-shrink: 0;
-  }
-
-  &__tab {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 16px;
-    border: none;
-    background: none;
-    color: var(--c-muted);
-    font-size: 12px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.1s;
-
-    &:hover {
-      color: var(--c-text);
-    }
-
-    &--active {
-      color: var(--c-text);
-      border-bottom-color: var(--c-accent);
-    }
   }
 
   &__content {

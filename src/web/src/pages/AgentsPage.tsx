@@ -8,15 +8,15 @@ import { MessageView } from '../components/MessageView';
 import { InputBar } from '../components/InputBar';
 import { CreateAgentModal } from '../components/CreateAgentModal';
 import { AgentSettings } from '../components/AgentSettings';
-import { FileBrowser } from '../components/file-browser';
+import { FileBrowser, Terminal } from '../components/file-browser';
 import { Countdown } from '../components/Countdown';
 import { useToast, ToastContainer } from '../components/Toast';
 import { TreeView, type TreeItem } from '../components/TreeView';
 import { useTheme, THEME_LABELS } from '../hooks/useTheme';
-import { Play, RotateCw, Square, PlayCircle, RefreshCw, Settings, Palette, FolderOpen } from 'lucide-react';
+import { Play, RotateCw, Square, PlayCircle, RefreshCw, Palette, MessageSquare, FileCode, TerminalSquare, Settings } from 'lucide-react';
 import '../styles/components.scss';
 
-type Tab = 'runs' | 'files' | 'settings';
+type Tab = 'runs' | 'editor' | 'terminal' | 'settings';
 
 function formatRunDate(iso: string): string {
   const date = new Date(iso);
@@ -488,16 +488,34 @@ export function AgentsPage() {
                 {isPaused && <button className="btn primary" onClick={handleStartRun}><Play size={13} /> New Run</button>}
                 <button className="btn icon-btn" onClick={cycleTheme} title={`Theme: ${THEME_LABELS[theme]}`}><Palette size={13} /></button>
                 <button className="btn icon-btn" onClick={handleRefreshMessages} title="Refresh"><RefreshCw size={13} /></button>
-                <button className="btn icon-btn" onClick={() => setActiveTab(activeTab === 'files' ? 'runs' : 'files')} title="Files"><FolderOpen size={13} /></button>
-                <button className="btn icon-btn" onClick={() => setActiveTab(activeTab === 'settings' ? 'runs' : 'settings')} title="Settings"><Settings size={13} /></button>
               </div>
+            </div>
+
+            {/* Tab bar */}
+            <div className="tab-bar">
+              <button className={`tab-bar__tab ${activeTab === 'runs' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('runs')}>
+                <MessageSquare size={13} /> Runs
+              </button>
+              <button className={`tab-bar__tab ${activeTab === 'editor' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('editor')}>
+                <FileCode size={13} /> Editor
+              </button>
+              <button className={`tab-bar__tab ${activeTab === 'terminal' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('terminal')}>
+                <TerminalSquare size={13} /> Terminal
+              </button>
+              <button className={`tab-bar__tab ${activeTab === 'settings' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('settings')}>
+                <Settings size={13} /> Settings
+              </button>
             </div>
 
             {/* Content */}
             {activeTab === 'settings' ? (
-              <AgentSettings agent={selectedAgent} onUpdated={loadAgents} onBack={() => setActiveTab('runs')} />
-            ) : activeTab === 'files' ? (
+              <AgentSettings agent={selectedAgent} onUpdated={loadAgents} />
+            ) : activeTab === 'editor' ? (
               <FileBrowser agentId={selectedAgent.id} />
+            ) : activeTab === 'terminal' ? (
+              <div className="terminal-fullpane">
+                <Terminal agentId={selectedAgent.id} />
+              </div>
             ) : (
               <div className="content-split">
                 {/* Runs tree */}
