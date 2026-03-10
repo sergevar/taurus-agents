@@ -43,13 +43,15 @@ export function Terminal({ agentId }: Props) {
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
+    ws.binaryType = 'arraybuffer';
+
     ws.onopen = () => {
       // Send initial size
       ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
     };
 
     ws.onmessage = (e) => {
-      term.write(e.data);
+      term.write(e.data instanceof ArrayBuffer ? new Uint8Array(e.data) : e.data);
     };
 
     ws.onclose = () => {
