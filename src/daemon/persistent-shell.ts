@@ -20,6 +20,9 @@ interface PendingCommand {
   resolve: (result: CommandResult) => void;
   reject: (error: Error) => void;
   stdout: string;
+  tail: string;
+  totalBytes: number;
+  truncated: boolean;
   startTime: number;
   timer: ReturnType<typeof setTimeout>;
   watchdog?: ReturnType<typeof setInterval>;
@@ -27,6 +30,7 @@ interface PendingCommand {
 }
 
 const DEFAULT_OUTPUT_LIMIT = 100_000; // 100KB
+const TAIL_LIMIT = 10_000; // 10KB — kept from the end when output is truncated
 const DEFAULT_TIMEOUT = 120_000; // 2 min
 const WATCHDOG_INTERVAL = 10_000; // 10s — how often to check if the command is still alive
 
@@ -104,15 +108,15 @@ export class PersistentShell {
         const pending = this.pending.get(sentinelId);
         if (pending) {
           this.clearPending(sentinelId, pending);
-          // Strip any sentinel that may have leaked into stdout
-          const cleanStdout = pending.stdout.replace(/\n?TAURUS_SENTINEL_[0-9a-f-]+_EXIT_\d+$/m, '').replace(/\n+$/, '');
-
           // Kill the foreground process so the shell returns to its prompt
           // and subsequent exec() calls work normally.
           this.interruptForeground();
 
+          const output = this.finalizeOutput(pending)
+            .replace(/\n?TAURUS_SENTINEL_[0-9a-f-]+_EXIT_\d+$/m, '');
+
           resolve({
-            stdout: cleanStdout + '\n[Process killed: timeout exceeded]',
+            stdout: output + '\n[Process killed: timeout exceeded]',
             exitCode: 124, // standard timeout exit code
             durationMs: Date.now() - pending.startTime,
           });
@@ -132,6 +136,9 @@ export class PersistentShell {
         resolve,
         reject,
         stdout: '',
+        tail: '',
+        totalBytes: 0,
+        truncated: false,
         startTime: Date.now(),
         timer,
         watchdog,
@@ -182,6 +189,19 @@ export class PersistentShell {
   }
 
   // ── Internal ──
+
+  /** Stitch head + tail when output was truncated, or return stdout as-is. */
+  private finalizeOutput(pending: PendingCommand): string {
+    if (!pending.truncated) {
+      return pending.stdout.replace(/\n+$/, '');
+    }
+    const head = pending.stdout.replace(/\n+$/, '');
+    const tail = pending.tail.replace(/^\n+/, '');
+    const skippedKB = Math.round((pending.totalBytes - head.length - tail.length) / 1024);
+    return head
+      + `\n\n[... ${skippedKB} KB truncated ...]\n\n`
+      + tail;
+  }
 
   /** Clear a pending command's timers and remove it from the map. */
   private clearPending(id: string, pending: PendingCommand): void {
@@ -289,7 +309,7 @@ export class PersistentShell {
       if (pending) {
         this.clearPending(sentinelId, pending);
         pending.resolve({
-          stdout: pending.stdout.replace(/\n+$/, ''),
+          stdout: this.finalizeOutput(pending),
           exitCode: parseInt(exitCodeStr, 10),
           durationMs: Date.now() - pending.startTime,
         });
@@ -301,17 +321,28 @@ export class PersistentShell {
     // (commands run sequentially, so there's at most one active)
     if (this.pending.size > 0) {
       const [, pending] = [...this.pending.entries()][0];
-      if (pending.stdout.length > 0) {
-        pending.stdout += '\n';
-      }
-      pending.stdout += line;
+      const lineLen = line.length + (pending.totalBytes > 0 ? 1 : 0); // +1 for \n
+      pending.totalBytes += lineLen;
 
-      // Stream output to caller if callback is set
+      // Stream output to caller if callback is set (always, even after truncation)
       pending.onData?.(line);
 
-      // Enforce output limit
-      if (pending.stdout.length > this.outputLimit) {
-        pending.stdout = pending.stdout.slice(0, this.outputLimit) + '\n[output truncated]';
+      if (!pending.truncated) {
+        if (pending.stdout.length > 0) pending.stdout += '\n';
+        pending.stdout += line;
+
+        if (pending.stdout.length > this.outputLimit) {
+          // Freeze head at the limit, start collecting tail
+          pending.stdout = pending.stdout.slice(0, this.outputLimit);
+          pending.truncated = true;
+        }
+      } else {
+        // Already truncated — maintain a rolling tail buffer
+        if (pending.tail.length > 0) pending.tail += '\n';
+        pending.tail += line;
+        if (pending.tail.length > TAIL_LIMIT) {
+          pending.tail = pending.tail.slice(-TAIL_LIMIT);
+        }
       }
     }
   }
