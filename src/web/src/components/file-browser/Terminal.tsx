@@ -5,9 +5,10 @@ import '@xterm/xterm/css/xterm.css';
 
 interface Props {
   agentId: string;
+  focused?: boolean;
 }
 
-export function Terminal({ agentId }: Props) {
+export function Terminal({ agentId, focused }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<XTerm | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -87,6 +88,10 @@ export function Terminal({ agentId }: Props) {
       fitRef.current = null;
     };
   }, [agentId]);
+
+  useEffect(() => {
+    if (focused) termRef.current?.focus();
+  }, [focused]);
 
   return <div ref={containerRef} className="fb-terminal" />;
 }

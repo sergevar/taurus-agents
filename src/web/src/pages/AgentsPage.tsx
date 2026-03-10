@@ -571,7 +571,7 @@ export function AgentsPage() {
             </div>
 
             <div className="terminal-fullpane" style={{ display: activeTab === 'terminal' ? undefined : 'none' }}>
-              <Terminal agentId={selectedAgent.id} />
+              <Terminal agentId={selectedAgent.id} focused={activeTab === 'terminal'} />
             </div>
           </>
         )}
