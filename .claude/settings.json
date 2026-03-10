@@ -22,7 +22,14 @@
       "Bash(grep \"\\\\.tsx$\")",
       "Bash(curl -s -m 5 http://localhost:7777/api/health)",
       "Bash(curl -s -m 5 http://localhost:7777/api/agents)",
-      "Bash(lsof -i :7777 -P)"
+      "Bash(lsof -i :7777 -P)",
+      "Bash(git add src/tools/shell/read.ts)",
+      "Bash(git commit:*)",
+      "Bash(npm install file-type)",
+      "Bash(git add src/tools/shell/read.ts package.json package-lock.json)",
+      "Bash(git add src/tools/shell/file-tracker.ts src/tools/shell/read.ts src/tools/shell/edit.ts src/tools/shell/write.ts src/daemon/run-worker.ts)",
+      "Bash(npm install ws node-pty @xterm/xterm @xterm/addon-fit @monaco-editor/react)",
+      "Bash(npm install -D @types/ws)"
     ]
   }
 }

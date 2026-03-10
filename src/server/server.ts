@@ -8,6 +8,7 @@ import { agentRoutes } from './routes/agents.js';
 import { folderRoutes } from './routes/folders.js';
 import { healthRoutes } from './routes/health.js';
 import { toolRoutes } from './routes/tools.js';
+import { fileRoutes } from './routes/files.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +36,7 @@ export function createServer(daemon: Daemon, port: number): http.Server {
     ...agentRoutes(daemon),
     ...healthRoutes(),
     ...toolRoutes(),
+    ...fileRoutes(daemon),
   ];
 
   const server = http.createServer(async (req, res) => {

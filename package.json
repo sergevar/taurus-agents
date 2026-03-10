@@ -18,8 +18,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@monaco-editor/react": "^4.7.0",
     "@mozilla/readability": "^0.6.0",
     "@vscode/ripgrep": "^1.15.9",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "croner": "^10.0.1",
     "cronstrue": "^3.13.0",
     "diff": "^8.0.3",
@@ -27,6 +30,7 @@
     "fast-glob": "^3.3.2",
     "linkedom": "^0.18.12",
     "lucide-react": "^0.577.0",
+    "node-pty": "^1.1.0",
     "openai": "^6.27.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -41,6 +45,7 @@
     "tree-kill": "^1.2.2",
     "turndown": "^7.2.2",
     "uuid": "^11.0.0",
+    "ws": "^8.19.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
@@ -49,6 +54,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/turndown": "^5.0.6",
     "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^5.1.4",
     "sass": "^1.97.3",
     "tsx": "^4.19.0",

@@ -17,6 +17,7 @@ import './db/models/AgentLog.js';
 
 import { Daemon } from './daemon/daemon.js';
 import { createServer } from './server/server.js';
+import { attachTerminalWs } from './server/ws.js';
 import { acquireLock, releaseLock } from './daemon/lockfile.js';
 
 const PORT = parseInt(process.env.TAURUS_PORT ?? '7777', 10);
@@ -31,6 +32,7 @@ async function main() {
   await daemon.init();
 
   const server = createServer(daemon, PORT);
+  attachTerminalWs(server, daemon);
   // Keep-alive timeout: close idle connections after 5s to avoid exhausting
   // the browser's 6-connection-per-host limit (SSE streams are long-lived).
   server.keepAliveTimeout = 5_000;

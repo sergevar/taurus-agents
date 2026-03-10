@@ -5,7 +5,7 @@
  * All calls are async (uses execFile instead of execSync).
  */
 
-import { execFile } from 'node:child_process';
+import { execFile, spawn as nodeSpawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -148,5 +148,28 @@ export class DockerService {
     try { await this.docker('rm', '-f', container_id); } catch { /* ignore */ }
     try { await this.docker('volume', 'rm', `taurus-vol-${container_id.replace('taurus-agent-', '')}`); } catch { /* ignore */ }
     this.logger('info', `Container removed: ${container_id}`);
+  }
+
+  /** Run an ad-hoc command in a container and return stdout. */
+  async execCommand(container_id: string, command: string[]): Promise<string> {
+    return this.docker('exec', container_id, ...command);
+  }
+
+  /** Run a command in a container with stdin piped. */
+  async execWithStdin(container_id: string, command: string[], stdin: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const proc = nodeSpawn('docker', ['exec', '-i', container_id, ...command]);
+      let stdout = '';
+      let stderr = '';
+      proc.stdout.on('data', (d: Buffer) => { stdout += d; });
+      proc.stderr.on('data', (d: Buffer) => { stderr += d; });
+      proc.on('close', (code) => {
+        if (code === 0) resolve(stdout.trim());
+        else reject(new Error(stderr.trim() || `Exit code ${code}`));
+      });
+      proc.on('error', reject);
+      proc.stdin.write(stdin);
+      proc.stdin.end();
+    });
   }
 }

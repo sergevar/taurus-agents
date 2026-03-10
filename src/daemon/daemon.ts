@@ -878,4 +878,14 @@ export class Daemon {
     });
     return logs.map(l => l.toApi());
   }
+
+  // ── File browsing ──
+
+  /** Ensure the agent's container is running and return its container_id. */
+  async ensureContainerForBrowsing(agentId: string): Promise<string> {
+    const managed = this.agents.get(agentId);
+    if (!managed) throw new Error(`Agent not found: ${agentId}`);
+    await this.docker.ensureContainer(managed.agent);
+    return managed.agent.container_id;
+  }
 }

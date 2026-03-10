@@ -8,14 +8,15 @@ import { MessageView } from '../components/MessageView';
 import { InputBar } from '../components/InputBar';
 import { CreateAgentModal } from '../components/CreateAgentModal';
 import { AgentSettings } from '../components/AgentSettings';
+import { FileBrowser } from '../components/file-browser';
 import { Countdown } from '../components/Countdown';
 import { useToast, ToastContainer } from '../components/Toast';
 import { TreeView, type TreeItem } from '../components/TreeView';
 import { useTheme, THEME_LABELS } from '../hooks/useTheme';
-import { Play, RotateCw, Square, PlayCircle, RefreshCw, Settings, Palette } from 'lucide-react';
+import { Play, RotateCw, Square, PlayCircle, RefreshCw, Settings, Palette, FolderOpen } from 'lucide-react';
 import '../styles/components.scss';
 
-type Tab = 'runs' | 'settings';
+type Tab = 'runs' | 'files' | 'settings';
 
 function formatRunDate(iso: string): string {
   const date = new Date(iso);
@@ -472,6 +473,7 @@ export function AgentsPage() {
                 {isPaused && <button className="btn primary" onClick={handleStartRun}><Play size={13} /> New Run</button>}
                 <button className="btn icon-btn" onClick={cycleTheme} title={`Theme: ${THEME_LABELS[theme]}`}><Palette size={13} /></button>
                 <button className="btn icon-btn" onClick={handleRefreshMessages} title="Refresh"><RefreshCw size={13} /></button>
+                <button className="btn icon-btn" onClick={() => setActiveTab(activeTab === 'files' ? 'runs' : 'files')} title="Files"><FolderOpen size={13} /></button>
                 <button className="btn icon-btn" onClick={() => setActiveTab(activeTab === 'settings' ? 'runs' : 'settings')} title="Settings"><Settings size={13} /></button>
               </div>
             </div>
@@ -479,6 +481,8 @@ export function AgentsPage() {
             {/* Content */}
             {activeTab === 'settings' ? (
               <AgentSettings agent={selectedAgent} onUpdated={loadAgents} onBack={() => setActiveTab('runs')} />
+            ) : activeTab === 'files' ? (
+              <FileBrowser agentId={selectedAgent.id} />
             ) : (
               <div className="content-split">
                 {/* Runs tree */}

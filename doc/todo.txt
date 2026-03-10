@@ -7,12 +7,28 @@ NEXT
 
 LEFT UNTIL PARITY WITH CC
 [] compaction / ctx len control
+    [] also evict edit mtime guard on compactify?
 [] see the files (vscode)
     [] show/visualize kb, view/edit/download/upload files
         [] is vscode embeddable? would be great. yeah i think we can connect it remotely by having a vscode server in the docker and rendering it... in an iframe? need to ask claude how that works
     [] add console page - log into the container and run commands as needed
         actually vscode would expose terminal to you i guess?
 
+UNTIL USEFUL FOR FRIENDS:
+[] do stuff on the local computer if no docker (but warning + auto suggesting local ("No Docker? You can use local"))
+[] proper coding prompts? investigate
+
+[] file-browser:
+    > The backend adds a few API endpoints that proxy to the container's shell
+    I'm smelling potential security issues when we add proper auth and multiuser, investigate
+
+[] check security: are you escaping all the docker -it exec? and other potential similar issues. scan for it with an agent
+
+[] Read tool
+    [x] Binary files (executables, .wasm, .zip) — refuses to read, returns an error like "This is a binary file"
+    [x] Images (PNG, JPG, SVG) — converts to base64 and sends as a multimodal image content block alongside text. The model literally sees the image.
+    [] PDFs — extracts text content page by page. Has a pages param ("1-5") because large PDFs would overwhelm context. Max 20 pages per call.
+[x] enforce freshness
 
 then you can do: - mysticeti - stockfish transplant
 
