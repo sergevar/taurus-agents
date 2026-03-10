@@ -127,9 +127,10 @@
     }
 
     &--sending {
-      background: rgba($text2, 0.15);
-      color: $text2;
-      font-style: italic;
+      background: rgba($amber, 0.15);
+      color: $amber;
+      font-weight: 500;
+      animation: pulse-streaming 1.5s ease-in-out infinite;
     }
   }
 

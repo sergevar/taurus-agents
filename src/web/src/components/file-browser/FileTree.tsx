@@ -12,22 +12,23 @@ interface TreeNode extends FileEntry {
 
 interface Props {
   agentId: string;
+  rootPath: string;
   selectedPath?: string;
   dirtyPaths?: Set<string>;
   onSelect: (path: string) => void;
 }
 
-export function FileTree({ agentId, selectedPath, dirtyPaths, onSelect }: Props) {
+export function FileTree({ agentId, rootPath, selectedPath, dirtyPaths, onSelect }: Props) {
   const [roots, setRoots] = useState<TreeNode[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Load the root directory on mount
+  // Load the root directory on mount or when rootPath changes
   useEffect(() => {
-    loadDir('/workspace').then(entries => {
+    loadDir(rootPath).then(entries => {
       setRoots(entries);
       setError(null);
     }).catch(err => setError(err.message));
-  }, [agentId]);
+  }, [agentId, rootPath]);
 
   async function loadDir(dirPath: string): Promise<TreeNode[]> {
     const listing = await fileApi.listDir(agentId, dirPath);

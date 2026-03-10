@@ -11,10 +11,10 @@ import { route, json, error, parseBody, type Route } from '../helpers.js';
 
 const MAX_FILE_SIZE = 1_000_000; // 1MB read limit
 
-/** Resolve and validate path — must stay under /workspace. */
+/** Resolve and validate path — must be absolute, no traversal. */
 function safePath(userPath: string): string | null {
-  const resolved = path.posix.resolve('/workspace', userPath);
-  if (!resolved.startsWith('/workspace')) return null;
+  if (!userPath.startsWith('/')) return null;
+  const resolved = path.posix.normalize(userPath);
   return resolved;
 }
 

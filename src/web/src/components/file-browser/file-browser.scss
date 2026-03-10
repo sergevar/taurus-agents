@@ -19,14 +19,26 @@
   }
 
   &__tree-header {
-    padding: 8px 16px;
+    padding: 4px 6px;
     border-bottom: 1px solid var(--c-border);
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--c-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     flex-shrink: 0;
+  }
+
+  &__path-input {
+    width: 100%;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    color: var(--c-muted);
+    outline: none;
+
+    &:focus {
+      border-color: var(--c-accent);
+      color: var(--c-text);
+    }
   }
 
   // ── Right pane (editor) ──
