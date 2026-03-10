@@ -62,13 +62,17 @@ Exit code 1
 
 
 [] small: in ui
-    [] still better color for primary buttons (not blue)
-    [] still better neon border
+    [] still better color for primary buttons (not blue, should be violet to adhere to the chosen scheme)
+    [] still better neon border - it's not neon right now, kinda fuzzy. neon you do by having the first line really bright etc
         [] the one highlighting message turns is still blue and offsetting - why are we using different code for the same thing?
 
     [] if all items in the tree branch are childless, don't render the empty space where their [+] would have been
         [] actually no, that would offset them awkwardly. i guess, just continue the --- dotted in its place, so it's not empty gap
 
+    [] paused is enough that it 
+
+    [] think about dot on the agent itself. i guess it should be 
+    [] "running" should be better - like, different color not blue maybe, like orange? and better pulsating with shadow?
 
     [] Tool: Bash - replace "tool" with icon
     [] for Tool: Bash, it's always command: something syntax, isn't it. so "command: " part i wouldn't like to see all the time. needs to be rendered separately. if bash has more parameters those we can pass to jsonkv. we could try prepending a "command line" icon to the command prompt rendered line

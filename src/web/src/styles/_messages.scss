@@ -40,7 +40,7 @@
   color: $text;
   white-space: pre-wrap;
   word-break: break-word;
-  border-left: 2px solid $accent;
+  border-left: 2px solid var(--c-marker);
   margin: 4px 16px;
   background: $bg2;
   border-radius: 0 4px 4px 0;
@@ -132,7 +132,7 @@
   }
 
   &--streaming {
-    border-left: 2px solid $accent;
+    border-left: 2px solid var(--c-marker);
   }
 
   &--optimistic {

@@ -23,6 +23,13 @@
   --c-purple:  #bc8cff;
   --c-amber:   #d49562;
 
+  // Active marker (neon violet)
+  --c-marker:       #bc8cff;
+  --c-marker-bright: #e0c8ff;
+  --c-marker-glow1: rgba(188, 140, 255, 0.7);
+  --c-marker-glow2: rgba(188, 140, 255, 0.35);
+  --c-marker-glow3: rgba(188, 140, 255, 0.15);
+
   // Status backgrounds
   --c-status-running: #0d419d;
   --c-status-paused:  #4d2d00;
@@ -61,18 +68,25 @@
   --c-purple:  #cba6f7; // mauve
   --c-amber:   #fab387; // peach
 
+  // Active marker (neon violet)
+  --c-marker:       #cba6f7; // mauve
+  --c-marker-bright: #e8d5ff;
+  --c-marker-glow1: rgba(203, 166, 247, 0.7);
+  --c-marker-glow2: rgba(203, 166, 247, 0.35);
+  --c-marker-glow3: rgba(203, 166, 247, 0.15);
+
   // Status backgrounds
   --c-status-running: #1e3a5f;
   --c-status-paused:  #3d2e00;
   --c-status-error:   #3e1215;
 
-  // Buttons — primary: deep blue-violet gradient, dark but rich
-  --c-btn-primary-from:  #3b4f8a; // muted deep blue
-  --c-btn-primary-to:    #2e3a6e; // darker indigo
-  --c-btn-primary-hover-from: #4a62a8; // lifted blue
-  --c-btn-primary-hover-to:   #3b4f8a; // muted deep blue
-  --c-btn-primary-text:  #cdd6f4; // text (light on dark)
-  --c-btn-primary-shine: rgba(137, 180, 250, 0.15); // blue-tinted shine
+  // Buttons — primary: dark violet gradient
+  --c-btn-primary-from:  #5c3d8f; // muted deep violet
+  --c-btn-primary-to:    #4a2d7a; // darker violet
+  --c-btn-primary-hover-from: #7050a8; // lifted violet
+  --c-btn-primary-hover-to:   #5c3d8f;
+  --c-btn-primary-text:  #cdd6f4; // text
+  --c-btn-primary-shine: rgba(203, 166, 247, 0.15); // mauve-tinted shine
 
   // Buttons — danger
   --c-btn-danger:        #f38ba8; // red
