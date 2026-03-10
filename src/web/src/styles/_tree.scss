@@ -235,6 +235,12 @@
     z-index: 1;
   }
 
+  // Leaf nodes: extend horizontal connector through the empty toggle area
+  &.tv__group--leaf::after {
+    width: 28px;
+    top: 12px;
+  }
+
   // Last child: vertical line stops at the horizontal connector
   &:last-child::before {
     bottom: auto;

@@ -157,7 +157,7 @@ function TreeNodeView<T extends TreeItem>({
 
   return (
     <div
-      className={`tv__group${depth > 0 ? ' tv__group--child' : ''}`}
+      className={`tv__group${depth > 0 ? ' tv__group--child' : ''}${depth > 0 && !hasChildren ? ' tv__group--leaf' : ''}`}
       data-depth={depth}
       style={groupStyle}
     >

@@ -508,11 +508,11 @@ export function AgentsPage() {
                     )}
                     renderSecondary={(run) => {
                       if (run.run_error) return <span style={{ color: 'var(--c-red)' }}>{run.run_error}</span>;
-                      if (run.run_summary) return <span title={run.run_summary}>{run.run_summary.slice(0, 80)}</span>;
+                      if (run.run_summary) return <span>{run.run_summary.slice(0, 80)}</span>;
                       const activity = runActivity[run.id];
-                      if (activity) return <span title={activity}>{activity.slice(0, 80)}</span>;
+                      if (activity) return <span>{activity.slice(0, 80)}</span>;
                       if (run.status === 'running') return <span style={{ color: 'var(--c-accent)' }}>Running...</span>;
-                      if (run.last_message) return <span title={run.last_message.text}>{run.last_message.text.slice(0, 80)}</span>;
+                      if (run.last_message) return <span>{run.last_message.text.slice(0, 80)}</span>;
                       return null;
                     }}
                     renderActions={(run) =>
@@ -545,7 +545,7 @@ export function AgentsPage() {
                     </div>
                   )}
                   {selectedRun ? (
-                    <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} />
+                    <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} runStatus={selectedRun.status} />
                   ) : (
                     <div className="empty-state">Select a run</div>
                   )}

@@ -78,16 +78,16 @@ export class Daemon {
 
     const agents = await Agent.findAll();
     for (const agent of agents) {
-      if (agent.status === 'running' || agent.status === 'paused') {
+      if (agent.status === 'running') {
         await agent.update({ status: 'idle' });
       }
       this.agents.set(agent.id, { agent, runs: new Map() });
     }
 
-    // Mark orphaned runs (still 'running'/'paused' in DB) as stopped — no process survived restart
-    const orphanedRuns = await Run.findAll({ where: { status: ['running', 'paused'] } });
+    // Mark orphaned running runs as stopped — paused runs stay paused (no resources consumed)
+    const orphanedRuns = await Run.findAll({ where: { status: 'running' } });
     if (orphanedRuns.length > 0) {
-      await Run.update({ status: 'stopped' }, { where: { status: ['running', 'paused'] } });
+      await Run.update({ status: 'stopped' }, { where: { status: 'running' } });
       this.logger('warn', `Marked ${orphanedRuns.length} orphaned run(s) as stopped`);
     }
 

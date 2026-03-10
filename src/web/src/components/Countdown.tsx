@@ -31,7 +31,7 @@ export function Countdown({ targetDate }: CountdownProps) {
 
   return (
     <span className="countdown" title={new Date(targetDate).toLocaleString()}>
-      {formatRemaining(remaining)}
+      <span className="countdown__label">Next:</span> {formatRemaining(remaining)}
     </span>
   );
 }

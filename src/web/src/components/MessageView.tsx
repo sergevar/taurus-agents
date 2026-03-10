@@ -1,9 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  Terminal, FileText, FilePen, FolderSearch, Search,
+  Pause, Globe, Download, MonitorPlay, Eye,
+  Wrench,
+} from 'lucide-react';
 import type { MessageRecord } from '../types';
 import { Markdown } from './Markdown';
 import { JsonKV } from './JsonKV';
 import { DiffView } from './DiffView';
 import { Lightbox } from './Lightbox';
+
+const TOOL_ICONS: Record<string, typeof Terminal> = {
+  Bash: Terminal,
+  Read: Eye,
+  Write: FileText,
+  Edit: FilePen,
+  Glob: FolderSearch,
+  Grep: Search,
+  Pause: Pause,
+  WebSearch: Globe,
+  WebFetch: Download,
+  Browser: MonitorPlay,
+};
+
+function ToolHeader({ name }: { name: string }) {
+  const Icon = TOOL_ICONS[name] ?? Wrench;
+  return (
+    <div className="msg-tool-use__header">
+      <Icon size={12} />
+      {name}
+    </div>
+  );
+}
 
 // ── Collapsible thinking block ──
 
@@ -32,7 +60,7 @@ function ThinkingBlock({ text, defaultCollapsed = true }: { text: string; defaul
         )}
       </div>
       {!collapsed && (
-        <div className="thinking-block__content">{text}</div>
+        <div className="thinking-block__content"><Markdown>{text}</Markdown></div>
       )}
     </div>
   );
@@ -60,7 +88,7 @@ function ContentBlockView({ block }: { block: any }) {
     if (block.name === 'Edit' && block.input?.old_string != null && block.input?.new_string != null) {
       return (
         <div className="msg-tool-use">
-          <div className="msg-tool-use__header">Tool: {block.name}</div>
+          <ToolHeader name={block.name} />
           <div className="msg-tool-use__input msg-tool-use__input--diff">
             <DiffView
               filePath={block.input.file_path ?? ''}
@@ -72,9 +100,26 @@ function ContentBlockView({ block }: { block: any }) {
         </div>
       );
     }
+    if (block.name === 'Bash' && block.input?.command) {
+      const { command, ...rest } = block.input;
+      const hasExtra = Object.keys(rest).length > 0;
+      return (
+        <div className="msg-tool-use">
+          <ToolHeader name={block.name} />
+          <div className="msg-tool-use__cmd">
+            <code>{command}</code>
+          </div>
+          {hasExtra && (
+            <div className="msg-tool-use__input">
+              <JsonKV data={rest} />
+            </div>
+          )}
+        </div>
+      );
+    }
     return (
       <div className="msg-tool-use">
-        <div className="msg-tool-use__header">Tool: {block.name}</div>
+        <ToolHeader name={block.name} />
         <div className="msg-tool-use__input">
           <JsonKV data={block.input} />
         </div>
@@ -140,9 +185,10 @@ interface MessageViewProps {
   messages: MessageRecord[];
   streamingText?: string;
   streamingThinking?: string;
+  runStatus?: string;
 }
 
-export function MessageView({ messages, streamingText, streamingThinking }: MessageViewProps) {
+export function MessageView({ messages, streamingText, streamingThinking, runStatus }: MessageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wasNearBottom = useRef(true);
 
@@ -163,7 +209,8 @@ export function MessageView({ messages, streamingText, streamingThinking }: Mess
   }
 
   if (messages.length === 0) {
-    return <div className="empty-state">No messages in this run</div>;
+    const label = runStatus === 'running' ? 'Starting...' : 'No messages in this run';
+    return <div className="empty-state">{label}</div>;
   }
 
   const totalIn = messages.reduce((s, m) => s + m.input_tokens, 0);
