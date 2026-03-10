@@ -13,11 +13,12 @@ const require = createRequire('/usr/lib/node_modules/');
 const { chromium } = require('playwright');
 
 import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 
 const STATE_FILE = '/tmp/.browser-cli.json';
 const CDP_PORT = 9222;
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36';
+const VIEWPORT = { width: 1280, height: 720 };
 
 // ── State persistence ──
 
@@ -46,7 +47,7 @@ async function ensureBrowser() {
     try {
       const browser = await chromium.connectOverCDP(state.cdpUrl, { timeout: 3000 });
       const contexts = browser.contexts();
-      const ctx = contexts[0] || await browser.newContext({ viewport: { width: 1280, height: 720 }, userAgent: USER_AGENT });
+      const ctx = contexts[0] || await browser.newContext({ viewport: VIEWPORT, userAgent: USER_AGENT });
       const pages = ctx.pages();
       const page = pages[0] || await ctx.newPage();
       return { browser, page };
@@ -56,20 +57,14 @@ async function ensureBrowser() {
     }
   }
 
-  // Find Playwright's Chromium binary
-  const chromePath = execSync(
-    `find /root/.cache/ms-playwright -name chrome -type f 2>/dev/null | head -1`,
-    { encoding: 'utf-8' }
-  ).trim();
-  if (!chromePath) throw new Error('Chromium not found. Run: npx playwright install chromium');
-
   // Launch Chromium with remote debugging
-  execSync(
-    `${chromePath} --headless --no-sandbox --disable-gpu --disable-dev-shm-usage ` +
-    `--user-agent='${USER_AGENT}' ` +
-    `--remote-debugging-port=${CDP_PORT} --remote-debugging-address=127.0.0.1 &`,
-    { shell: '/bin/bash', stdio: 'ignore' }
-  );
+  const chromePath = chromium.executablePath();
+  const child = spawn(chromePath, [
+    '--headless', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
+    `--user-agent=${USER_AGENT}`,
+    `--remote-debugging-port=${CDP_PORT}`, '--remote-debugging-address=127.0.0.1',
+  ], { stdio: 'ignore', detached: true });
+  child.unref();
 
   // Wait for CDP to be ready
   const cdpUrl = `http://127.0.0.1:${CDP_PORT}`;
@@ -82,7 +77,7 @@ async function ensureBrowser() {
   }
 
   const browser = await chromium.connectOverCDP(cdpUrl);
-  const ctx = browser.contexts()[0] || await browser.newContext({ viewport: { width: 1280, height: 720 }, userAgent: USER_AGENT });
+  const ctx = browser.contexts()[0] || await browser.newContext({ viewport: VIEWPORT, userAgent: USER_AGENT });
   const page = ctx.pages()[0] || await ctx.newPage();
 
   saveState({ cdpUrl });
@@ -276,8 +271,8 @@ function formatAXNodes(nodes) {
 
 // ── Main ──
 
-const input = JSON.parse(process.argv[2] || '{}');
 try {
+  const input = JSON.parse(process.argv[2] || '{}');
   const result = await handleAction(input);
   process.stdout.write(result);
 } catch (err) {
