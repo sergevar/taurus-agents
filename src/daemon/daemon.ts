@@ -682,6 +682,13 @@ export class Daemon {
 
     // Container is already running (parent is active) — no ensureContainer needed
 
+    // Enforce tool subsetting: child tools must be a subset of the parent agent's tools.
+    // Any tools not in the parent's set are silently dropped.
+    const parentTools = new Set(managed.agent.tools as string[]);
+    const childTools = msg.tools
+      ? msg.tools.filter(t => parentTools.has(t))
+      : undefined; // undefined = inherit parent's full set
+
     const childRun = await Run.create({
       cwd: managed.agent.cwd,
       model: managed.agent.model,
@@ -696,6 +703,7 @@ export class Daemon {
       runId: childRun.id,
       trigger: 'spawn',
       input: msg.input,
+      tools: childTools,
     });
 
     // Tag the child run so we can route the result back

@@ -13,12 +13,14 @@ LEFT UNTIL PARITY WITH CC
     [] add console page - log into the container and run commands as needed
         actually vscode would expose terminal to you i guess?
 
+
 then you can do: - mysticeti - stockfish transplant
 
 [] factorio use case:
     create an agent - fetch token count and costs from anthropic? and put on dashboard. wow
 
 WHEN YOU HAVE TIME: IMPORTANT FEATURE ASKS
+[] meta: look at your other CC conversations and source from there
 [] Bash tool: "<persisted-output>Output too large (56.5KB). Full output saved to: /......../.claude/projects/User-s......./...
     [] what are the read line limits
     [] are there line numbers to read partially

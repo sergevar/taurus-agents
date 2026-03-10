@@ -210,7 +210,7 @@ function expandSystemPrompt(prompt: string): string {
 
 // ── Main run function ──
 
-async function runAgent(agentId: string, runId: string, trigger: TriggerType, input?: string, resume?: boolean, images?: IpcImage[]): Promise<void> {
+async function runAgent(agentId: string, runId: string, trigger: TriggerType, input?: string, resume?: boolean, images?: IpcImage[], toolOverride?: string[]): Promise<void> {
   // 0. Load agent and run from DB
   const agent = await Agent.findByPk(agentId);
   if (!agent) throw new Error(`Agent not found: ${agentId}`);
@@ -236,9 +236,12 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
   // 3. Register tools
   // Pause is always available — it's the agent's safety valve to ask for human input.
   // Spawn children never get Pause (nobody can resume them — it would deadlock).
+  // Spawn children can request a tool subset (already intersected with parent's tools by daemon).
+  // Pause is always available except for spawn children (nobody can resume them — deadlock).
   const ALWAYS_ON_TOOLS = trigger === 'spawn' ? [] : ['Pause'];
+  const baseTools = toolOverride ?? agent.tools as string[];
   const tools = new ToolRegistry();
-  const toolNames = [...new Set([...agent.tools, ...ALWAYS_ON_TOOLS])];
+  const toolNames = [...new Set([...baseTools, ...ALWAYS_ON_TOOLS])];
   registerTools(tools, toolNames, shell);
 
   // 4. Build ChatML
@@ -422,7 +425,7 @@ process.on('message', async (msg: ParentMessage) => {
   switch (msg.type) {
     case 'start':
       try {
-        await runAgent(msg.agentId, msg.runId, msg.trigger, msg.input, msg.resume, msg.images);
+        await runAgent(msg.agentId, msg.runId, msg.trigger, msg.input, msg.resume, msg.images, msg.tools);
       } catch (err: any) {
         send({ type: 'error', error: err.message, stack: err.stack });
       }

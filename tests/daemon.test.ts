@@ -117,6 +117,7 @@ vi.mock('../src/db/models/Run.js', () => ({
       update: vi.fn(async () => {}),
     })),
     update: vi.fn(async () => {}),
+    hasMany: vi.fn(),
   },
 }));
 
@@ -504,6 +505,46 @@ describe('Daemon run lifecycle', () => {
       expect(spawnResult).toBeDefined();
       expect(spawnResult.requestId).toBe('req-2');
       expect(spawnResult.error).toContain('exited with code 1');
+    });
+
+    it('passes only subset tools to child (intersection with parent)', async () => {
+      // Parent agent has tools: ['Bash']
+      await daemon.startRun('agent-1', 'manual', 'hello');
+      const parentWorker = latestFakeChild;
+
+      // Spawn requests tools including ones the parent doesn't have
+      parentWorker.emit('message', {
+        type: 'spawn_request',
+        requestId: 'req-tools',
+        input: 'do subtask',
+        tools: ['Bash', 'Read', 'WebSearch'], // Read and WebSearch not in parent's tools
+      });
+      await new Promise(r => setTimeout(r, 50));
+
+      const childWorker = latestFakeChild;
+      const startMsg = childWorker.sent[0];
+      expect(startMsg.type).toBe('start');
+      // Only 'Bash' should survive intersection — Read and WebSearch are not in parent's ['Bash']
+      expect(startMsg.tools).toEqual(['Bash']);
+    });
+
+    it('inherits parent tools when no tools specified in spawn', async () => {
+      await daemon.startRun('agent-1', 'manual', 'hello');
+      const parentWorker = latestFakeChild;
+
+      parentWorker.emit('message', {
+        type: 'spawn_request',
+        requestId: 'req-no-tools',
+        input: 'do subtask',
+        // no tools field
+      });
+      await new Promise(r => setTimeout(r, 50));
+
+      const childWorker = latestFakeChild;
+      const startMsg = childWorker.sent[0];
+      expect(startMsg.type).toBe('start');
+      // tools should be undefined — worker falls back to agent.tools from DB
+      expect(startMsg.tools).toBeUndefined();
     });
 
     it('cascade kills child runs when parent exits', async () => {

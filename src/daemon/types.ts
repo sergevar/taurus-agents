@@ -9,7 +9,7 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type IpcImage = { base64: string; mediaType: string };
 
 export type ParentMessage =
-  | { type: 'start'; agentId: string; runId: string; trigger: TriggerType; input?: string; resume?: boolean; images?: IpcImage[] }
+  | { type: 'start'; agentId: string; runId: string; trigger: TriggerType; input?: string; resume?: boolean; images?: IpcImage[]; tools?: string[] }
   | { type: 'stop'; reason: string }
   | { type: 'resume'; message?: string }
   | { type: 'inject'; message: string; images?: IpcImage[] }

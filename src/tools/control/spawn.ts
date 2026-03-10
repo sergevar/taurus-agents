@@ -41,7 +41,7 @@ export class SpawnTool extends Tool {
       tools: {
         type: 'array',
         items: { type: 'string' },
-        description: 'Optional tool subset for the sub-agent. Defaults to the parent agent\'s tools.',
+        description: 'Optional tool subset for the sub-agent. Must be a subset of your available tools — any tools not in your set are ignored. Defaults to all your available tools.',
       },
       max_turns: {
         type: 'number',
