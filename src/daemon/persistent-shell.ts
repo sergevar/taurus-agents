@@ -116,10 +116,19 @@ export class PersistentShell {
         timer,
       });
 
-      // Send command with sentinel. Merge stderr via 2>&1.
-      // Save exit code first, then echo a blank line to ensure sentinel starts on its own line
-      // (in case command output doesn't end with a newline).
-      const wrappedCmd = `{ ${command}; } 2>&1; _e=$?; echo; echo "TAURUS_SENTINEL_${sentinelId}_EXIT_$_e"\n`;
+      // Send command with sentinel. Each part on its own line so that:
+      // - Heredoc terminators (EOF etc.) are recognized (they must be alone on a line)
+      // - Background commands (cmd &) work — & inside braces backgrounds the child,
+      //   the group itself completes immediately, sentinel fires right away
+      // - stderr is merged via 2>&1 on the brace group
+      const wrappedCmd = [
+        `{ ${command}`,
+        `} 2>&1`,
+        `__taurus_rc=$?`,
+        `echo`,
+        `echo "TAURUS_SENTINEL_${sentinelId}_EXIT_$__taurus_rc"`,
+        ``,
+      ].join('\n');
       this.proc!.stdin!.write(wrappedCmd);
     });
   }

@@ -33,12 +33,17 @@ export class ShellReadTool extends Tool {
     const limit = input.limit ?? 2000;
     const end = offset + limit - 1;
 
-    // Detect file type via MIME
+    // Detect file type via MIME (file command may not be installed in minimal images)
     const probe = await this.shell.exec(`file --mime-type -b ${JSON.stringify(fp)} 2>/dev/null`);
-    const mime = probe.stdout.trim();
+    const mime = probe.exitCode === 0 ? probe.stdout.trim() : '';
 
-    if (probe.exitCode !== 0 || !mime) {
-      return { output: `Error reading file: ${fp}`, isError: true, durationMs: probe.durationMs };
+    // If file command failed, check that the file at least exists
+    if (!mime) {
+      const exists = await this.shell.exec(`test -f ${JSON.stringify(fp)} && echo ok`);
+      if (exists.exitCode !== 0) {
+        return { output: `File not found: ${fp}`, isError: true, durationMs: probe.durationMs + exists.durationMs };
+      }
+      // Fall through — treat as text when file command unavailable
     }
 
     // Image — return as multimodal content
@@ -57,8 +62,8 @@ export class ShellReadTool extends Tool {
       };
     }
 
-    // Other binary — reject
-    if (!mime.startsWith('text/') && mime !== 'application/json' && mime !== 'application/xml' && mime !== 'application/javascript') {
+    // Other binary — reject (skip check if file command was unavailable)
+    if (mime && !mime.startsWith('text/') && mime !== 'application/json' && mime !== 'application/xml' && mime !== 'application/javascript') {
       return { output: `Cannot read binary file: ${fp} (${mime})`, isError: true, durationMs: probe.durationMs };
     }
 

@@ -9,6 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # ── Core utilities + ripgrep + fd ──
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
+    file \
     git \
     curl \
     wget \
