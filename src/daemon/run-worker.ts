@@ -28,6 +28,7 @@ import { ShellGlobTool } from '../tools/shell/glob.js';
 import { ShellGrepTool } from '../tools/shell/grep.js';
 import { WebFetchTool } from '../tools/web/web-fetch.js';
 import { WebSearchTool } from '../tools/web/web-search.js';
+import { FileTracker } from '../tools/shell/file-tracker.js';
 import { BraveSearchProvider } from '../tools/web/brave-search.js';
 import { BrowserTool } from '../tools/web/browser.js';
 import { SpawnTool, type SpawnRequest, type SpawnResult } from '../tools/control/spawn.js';
@@ -83,12 +84,12 @@ const injectQueue: InjectedMessage[] = [];
 // Each tool registers a factory: (shell) => Tool | null.
 // Returning null skips registration (e.g. missing API key).
 
-type ToolFactory = (shell: PersistentShell) => import('../tools/base.js').Tool | null;
+type ToolFactory = (shell: PersistentShell, tracker: FileTracker) => import('../tools/base.js').Tool | null;
 
 const TOOL_FACTORIES: Record<string, ToolFactory> = {
-  Read:      (s) => new ShellReadTool(s),
-  Write:     (s) => new ShellWriteTool(s),
-  Edit:      (s) => new ShellEditTool(s),
+  Read:      (s, t) => new ShellReadTool(s, t),
+  Write:     (s, t) => new ShellWriteTool(s, t),
+  Edit:      (s, t) => new ShellEditTool(s, t),
   Glob:      (s) => new ShellGlobTool(s),
   Grep:      (s) => new ShellGrepTool(s),
   Bash:      (s) => new PersistentBashTool(s),
@@ -103,10 +104,11 @@ const TOOL_FACTORIES: Record<string, ToolFactory> = {
 };
 
 function registerTools(registry: ToolRegistry, toolNames: string[], shell: PersistentShell): void {
+  const tracker = new FileTracker();
   for (const name of toolNames) {
     const factory = TOOL_FACTORIES[name];
     if (!factory) continue;
-    const tool = factory(shell);
+    const tool = factory(shell, tracker);
     if (tool) registry.register(tool);
   }
 }

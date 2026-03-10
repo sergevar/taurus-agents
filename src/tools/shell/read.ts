@@ -1,6 +1,7 @@
 import type { ToolResult, ToolContext, ImageData } from '../../core/types.js';
 import { Tool } from '../base.js';
 import type { PersistentShell } from '../../daemon/persistent-shell.js';
+import type { FileTracker } from './file-tracker.js';
 
 const MAX_LINE_LENGTH = 2000;
 
@@ -24,7 +25,7 @@ export class ShellReadTool extends Tool {
     required: ['file_path'],
   };
 
-  constructor(private shell: PersistentShell) { super(); }
+  constructor(private shell: PersistentShell, private tracker?: FileTracker) { super(); }
 
   async execute(input: { file_path: string; offset?: number; limit?: number }, context: ToolContext): Promise<ToolResult> {
     const fp = input.file_path.startsWith('/') ? input.file_path : `${context.cwd}/${input.file_path}`;
@@ -88,6 +89,14 @@ export class ShellReadTool extends Tool {
     const showing = contentLines.length < totalLines
       ? `\n[Showing lines ${offset}-${offset + contentLines.length - 1} of ${totalLines}]`
       : '';
+
+    // Track mtime for freshness enforcement
+    if (this.tracker) {
+      const stat = await this.shell.exec(`stat -c %Y ${JSON.stringify(fp)} 2>/dev/null || stat -f %m ${JSON.stringify(fp)} 2>/dev/null`);
+      if (stat.exitCode === 0) {
+        this.tracker.markRead(fp, parseInt(stat.stdout.trim(), 10));
+      }
+    }
 
     return { output: `${header}${showing}\n${numbered}`, isError: false, durationMs: result.durationMs };
   }
