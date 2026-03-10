@@ -23,6 +23,7 @@ interface PendingCommand {
   startTime: number;
   timer: ReturnType<typeof setTimeout>;
   watchdog?: ReturnType<typeof setInterval>;
+  onData?: (line: string) => void;
 }
 
 const DEFAULT_OUTPUT_LIMIT = 100_000; // 100KB
@@ -90,7 +91,7 @@ export class PersistentShell {
     }
   }
 
-  async exec(command: string, opts?: { timeout?: number }): Promise<CommandResult> {
+  async exec(command: string, opts?: { timeout?: number; onData?: (line: string) => void }): Promise<CommandResult> {
     if (!this.alive || !this.proc) {
       throw new Error('Shell is not alive. Call spawn() first.');
     }
@@ -134,6 +135,7 @@ export class PersistentShell {
         startTime: Date.now(),
         timer,
         watchdog,
+        onData: opts?.onData,
       });
 
       // Send command with sentinel. Each part on its own line so that:
@@ -303,6 +305,9 @@ export class PersistentShell {
         pending.stdout += '\n';
       }
       pending.stdout += line;
+
+      // Stream output to caller if callback is set
+      pending.onData?.(line);
 
       // Enforce output limit
       if (pending.stdout.length > this.outputLimit) {

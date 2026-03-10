@@ -66,6 +66,7 @@ export function AgentsPage() {
   const [messages, setMessages] = useState<MessageRecord[]>([]);
   const [streamingText, setStreamingText] = useState('');
   const [streamingThinking, setStreamingThinking] = useState('');
+  const [streamingToolOutput, setStreamingToolOutput] = useState('');
   const [runActivity, setRunActivity] = useState<Record<string, string>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('runs');
@@ -81,6 +82,7 @@ export function AgentsPage() {
   const messagesRef = useRef(messages);
   const streamingTextRef = useRef('');
   const streamingThinkingRef = useRef('');
+  const streamingToolOutputRef = useRef('');
   const runStreamingRef = useRef<Record<string, string>>({});
   useEffect(() => { agentIdRef.current = agentId; }, [agentId]);
   useEffect(() => {
@@ -202,9 +204,11 @@ export function AgentsPage() {
 
     streamingTextRef.current = '';
     streamingThinkingRef.current = '';
+    streamingToolOutputRef.current = '';
     runStreamingRef.current = {};
     setStreamingText('');
     setStreamingThinking('');
+    setStreamingToolOutput('');
     setRunActivity({});
 
     const es = new EventSource(`/api/agents/${agentId}/stream`);
@@ -235,8 +239,10 @@ export function AgentsPage() {
           case 'run_complete':
             streamingTextRef.current = '';
             streamingThinkingRef.current = '';
+            streamingToolOutputRef.current = '';
             setStreamingText('');
             setStreamingThinking('');
+            setStreamingToolOutput('');
             fetchNewMessages();
             api.listRuns(agentIdRef.current!).then(setRuns);
             loadAgents();
@@ -252,6 +258,13 @@ export function AgentsPage() {
             setAgents(prev => prev.map(a =>
               a.id === data.agentId ? { ...a, status: 'error' as const } : a,
             ));
+            break;
+
+          case 'tool_output':
+            if (typeof data.text === 'string' && data.runId === runIdRef.current) {
+              streamingToolOutputRef.current += (streamingToolOutputRef.current ? '\n' : '') + data.text;
+              setStreamingToolOutput(streamingToolOutputRef.current);
+            }
             break;
 
           case 'llm_thinking':
@@ -286,8 +299,10 @@ export function AgentsPage() {
               if (data.runId === runIdRef.current) {
                 streamingTextRef.current = '';
                 streamingThinkingRef.current = '';
+                streamingToolOutputRef.current = '';
                 setStreamingText('');
                 setStreamingThinking('');
+                setStreamingToolOutput('');
                 fetchNewMessages();
               }
             }
@@ -530,7 +545,7 @@ export function AgentsPage() {
                     </div>
                   )}
                   {selectedRun ? (
-                    <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} runStatus={selectedRun.status} />
+                    <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} streamingToolOutput={streamingToolOutput} runStatus={selectedRun.status} />
                   ) : (
                     <div className="empty-state">Select a run</div>
                   )}

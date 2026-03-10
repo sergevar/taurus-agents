@@ -92,7 +92,9 @@ const TOOL_FACTORIES: Record<string, ToolFactory> = {
   Edit:      (s, t) => new ShellEditTool(s, t),
   Glob:      (s) => new ShellGlobTool(s),
   Grep:      (s) => new ShellGrepTool(s),
-  Bash:      (s) => new PersistentBashTool(s),
+  Bash:      (s) => new PersistentBashTool(s, (chunk) => {
+    send({ type: 'log', level: 'debug', event: 'tool.output', message: chunk });
+  }),
   Browser:   (s) => new BrowserTool(s),
   Pause:     ()  => new PauseTool(sendPause, waitForResume),
   Spawn:     ()  => new SpawnTool(sendSpawnRequest, waitForSpawnResult),

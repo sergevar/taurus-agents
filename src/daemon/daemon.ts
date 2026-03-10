@@ -546,6 +546,16 @@ export class Daemon {
           break;
         }
 
+        if (msg.event === 'tool.output') {
+          this.sse.broadcast(agentId, {
+            type: 'tool_output',
+            agentId,
+            runId,
+            text: msg.message,
+          });
+          break;
+        }
+
         if (msg.level !== 'debug') {
           this.logger(msg.level, `[${managed.agent.name}] ${msg.message}`);
 

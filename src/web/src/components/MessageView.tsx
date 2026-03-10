@@ -187,12 +187,15 @@ interface MessageViewProps {
   messages: MessageRecord[];
   streamingText?: string;
   streamingThinking?: string;
+  streamingToolOutput?: string;
   runStatus?: string;
 }
 
-export function MessageView({ messages, streamingText, streamingThinking, runStatus }: MessageViewProps) {
+export function MessageView({ messages, streamingText, streamingThinking, streamingToolOutput, runStatus }: MessageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const toolOutputRef = useRef<HTMLPreElement>(null);
   const wasNearBottom = useRef(true);
+  const toolOutputNearBottom = useRef(true);
 
   // After new messages or streaming text render, scroll to bottom if we were already near it
   useEffect(() => {
@@ -201,7 +204,20 @@ export function MessageView({ messages, streamingText, streamingThinking, runSta
     if (wasNearBottom.current) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [messages, streamingText, streamingThinking]);
+  }, [messages, streamingText, streamingThinking, streamingToolOutput]);
+
+  // Auto-scroll the tool output <pre> to its bottom as new content streams in
+  useEffect(() => {
+    const el = toolOutputRef.current;
+    if (el && toolOutputNearBottom.current) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [streamingToolOutput]);
+
+  // Reset tool output scroll tracking when a new stream starts
+  useEffect(() => {
+    if (streamingToolOutput) toolOutputNearBottom.current = true;
+  }, [!streamingToolOutput]);
 
   // On scroll, record whether we're near the bottom
   function handleScroll() {
@@ -243,6 +259,22 @@ export function MessageView({ messages, streamingText, streamingThinking, runSta
         </div>
         );
       })}
+      {streamingToolOutput && (
+        <div className="message message--user">
+          <div className="message__header">
+            <span className="message__role">user</span>
+          </div>
+          <div className="message__body">
+            <div className="msg-tool-result">
+              <div className="msg-tool-result__header">Result</div>
+              <pre ref={toolOutputRef} className="msg-tool-result__content" onScroll={() => {
+                const el = toolOutputRef.current;
+                if (el) toolOutputNearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+              }}>{streamingToolOutput}</pre>
+            </div>
+          </div>
+        </div>
+      )}
       {isStreaming && (
         <div className="message message--assistant message--streaming">
           <div className="message__header">
