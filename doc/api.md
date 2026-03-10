@@ -31,7 +31,7 @@ POST /api/agents
 | `tools` | string[] | no | `["Read", "Glob", "Grep"]` | Tool names to enable |
 | `cwd` | string | no | daemon cwd | Working directory (mapped to `/workspace` in container) |
 | `model` | string | no | `claude-sonnet-4-20250514` | LLM model ID |
-| `docker_image` | string | no | `ubuntu:22.04` | Docker image for the agent's container |
+| `docker_image` | string | no | `taurus-base` | Docker image for the agent's container |
 | `schedule` | string | no | — | Cron expression for scheduled runs |
 | `schedule_overlap` | string | no | `"skip"` | `"skip"`, `"queue"`, or `"kill"` |
 | `max_turns` | number | no | `0` | Max inference turns per run (0 = unlimited) |
@@ -254,7 +254,7 @@ Returns:
   ],
   "defaults": {
     "model": "claude-sonnet-4-20250514",
-    "docker_image": "ubuntu:22.04",
+    "docker_image": "taurus-base",
     "tools": ["Read", "Glob", "Grep"],
     "max_turns": 0,
     "timeout_ms": 300000
@@ -290,6 +290,45 @@ DELETE /api/folders/:id
 ```
 
 Cannot delete root. Agents and subfolders are moved to the parent.
+
+---
+
+## File Browser
+
+Browse and edit files inside an agent's Docker container.
+
+### List directory
+
+```
+GET /api/agents/:id/files?path=/workspace
+```
+
+Returns `{ path, entries }` where each entry has `name` and `type` (`"file"`, `"dir"`, or `"symlink"`). Defaults to `/workspace`.
+
+### Read file
+
+```
+POST /api/agents/:id/files/read
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | string | yes | Absolute path inside the container |
+
+Returns `{ path, content, size }`. Max 1MB.
+
+### Write file
+
+```
+POST /api/agents/:id/files/write
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | string | yes | Absolute path inside the container |
+| `content` | string | yes | File content |
+
+Creates parent directories automatically. Returns `{ ok: true }`.
 
 ---
 

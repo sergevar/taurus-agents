@@ -1,23 +1,6 @@
-# Taurus Agents
+# Taurus Agents — Developer Reference
 
-Multi-agent orchestration framework. Each agent runs in an isolated Docker container with a persistent shell, an LLM-powered TAOR loop (Think-Act-Observe-Repeat), and a configurable tool set.
-
-## Quick start
-
-```bash
-# Prerequisites: Node.js 18+, Docker
-
-# Install dependencies
-npm install
-
-# Start the daemon (builds web UI, starts HTTP server on :7777)
-./taurus dev
-
-# Or just the daemon without web rebuild
-./taurus
-```
-
-The web UI is at `http://localhost:7777`. The API is at `http://localhost:7777/api/`.
+Internal reference for contributors. For the public overview, see the root [README.md](../README.md).
 
 ## Architecture
 
@@ -61,16 +44,17 @@ A run is a single execution of an agent. It contains a sequence of messages (use
 
 | Tool | Group | Description |
 |------|-------|-------------|
-| Read | file | Read file contents |
+| Read | file | Read file contents (binary detection, image support) |
 | Write | file | Create or overwrite files |
-| Edit | file | String replacement edits |
-| Glob | search | Find files by pattern |
-| Grep | search | Search file contents with regex |
+| Edit | file | String replacement edits with freshness enforcement |
+| Glob | search | Find files by glob pattern |
+| Grep | search | Search file contents with regex (ripgrep) |
 | Bash | exec | Run shell commands |
-| Pause | control | Pause execution, wait for human |
-| WebSearch | web | Brave search API |
+| Pause | control | Pause execution, wait for human input |
+| Spawn | control | Spawn sub-agents |
+| WebSearch | web | Brave Search API |
 | WebFetch | web | Fetch and extract web pages |
-| Browser | web | Control a headless browser |
+| Browser | web | Control a headless Chromium browser (Playwright) |
 
 ### System prompt templates
 
@@ -90,43 +74,6 @@ Agents can have a `schedule` (cron expression). Overlap behavior when a schedule
 - `queue` — queue it, run after current finishes
 - `kill` — stop current run, start new
 
-
-## CLI
-
-```bash
-./taurus              # Start daemon
-./taurus dev          # Build web UI + start daemon
-./taurus build        # Build web UI only
-./taurus watch        # Build web UI in watch mode
-./taurus seed         # Create a test agent via API
-```
-
-## API
-
-Full API reference: [api.md](api.md)
-
-Key endpoints:
-
-```bash
-# List agents
-curl localhost:7777/api/agents
-
-# Create agent
-curl -X POST localhost:7777/api/agents \
-  -H 'Content-Type: application/json' \
-  -d '{"name": "my-agent", "system_prompt": "You are helpful."}'
-
-# Start a run
-curl -X POST localhost:7777/api/agents/<id>/run \
-  -H 'Content-Type: application/json' \
-  -d '{"input": "Hello"}'
-
-# Blocking ask (waits for completion, returns response)
-curl localhost:7777/api/ask \
-  -H 'Content-Type: application/json' \
-  -d '{"agent": "my-agent", "message": "What files are in /workspace?"}'
-```
-
 ## Project structure
 
 ```
@@ -142,25 +89,30 @@ src/
     persistent-shell.ts # Persistent bash session (docker exec)
     docker.ts           # Docker container lifecycle
     scheduler.ts        # Cron-based scheduling
+    lockfile.ts         # PID-based lockfile (data/taurus.lock)
     sse.ts              # SSE broadcaster
     types.ts            # IPC message types
   agents/
-    agent-loop.ts       # Core TAOR loop (~130 lines)
+    agent-loop.ts       # Core TAOR loop
   inference/
-    service.ts          # Inference abstraction
+    service.ts          # Inference abstraction (provider routing)
     providers/
       anthropic.ts      # Anthropic API + extended thinking
+      openai.ts         # OpenAI API
+      openrouter.ts     # OpenRouter (OpenAI-compatible)
   tools/
     base.ts             # Tool abstract class
     registry.ts         # Tool registration + execution
     shell/              # File and exec tools (Read, Write, Edit, Glob, Grep, Bash)
-    web/                # Web tools (WebFetch, WebSearch)
-    control/            # Control tools (Pause)
+    web/                # Web tools (WebFetch, WebSearch, Browser)
+    control/            # Control tools (Pause, Spawn)
   server/
     server.ts           # HTTP server + routing
+    ws.ts               # WebSocket terminal (persistent sessions with replay)
     helpers.ts          # json(), error(), parseBody(), route()
     routes/
       agents.ts         # Agent + run + ask endpoints
+      files.ts          # File browser API (list, read, write in container)
       folders.ts        # Folder CRUD
       health.ts         # Health check
       tools.ts          # Tool listing
@@ -168,14 +120,26 @@ src/
     index.ts            # Sequelize + SQLite setup
     models/             # Agent, Run, Message, AgentLog, Folder
   web/
-    src/                # React frontend
+    src/                # React frontend (Vite, React 19, Monaco, xterm.js)
+docker/
+  Dockerfile            # Custom agent container image (taurus-base)
 data/
   taurus.db             # SQLite database (auto-created)
 doc/
-  README.md             # This file
   api.md                # API reference
   todo.txt              # Development backlog
-  research/             # Claude Code architecture research notes
+  research/             # Architecture research notes
+```
+
+## CLI
+
+```bash
+./taurus              # Start daemon
+./taurus dev          # Build web UI + start daemon
+./taurus build        # Build web UI only
+./taurus watch        # Build web UI in watch mode
+./taurus status       # Check if daemon is running
+./taurus seed         # Create a test agent via API
 ```
 
 ## DB Migrations
@@ -185,3 +149,7 @@ doc/
 - After makemigration, review the generated file — it may pick up unrelated drift if `_current.json` was stale
 - Apply with `npm run migrate`
 - Migration files are `.cjs` (the npm script auto-renames `.js → .cjs`)
+
+## API
+
+Full API reference: [api.md](api.md)

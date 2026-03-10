@@ -29,7 +29,25 @@
       "Bash(git add src/tools/shell/read.ts package.json package-lock.json)",
       "Bash(git add src/tools/shell/file-tracker.ts src/tools/shell/read.ts src/tools/shell/edit.ts src/tools/shell/write.ts src/daemon/run-worker.ts)",
       "Bash(npm install ws node-pty @xterm/xterm @xterm/addon-fit @monaco-editor/react)",
-      "Bash(npm install -D @types/ws)"
+      "Bash(npm install -D @types/ws)",
+      "Read(//Users/serge/.local/share/claude/versions/**)",
+      "Bash(grep -E \"echo.*$\\\\?|exit.*code|return.*code\")",
+      "Read(//Users/serge/.claude/**)",
+      "Read(//Users/serge/.local/**)",
+      "Read(//Users/serge/.nvm/versions/node/v22.14.0/lib/node_modules/**)",
+      "Read(//Users/serge/**)",
+      "Read(//private/tmp/claude-code/**)",
+      "Read(//tmp/claude-code/**)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(reading file\" which also blocked Write via freshness enforcement.:*)",
+      "Bash(docker exec:*)",
+      "Bash(curl -s \"localhost:7777/api/agents/513a3af9-2016-4edb-8281-5a044b4be980/runs/5ef0c4dd-891e-45b0-a023-68a30598d9df/messages?after=0\")",
+      "Bash(python3 -c \"import sys,json; msgs=json.load\\(sys.stdin\\); [print\\(f''''{m[\"\"seq\"\"]} {m[\"\"role\"\"]} {str\\(m[\"\"content\"\"]\\)[:200]}''''\\) for m in msgs[-5:]]\")",
+      "Bash(curl -s \"localhost:7777/api/agents/513a3af9-2016-4edb-8281-5a044b4be980/runs/5ef0c4dd-891e-45b0-a023-68a30598d9df/messages?after=61\")",
+      "Bash(python3 -c \"import sys,json; msgs=json.load\\(sys.stdin\\); print\\(json.dumps\\(msgs[0][''''content''''], indent=2\\)\\)\")",
+      "Bash(curl -s \"localhost:7777/api/agents/513a3af9-2016-4edb-8281-5a044b4be980/runs/5ef0c4dd-891e-45b0-a023-68a30598d9df/messages?after=62\")",
+      "Bash(python3 -c \"import sys,json; msgs=json.load\\(sys.stdin\\); print\\(f''''{len\\(msgs\\)} messages after seq 62''''\\); [print\\(f''''{m[\"\"seq\"\"]} {m[\"\"role\"\"]} {str\\(m[\"\"content\"\"]\\)[:200]}''''\\) for m in msgs]\")"
     ]
   }
 }
