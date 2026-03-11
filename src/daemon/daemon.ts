@@ -131,15 +131,15 @@ export class Daemon {
     }
     await Promise.allSettled(stopPromises);
 
-    for (const [, managed] of this.agents) {
-      if (managed.agent.status !== 'disabled') {
-        await Agent.update({ status: 'idle' }, { where: { id: managed.agent.id } });
-      }
-    }
+    await Promise.allSettled(
+      [...this.agents.values()]
+        .filter(m => m.agent.status !== 'disabled')
+        .map(m => Agent.update({ status: 'idle' }, { where: { id: m.agent.id } }))
+    );
 
-    for (const [, managed] of this.agents) {
-      await this.docker.stopContainer(managed.agent.container_id);
-    }
+    await Promise.allSettled(
+      [...this.agents.values()].map(m => this.docker.stopContainer(m.agent.container_id))
+    );
 
     this.sse.closeAll();
     this.logger('info', 'Graceful shutdown complete.');
