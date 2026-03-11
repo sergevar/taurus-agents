@@ -33,7 +33,23 @@
   cursor: pointer;
   position: relative; // anchor for .tv__stem
 
-  &:hover { background: var(--c-bg3); }
+  &:hover:not(&--selected) {
+    background: var(--c-hover);
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--c-marker-glow1);
+      box-shadow:
+        0 0 4px var(--c-marker-glow1),
+        0 0 10px var(--c-marker-glow2),
+        0 0 20px var(--c-marker-glow3);
+      clip-path: inset(0 -50px 0 -50px);
+    }
+  }
 
   &--selected {
     background: linear-gradient(90deg, var(--c-marker-glow3) 0%, transparent 70%);
@@ -45,7 +61,7 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 2px;
+      width: 1px;
       background: var(--c-marker-bright);
       box-shadow:
         0 0 2px var(--c-marker-bright),

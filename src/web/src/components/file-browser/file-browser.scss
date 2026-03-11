@@ -1,3 +1,5 @@
+@use '../../styles/variables' as *;
+
 // ── File Browser ──
 // Self-contained styles for the file browser component.
 
@@ -31,7 +33,7 @@
     border-radius: 4px;
     padding: 3px 8px;
     font-size: 11px;
-    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    font-family: $font-mono;
     color: var(--c-muted);
     outline: none;
 
@@ -91,9 +93,24 @@
     color: var(--c-text);
     white-space: nowrap;
     user-select: none;
+    position: relative;
 
-    &:hover {
-      background: var(--c-bg3);
+    &:hover:not(.fb-tree__item--selected) {
+      background: var(--c-hover);
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: var(--c-marker-glow1);
+        box-shadow:
+          0 0 4px var(--c-marker-glow1),
+          0 0 10px var(--c-marker-glow2),
+          0 0 20px var(--c-marker-glow3);
+        clip-path: inset(0 -50px 0 -50px);
+      }
     }
 
     &--selected {
@@ -147,7 +164,7 @@
   &__path {
     font-size: 12px;
     color: var(--c-muted);
-    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    font-family: $font-mono;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

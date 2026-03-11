@@ -6,6 +6,15 @@
   box-sizing: border-box;
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--c-marker);
+}
+
+html, body {
+  overscroll-behavior: none;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   background: var(--c-bg);
@@ -22,22 +31,80 @@ body {
   padding: 5px 12px;
   border-radius: 6px;
   border: 1px solid var(--c-border);
-  background: var(--c-bg3);
+  background:
+    radial-gradient(
+      ellipse 80% 80% at 50% 50%,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 30%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0%,
+      transparent 40%
+    ),
+    var(--c-bg3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.15);
   color: var(--c-text);
   cursor: pointer;
   font-size: 12px;
   font-family: inherit;
   transition: all 0.15s ease;
 
-  &:hover { border-color: var(--c-muted); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  // ── Primary: gradient + 3D shine ──
-  &.primary {
+  &:hover {
+    border-color: var(--c-muted);
     background:
+      radial-gradient(
+        ellipse 90% 90% at 50% 50%,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 70%
+      ),
       linear-gradient(
         180deg,
-        var(--c-btn-primary-shine) 0%,
+        rgba(255, 255, 255, 0.07) 0%,
+        transparent 30%
+      ),
+      linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        transparent 40%
+      ),
+      var(--c-bg3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 6px rgba(0, 0, 0, 0.12),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  &:active {
+    transform: translateY(0.5px);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  // ── Primary: neon glow ──
+  &.primary {
+    background:
+      radial-gradient(
+        ellipse 80% 80% at 50% 50%,
+        var(--c-marker-glow3) 0%,
+        transparent 70%
+      ),
+      linear-gradient(
+        180deg,
+        var(--c-marker-glow2) 0%,
+        transparent 30%
+      ),
+      linear-gradient(
+        0deg,
+        var(--c-marker-glow3) 0%,
         transparent 40%
       ),
       linear-gradient(
@@ -45,46 +112,99 @@ body {
         var(--c-btn-primary-from) 0%,
         var(--c-btn-primary-to) 100%
       );
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--c-marker-glow2);
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 var(--c-btn-primary-shine);
+      inset 0 1px 0 var(--c-marker-glow2),
+      inset 0 -1px 6px var(--c-marker-glow3),
+      0 0 6px var(--c-btn-primary-glow);
     color: var(--c-btn-primary-text);
     font-weight: 500;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 
     &:hover {
       background:
+        radial-gradient(
+          ellipse 90% 90% at 50% 50%,
+          var(--c-marker-glow2) 0%,
+          transparent 70%
+        ),
         linear-gradient(
           180deg,
-          var(--c-btn-primary-shine) 0%,
-          transparent 50%
+          var(--c-marker-glow1) 0%,
+          transparent 30%
+        ),
+        linear-gradient(
+          0deg,
+          var(--c-marker-glow2) 0%,
+          transparent 40%
         ),
         linear-gradient(
           180deg,
           var(--c-btn-primary-hover-from) 0%,
           var(--c-btn-primary-hover-to) 100%
         );
+      border-color: var(--c-marker-glow1);
       box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 var(--c-btn-primary-shine);
+        inset 0 1px 0 var(--c-marker-glow1),
+        inset 0 -1px 8px var(--c-marker-glow2),
+        0 0 10px var(--c-btn-primary-glow),
+        0 0 20px var(--c-btn-primary-glow);
       transform: translateY(-0.5px);
     }
 
     &:active {
       transform: translateY(0.5px);
       box-shadow:
-        0 0 1px rgba(0, 0, 0, 0.2),
-        inset 0 2px 4px rgba(0, 0, 0, 0.15);
+        inset 0 2px 6px var(--c-marker-glow2),
+        0 0 4px var(--c-btn-primary-glow);
     }
   }
 
   // ── Danger ──
   &.danger {
-    background: var(--c-btn-danger);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 30%
+      ),
+      linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        transparent 40%
+      ),
+      var(--c-btn-danger);
     border-color: var(--c-btn-danger-hover);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 4px rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.2);
     color: #fff;
-    &:hover { background: var(--c-btn-danger-hover); }
+
+    &:hover {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 30%
+        ),
+        linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.08) 0%,
+          transparent 40%
+        ),
+        var(--c-btn-danger-hover);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 6px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.25);
+      transform: translateY(-0.5px);
+    }
+
+    &:active {
+      transform: translateY(0.5px);
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
   }
 
   &.icon-btn {

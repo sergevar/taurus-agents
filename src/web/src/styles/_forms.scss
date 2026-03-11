@@ -33,7 +33,7 @@
     margin-bottom: 12px;
     outline: none;
 
-    &:focus { border-color: $accent; }
+    &:focus { border-color: $purple; }
   }
 
   textarea {
@@ -48,14 +48,51 @@
   background: $bg2;
   border: 1px solid $border;
   border-radius: 10px;
-  padding: 20px;
   width: 480px;
   max-height: 80vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 
-  h3 {
-    margin-bottom: 16px;
-    font-size: 16px;
+  &__header {
+    padding: 14px 20px;
+    flex-shrink: 0;
+    position: relative;
+    background:
+      linear-gradient(
+        180deg,
+        rgba($purple, 0.06) 0%,
+        transparent 100%
+      );
+
+    // Bottom neon line
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba($purple, 0.4) 20%,
+        rgba($purple, 0.4) 80%,
+        transparent 100%
+      );
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 200;
+      letter-spacing: 0.03em;
+      color: $text;
+    }
+  }
+
+  &__body {
+    padding: 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   &__actions {
@@ -70,8 +107,9 @@
 
 .field-hint {
   font-size: 11px;
-  color: $text2;
+  color: rgba($text2, 0.6);
   margin: -8px 0 12px;
+  font-style: italic;
 }
 
 // ── Label with inline action buttons ──
@@ -100,39 +138,104 @@
   font-family: inherit;
 
   &:hover {
-    border-color: $accent;
+    border-color: $purple;
     color: $text;
   }
 }
 
 // ── Bind Mounts Editor ──
 
-.mount-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  margin-bottom: 8px;
+.mounts-group {
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
 
-  input[type="text"] {
-    flex: 1;
-    margin-bottom: 0;
-    font-family: $font-mono;
-    font-size: 12px;
+  .field-hint {
+    margin: 0;
+    padding: 8px 10px;
+  }
+}
+
+.mounts-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th, td {
+    padding: 0;
+    border-bottom: 1px solid $border;
+    border-right: 1px solid $border;
+
+    &:last-child { border-right: none; }
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  &__head th {
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba($text2, 0.6);
+    text-align: left;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  td {
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 0;
+      font-size: 12px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      padding: 6px 10px;
+
+      &:focus {
+        background: rgba($purple, 0.05);
+        border: none;
+      }
+    }
   }
 
   .mount-ro {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 11px;
-    color: $text2;
+    justify-content: center;
     margin-bottom: 0;
-    white-space: nowrap;
     cursor: pointer;
+    padding: 6px 10px;
 
     input[type="checkbox"] {
       width: auto;
       margin: 0;
+    }
+  }
+
+  .mount-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 6px;
+    border: none;
+    background: none;
+    color: $text2;
+    cursor: pointer;
+    transition: color 0.1s, background 0.1s;
+
+    &:hover {
+      color: $red;
+      background: rgba($red, 0.08);
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
     }
   }
 }
@@ -142,13 +245,17 @@
 .tool-picker {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 12px;
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: 6px;
+  padding: 10px 12px;
 
   &__group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 12px;
   }
 
   &__group-label {
@@ -178,14 +285,14 @@
     transition: all 0.15s ease;
 
     &:hover {
-      border-color: $accent;
+      border-color: $purple;
       color: $text;
     }
 
     &.active {
-      background: rgba($accent, 0.15);
-      border-color: $accent;
-      color: $accent;
+      background: rgba($purple, 0.15);
+      border-color: $purple;
+      color: $purple;
     }
   }
 }
@@ -195,6 +302,7 @@
 .agent-settings {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px;
 
   &__header {

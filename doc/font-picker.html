@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Font Picker — TAURUS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant:wght@300;400;600&family=Bodoni+Moda:wght@400;700&family=Libre+Caslon+Display&family=DM+Serif+Display&family=DM+Serif+Text&family=Cinzel:wght@400;700&family=Abril+Fatface&family=Yeseva+One&family=Spectral:wght@300;400;600&family=Lora:wght@400;600&family=Merriweather:wght@300;400;700&family=Source+Serif+4:wght@300;400;600&family=Crimson+Pro:wght@300;400;600&family=EB+Garamond:wght@400;600&family=Cormorant+Garamond:wght@300;400;600&family=Josefin+Sans:wght@100;300;400&family=Raleway:wght@100;200;300&family=Poiret+One&family=Tenor+Sans&family=Julius+Sans+One&family=Marcellus&family=Forum&family=Philosopher:wght@400;700&family=Noto+Serif+Display:wght@300;400;600&family=Fraunces:wght@300;400;700&family=Gilda+Display&family=Antic+Didone&family=Cardo:wght@400;700&family=Old+Standard+TT:wght@400;700&family=Sorts+Mill+Goudy&family=Unna:wght@400;700&family=Prata&family=Oranienbaum&family=Vast+Shadow&family=Baskervville&family=Libre+Baskerville:wght@400;700&family=Rozha+One&family=Vollkorn:wght@400;600&family=Alegreya:wght@400;700&family=Instrument+Serif&family=Newsreader:wght@300;400;600&family=Literata:wght@300;400;600&family=Brygada+1918:wght@400;600&family=Pirata+One&family=Almendra:wght@400;700&family=Uncial+Antiqua&family=Macondo&family=Orbitron:wght@400;600;700&family=Audiowide&family=Rajdhani:wght@300;400;600&family=Chakra+Petch:wght@300;400;600&family=Share+Tech+Mono&family=Oxanium:wght@300;400;600&family=Italiana&family=Bellefair&family=Fahkwang:wght@300;400;600&family=Megrim&family=Syncopate:wght@400;700&family=Gruppo&family=Kaushan+Script&family=Sacramento&family=Montserrat:wght@100;200;300;400&family=Didact+Gothic&family=Jura:wght@300;400;600&family=Electrolize&family=Michroma&family=Iceland&family=Nova+Square&family=Aldrich&family=Quantico:wght@400;700&family=Exo+2:wght@100;300;400;600&family=Teko:wght@300;400;600&family=Saira:wght@100;300;400&family=Barlow+Condensed:wght@100;300;400;600&family=Yanone+Kaffeesatz:wght@300;400;600&family=Bebas+Neue&family=Oswald:wght@300;400;600&family=Anton&family=Big+Shoulders+Display:wght@300;400;600&family=Secular+One&family=Righteous&family=Bungee&family=Major+Mono+Display&family=Space+Mono:wght@400;700&family=Cutive+Mono&family=Courier+Prime:wght@400;700&family=IBM+Plex+Mono:wght@100;300;400&family=Fira+Code:wght@300;400;600&family=Syne:wght@400;600;700&family=Urbanist:wght@100;200;300;400&family=Outfit:wght@100;200;300;400&family=Inter+Tight:wght@100;200;300;400&family=Plus+Jakarta+Sans:wght@200;300;400&family=Manrope:wght@200;300;400&family=General+Sans&family=Cabinet+Grotesk&family=Satoshi&family=Archivo:wght@100;200;300;400&family=Space+Grotesk:wght@300;400;600&family=Red+Hat+Display:wght@300;400;600&family=DM+Sans:wght@100;200;300;400&family=Lexend:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    } 
+    .header h2 { font-size: 14px; font-weight: 500; color: #8b949e; }
+    .controls { display: flex; gap: 12px; align-items: center; }
+    .controls label { font-size: 12px; color: #8b949e; }
+    .controls input, .controls select {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .controls input[type="text"] { width: 140px; }
+    .controls input[type="range"] { width: 100px; }
+    .picked-bar {
+      margin-left: auto;
+      font-size: 12px;
+      color: #bc8cff;
+    }
+    .list {
+      margin-top: 56px;
+      padding: 16px 24px;
+    }
+    .font-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #21262d;
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .font-row:hover { background: rgba(188, 140, 255, 0.04); }
+    .font-row.picked {
+      background: linear-gradient(90deg, rgba(188, 140, 255, 0.08) 0%, transparent 70%);
+    }
+    .font-row.picked::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: #bc8cff;
+      box-shadow: 0 0 6px rgba(188,140,255,0.6), 0 0 14px rgba(188,140,255,0.3);
+    }
+    .font-name {
+      width: 200px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #8b949e;
+      white-space: nowrap;
+    }
+    .font-preview {
+      flex: 1;
+      color: #e6e6e6;
+      white-space: nowrap;
+      font-kerning: auto;
+      font-feature-settings: 'kern' 1, 'liga' 1;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-pick, .font-remove {
+      font-size: 11px;
+      color: #8b949e;
+      opacity: 0;
+      transition: opacity 0.1s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: inherit;
+    }
+    .font-row:hover .font-pick,
+    .font-row:hover .font-remove { opacity: 1; }
+    .font-row.picked .font-pick { opacity: 1; color: #bc8cff; }
+    .font-remove:hover { color: #f85149; background: rgba(248,81,73,0.1); }
+    .font-row.removed {
+      opacity: 0.25;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+    .rank {
+      width: 24px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #484f58;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Font Picker</h2>
+    <div class="controls">
+      <label>Text:</label>
+      <input type="text" id="text" value="TAURUS">
+      <label>Size:</label>
+      <input type="range" id="size" min="14" max="40" value="20">
+      <span id="size-val" style="font-size:11px;color:#8b949e;width:30px">20px</span>
+      <label>Weight:</label>
+      <select id="weight">
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400" selected>400</option>
+        <option value="500">500</option>
+        <option value="600">600</option>
+        <option value="700">700</option>
+      </select>
+      <label>Spacing:</label>
+      <input type="range" id="spacing" min="0" max="30" value="0">
+      <span id="spacing-val" style="font-size:11px;color:#8b949e;width:40px">0.00em</span>
+    </div>
+    <div class="picked-bar" id="picked-bar"></div>
+  </div>
+  <div class="list" id="list"></div>
+
+  <script>
+    const fonts = [
+      // Serifs — editorial / high contrast
+      { name: 'Playfair Display', family: "'Playfair Display', serif" },
+      { name: 'Bodoni Moda', family: "'Bodoni Moda', serif" },
+      { name: 'Abril Fatface', family: "'Abril Fatface', serif" },
+      { name: 'DM Serif Display', family: "'DM Serif Display', serif" },
+      { name: 'DM Serif Text', family: "'DM Serif Text', serif" },
+      { name: 'Libre Caslon Display', family: "'Libre Caslon Display', serif" },
+      { name: 'Instrument Serif', family: "'Instrument Serif', serif" },
+      { name: 'Fraunces', family: "'Fraunces', serif" },
+      { name: 'Antic Didone', family: "'Antic Didone', serif" },
+      { name: 'Prata', family: "'Prata', serif" },
+      { name: 'Yeseva One', family: "'Yeseva One', serif" },
+      { name: 'Rozha One', family: "'Rozha One', serif" },
+      { name: 'Gilda Display', family: "'Gilda Display', serif" },
+      { name: 'Vast Shadow', family: "'Vast Shadow', serif" },
+      // Serifs — classic / book
+      { name: 'Cormorant', family: "'Cormorant', serif" },
+      { name: 'Cormorant Garamond', family: "'Cormorant Garamond', serif" },
+      { name: 'EB Garamond', family: "'EB Garamond', serif" },
+      { name: 'Spectral', family: "'Spectral', serif" },
+      { name: 'Crimson Pro', family: "'Crimson Pro', serif" },
+      { name: 'Source Serif 4', family: "'Source Serif 4', serif" },
+      { name: 'Lora', family: "'Lora', serif" },
+      { name: 'Merriweather', family: "'Merriweather', serif" },
+      { name: 'Noto Serif Display', family: "'Noto Serif Display', serif" },
+      { name: 'Newsreader', family: "'Newsreader', serif" },
+      { name: 'Literata', family: "'Literata', serif" },
+      { name: 'Vollkorn', family: "'Vollkorn', serif" },
+      { name: 'Alegreya', family: "'Alegreya', serif" },
+      { name: 'Libre Baskerville', family: "'Libre Baskerville', serif" },
+      { name: 'Baskervville', family: "'Baskervville', serif" },
+      { name: 'Cardo', family: "'Cardo', serif" },
+      { name: 'Old Standard TT', family: "'Old Standard TT', serif" },
+      { name: 'Sorts Mill Goudy', family: "'Sorts Mill Goudy', serif" },
+      { name: 'Unna', family: "'Unna', serif" },
+      { name: 'Oranienbaum', family: "'Oranienbaum', serif" },
+      { name: 'Brygada 1918', family: "'Brygada 1918', serif" },
+      // Serifs — inscription / display
+      { name: 'Cinzel', family: "'Cinzel', serif" },
+      { name: 'Marcellus', family: "'Marcellus', serif" },
+      { name: 'Forum', family: "'Forum', serif" },
+      { name: 'Philosopher', family: "'Philosopher', serif" },
+      // Sans — thin / geometric / logo-like
+      { name: 'Josefin Sans', family: "'Josefin Sans', sans-serif" },
+      { name: 'Raleway', family: "'Raleway', sans-serif" },
+      { name: 'Poiret One', family: "'Poiret One', sans-serif" },
+      { name: 'Tenor Sans', family: "'Tenor Sans', sans-serif" },
+      { name: 'Julius Sans One', family: "'Julius Sans One', sans-serif" },
+      // Decorative / fantasy
+      { name: 'Pirata One', family: "'Pirata One', serif" },
+      { name: 'Almendra', family: "'Almendra', serif" },
+      { name: 'Uncial Antiqua', family: "'Uncial Antiqua', serif" },
+      { name: 'Macondo', family: "'Macondo', serif" },
+      // Sci-fi / tech
+      { name: 'Orbitron', family: "'Orbitron', sans-serif" },
+      { name: 'Audiowide', family: "'Audiowide', sans-serif" },
+      { name: 'Rajdhani', family: "'Rajdhani', sans-serif" },
+      { name: 'Chakra Petch', family: "'Chakra Petch', sans-serif" },
+      { name: 'Share Tech Mono', family: "'Share Tech Mono', monospace" },
+      { name: 'Oxanium', family: "'Oxanium', sans-serif" },
+      // Elegant / thin serif
+      { name: 'Italiana', family: "'Italiana', serif" },
+      { name: 'Bellefair', family: "'Bellefair', serif" },
+      { name: 'Fahkwang', family: "'Fahkwang', sans-serif" },
+      // Geometric / art deco
+      { name: 'Megrim', family: "'Megrim', sans-serif" },
+      { name: 'Syncopate', family: "'Syncopate', sans-serif" },
+      { name: 'Gruppo', family: "'Gruppo', sans-serif" },
+      // Script (for reference)
+      { name: 'Kaushan Script', family: "'Kaushan Script', cursive" },
+      { name: 'Sacramento', family: "'Sacramento', cursive" },
+      // Modern sans — thin weights
+      { name: 'Montserrat', family: "'Montserrat', sans-serif" },
+      { name: 'Didact Gothic', family: "'Didact Gothic', sans-serif" },
+      { name: 'Urbanist', family: "'Urbanist', sans-serif" },
+      { name: 'Outfit', family: "'Outfit', sans-serif" },
+      { name: 'Inter Tight', family: "'Inter Tight', sans-serif" },
+      { name: 'Plus Jakarta Sans', family: "'Plus Jakarta Sans', sans-serif" },
+      { name: 'Manrope', family: "'Manrope', sans-serif" },
+      { name: 'Archivo', family: "'Archivo', sans-serif" },
+      { name: 'Space Grotesk', family: "'Space Grotesk', sans-serif" },
+      { name: 'Red Hat Display', family: "'Red Hat Display', sans-serif" },
+      { name: 'DM Sans', family: "'DM Sans', sans-serif" },
+      { name: 'Lexend', family: "'Lexend', sans-serif" },
+      { name: 'Syne', family: "'Syne', sans-serif" },
+      // Tech / sci-fi continued
+      { name: 'Jura', family: "'Jura', sans-serif" },
+      { name: 'Electrolize', family: "'Electrolize', sans-serif" },
+      { name: 'Michroma', family: "'Michroma', sans-serif" },
+      { name: 'Iceland', family: "'Iceland', sans-serif" },
+      { name: 'Nova Square', family: "'Nova Square', sans-serif" },
+      { name: 'Aldrich', family: "'Aldrich', sans-serif" },
+      { name: 'Quantico', family: "'Quantico', sans-serif" },
+      // Condensed / display
+      { name: 'Exo 2', family: "'Exo 2', sans-serif" },
+      { name: 'Teko', family: "'Teko', sans-serif" },
+      { name: 'Saira', family: "'Saira', sans-serif" },
+      { name: 'Barlow Condensed', family: "'Barlow Condensed', sans-serif" },
+      { name: 'Yanone Kaffeesatz', family: "'Yanone Kaffeesatz', sans-serif" },
+      { name: 'Bebas Neue', family: "'Bebas Neue', sans-serif" },
+      { name: 'Oswald', family: "'Oswald', sans-serif" },
+      { name: 'Anton', family: "'Anton', sans-serif" },
+      { name: 'Big Shoulders Display', family: "'Big Shoulders Display', sans-serif" },
+      { name: 'Secular One', family: "'Secular One', sans-serif" },
+      { name: 'Righteous', family: "'Righteous', sans-serif" },
+      { name: 'Bungee', family: "'Bungee', sans-serif" },
+      // Mono / technical
+      { name: 'Major Mono Display', family: "'Major Mono Display', monospace" },
+      { name: 'Space Mono', family: "'Space Mono', monospace" },
+      { name: 'Cutive Mono', family: "'Cutive Mono', monospace" },
+      { name: 'Courier Prime', family: "'Courier Prime', monospace" },
+      { name: 'IBM Plex Mono', family: "'IBM Plex Mono', monospace" },
+      { name: 'Fira Code', family: "'Fira Code', monospace" },
+    ];
+
+    const picked = new Set();
+    const removed = new Set();
+    const list = document.getElementById('list');
+    const textInput = document.getElementById('text');
+    const sizeInput = document.getElementById('size');
+    const sizeVal = document.getElementById('size-val');
+    const weightInput = document.getElementById('weight');
+    const spacingInput = document.getElementById('spacing');
+    const spacingVal = document.getElementById('spacing-val');
+    const pickedBar = document.getElementById('picked-bar');
+
+    function render() {
+      const text = textInput.value || 'TAURUS';
+      const size = sizeInput.value + 'px';
+      const weight = weightInput.value;
+      const spacing = (spacingInput.value / 100).toFixed(2) + 'em';
+
+      sizeVal.textContent = size;
+      spacingVal.textContent = spacing;
+
+      const visible = fonts.filter(f => !removed.has(f.name));
+      list.innerHTML = visible.map((f, i) => `
+        <div class="font-row ${picked.has(f.name) ? 'picked' : ''}" data-name="${f.name}">
+          <span class="rank">${i + 1}</span>
+          <span class="font-name">${f.name}</span>
+          <span class="font-preview" style="font-family:${f.family};font-size:${size};font-weight:${weight};letter-spacing:${spacing};text-transform:uppercase">${text}</span>
+          <span class="font-preview" style="font-family:${f.family};font-size:${size};font-weight:${weight};letter-spacing:${spacing};font-variant:small-caps;text-transform:none">${text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()}</span>
+          <span class="font-preview" style="font-family:${f.family};font-size:${size};font-weight:${weight};letter-spacing:${spacing};text-transform:capitalize">${text.toLowerCase()}</span>
+          <span class="font-pick">${picked.has(f.name) ? '★' : 'pick'}</span>
+          <button class="font-remove" data-remove="${f.name}">✕</button>
+        </div>
+      `).join('');
+
+      const remaining = visible.length;
+      pickedBar.textContent = (picked.size ? `Picked: ${[...picked].join(', ')} · ` : '') + `${remaining} remaining`;
+    }
+
+    list.addEventListener('click', e => {
+      // Handle remove button
+      const removeBtn = e.target.closest('.font-remove');
+      if (removeBtn) {
+        e.stopPropagation();
+        removed.add(removeBtn.dataset.remove);
+        picked.delete(removeBtn.dataset.remove);
+        render();
+        return;
+      }
+      // Handle pick
+      const row = e.target.closest('.font-row');
+      if (!row) return;
+      const name = row.dataset.name;
+      if (picked.has(name)) picked.delete(name);
+      else picked.add(name);
+      render();
+    });
+
+    textInput.addEventListener('input', render);
+    sizeInput.addEventListener('input', render);
+    weightInput.addEventListener('change', render);
+    spacingInput.addEventListener('input', render);
+
+    render();
+  </script>
+</body>
+</html>

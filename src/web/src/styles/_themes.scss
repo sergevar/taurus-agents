@@ -17,7 +17,7 @@
 
   // Accents
   --c-accent:  #58a6ff;
-  --c-green:   #3fb950;
+  --c-green:   #34d399;
   --c-red:     #f85149;
   --c-yellow:  #d29922;
   --c-purple:  #bc8cff;
@@ -29,19 +29,24 @@
   --c-marker-glow1: rgba(188, 140, 255, 0.7);
   --c-marker-glow2: rgba(188, 140, 255, 0.35);
   --c-marker-glow3: rgba(188, 140, 255, 0.15);
+  --c-hover:        rgba(188, 140, 255, 0.08);
 
   // Status backgrounds
   --c-status-running: #3d2800;
   --c-status-paused:  #4d2d00;
   --c-status-error:   #490202;
 
-  // Buttons — primary gradient
-  --c-btn-primary-from:  #238636;
-  --c-btn-primary-to:    #1a6b2b;
-  --c-btn-primary-hover-from: #2ea043;
-  --c-btn-primary-hover-to:   #238636;
-  --c-btn-primary-text:  #fff;
-  --c-btn-primary-shine: rgba(255, 255, 255, 0.12);
+  // Buttons — primary (neon marker)
+  --c-btn-primary-from:  rgba(188, 140, 255, 0.20);
+  --c-btn-primary-to:    rgba(188, 140, 255, 0.10);
+  --c-btn-primary-hover-from: rgba(188, 140, 255, 0.30);
+  --c-btn-primary-hover-to:   rgba(188, 140, 255, 0.18);
+  --c-btn-primary-text:  #e0c8ff;
+  --c-btn-primary-shine: rgba(188, 140, 255, 0.12);
+  --c-btn-primary-border: rgba(188, 140, 255, 0.45);
+  --c-btn-primary-border-hover: rgba(188, 140, 255, 0.7);
+  --c-btn-primary-glow:  rgba(188, 140, 255, 0.15);
+  --c-btn-primary-glow-hover: rgba(188, 140, 255, 0.3);
 
   // Buttons — danger
   --c-btn-danger:        #da3633;
@@ -62,7 +67,7 @@
 
   // Accents
   --c-accent:  #89b4fa; // blue
-  --c-green:   #a6e3a1; // green
+  --c-green:   #7ee8c7; // green (jade)
   --c-red:     #f38ba8; // red
   --c-yellow:  #f9e2af; // yellow
   --c-purple:  #cba6f7; // mauve
@@ -74,19 +79,24 @@
   --c-marker-glow1: rgba(203, 166, 247, 0.7);
   --c-marker-glow2: rgba(203, 166, 247, 0.35);
   --c-marker-glow3: rgba(203, 166, 247, 0.15);
+  --c-hover:        rgba(203, 166, 247, 0.08);
 
   // Status backgrounds
   --c-status-running: #3d2800;
   --c-status-paused:  #3d2e00;
   --c-status-error:   #3e1215;
 
-  // Buttons — primary: dark violet gradient
-  --c-btn-primary-from:  #5c3d8f; // muted deep violet
-  --c-btn-primary-to:    #4a2d7a; // darker violet
-  --c-btn-primary-hover-from: #7050a8; // lifted violet
-  --c-btn-primary-hover-to:   #5c3d8f;
-  --c-btn-primary-text:  #cdd6f4; // text
-  --c-btn-primary-shine: rgba(203, 166, 247, 0.15); // mauve-tinted shine
+  // Buttons — primary (neon marker)
+  --c-btn-primary-from:  rgba(203, 166, 247, 0.20);
+  --c-btn-primary-to:    rgba(203, 166, 247, 0.10);
+  --c-btn-primary-hover-from: rgba(203, 166, 247, 0.30);
+  --c-btn-primary-hover-to:   rgba(203, 166, 247, 0.18);
+  --c-btn-primary-text:  #e8d5ff;
+  --c-btn-primary-shine: rgba(203, 166, 247, 0.12);
+  --c-btn-primary-border: rgba(203, 166, 247, 0.45);
+  --c-btn-primary-border-hover: rgba(203, 166, 247, 0.7);
+  --c-btn-primary-glow:  rgba(203, 166, 247, 0.15);
+  --c-btn-primary-glow-hover: rgba(203, 166, 247, 0.3);
 
   // Buttons — danger
   --c-btn-danger:        #f38ba8; // red

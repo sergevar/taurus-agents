@@ -92,7 +92,13 @@
     justify-content: space-between;
     align-items: center;
 
-    h1 { font-size: 16px; font-weight: 600; }
+    h1 {
+      font-size: 17px;
+      font-weight: 100;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e8e0f0;
+    }
   }
 
   &__list {
@@ -108,7 +114,23 @@
   transition: background 0.1s;
   position: relative;
 
-  &:hover { background: var(--c-bg3); }
+  &:hover:not(.active) {
+    background: var(--c-hover);
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--c-marker-glow1);
+      box-shadow:
+        0 0 4px var(--c-marker-glow1),
+        0 0 10px var(--c-marker-glow2),
+        0 0 20px var(--c-marker-glow3);
+      clip-path: inset(0 -50px 0 -50px);
+    }
+  }
   &.active {
     background: linear-gradient(90deg, var(--c-marker-glow3) 0%, transparent 70%);
 
@@ -126,7 +148,6 @@
         0 0 14px var(--c-marker-glow2),
         0 0 28px var(--c-marker-glow3);
       clip-path: inset(0 -50px 0 -50px);
-      border-radius: 0 1px 1px 0;
     }
   }
 
@@ -146,7 +167,7 @@
   &__meta {
     font-size: 11px;
     color: var(--c-muted);
-    margin-top: 3px;
+    margin-top: 5px;
     padding-left: 16px;
   }
 }
@@ -184,16 +205,31 @@
 // ── Countdown ──
 
 .countdown {
+  display: inline-flex;
+  align-items: stretch;
   font-size: 10px;
-  font-family: $font-mono;
-  color: var(--c-accent);
-  background: rgba($accent, 0.1);
-  padding: 1px 6px;
-  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
+  margin-top: 2px;
+  color: #d4a574;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
   white-space: nowrap;
 
   &__label {
-    font-family: $font-sans;
+    font-size: 9px;
+    line-height: 16px;
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0 4px 0 7px;
+    border-right: 1px solid var(--c-border);
+  }
+
+  &__value {
+    padding: 0 7px 0 5px;
+    font-weight: 300;
   }
 }
 
@@ -215,14 +251,47 @@
     color: var(--c-muted);
     font-size: 12px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.1s;
+    transition: color 0.1s, background 0.1s;
+    position: relative;
 
-    &:hover { color: var(--c-text); }
+    &:hover:not(.tab-bar__tab--active) {
+      color: var(--c-text);
+      background: var(--c-hover);
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 1px;
+        background: var(--c-marker-glow1);
+        box-shadow:
+          0 0 4px var(--c-marker-glow1),
+          0 0 10px var(--c-marker-glow2),
+          0 0 20px var(--c-marker-glow3);
+        clip-path: inset(-50px 0 -50px 0);
+      }
+    }
 
     &--active {
       color: var(--c-text);
-      border-bottom-color: var(--c-accent);
+      background: linear-gradient(180deg, transparent 0%, var(--c-marker-glow3) 100%);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 1px;
+        background: var(--c-marker-bright);
+        box-shadow:
+          0 0 2px var(--c-marker-bright),
+          0 0 6px var(--c-marker-glow1),
+          0 0 14px var(--c-marker-glow2),
+          0 0 28px var(--c-marker-glow3);
+        clip-path: inset(-50px 0 -50px 0);
+      }
     }
   }
 }
@@ -342,7 +411,7 @@
       text-align: left;
       cursor: pointer;
 
-      &:hover { background: var(--c-bg3); }
+      &:hover { background: var(--c-hover); }
     }
   }
 

@@ -33,8 +33,10 @@ export function CreateAgentModal({ onClose, onCreated }: CreateAgentModalProps) 
   return (
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal">
-        <h3>Create Agent</h3>
-        <AgentForm onSubmit={handleSubmit} onCancel={onClose} submitLabel="Create" />
+        <div className="modal__header"><h3>Create Agent</h3></div>
+        <div className="modal__body">
+          <AgentForm onSubmit={handleSubmit} onCancel={onClose} submitLabel="Create" />
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mono Font Picker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=JetBrains+Mono:wght@100;200;300;400;500;600&family=Source+Code+Pro:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@100;200;300;400;500&family=Roboto+Mono:wght@100;200;300;400;500;600&family=Inconsolata:wght@200;300;400;500;600&family=Ubuntu+Mono:wght@400;700&family=Space+Mono:wght@400;700&family=Courier+Prime:wght@400;700&family=Anonymous+Pro:wght@400;700&family=PT+Mono&family=Overpass+Mono:wght@300;400;500;600&family=Red+Hat+Mono:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Martian+Mono:wght@100;200;300;400;500;600&family=Geist+Mono:wght@100;200;300;400;500;600&family=Commit+Mono&family=Noto+Sans+Mono:wght@100;200;300;400;500;600&family=Share+Tech+Mono&family=Cutive+Mono&family=Major+Mono+Display&family=Azeret+Mono:wght@100;200;300;400;500&family=Spline+Sans+Mono:wght@300;400;500;600&family=Syne+Mono&family=Xanh+Mono&family=Chivo+Mono:wght@100;200;300;400;500;600&family=Fragment+Mono&family=Sometype+Mono:wght@400;500;600;700&family=Monaspace+Neon&family=Victor+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header h2 { font-size: 14px; font-weight: 500; color: #8b949e; }
+    .controls { display: flex; gap: 12px; align-items: center; }
+    .controls label { font-size: 12px; color: #8b949e; }
+    .controls input, .controls select {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .controls input[type="text"] { width: 200px; }
+    .controls input[type="range"] { width: 100px; }
+    .picked-bar {
+      margin-left: auto;
+      font-size: 12px;
+      color: #bc8cff;
+    }
+    .list {
+      margin-top: 56px;
+      padding: 16px 24px;
+    }
+    .font-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #21262d;
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .font-row:hover { background: rgba(188, 140, 255, 0.04); }
+    .font-row.picked {
+      background: linear-gradient(90deg, rgba(188, 140, 255, 0.08) 0%, transparent 70%);
+    }
+    .font-row.picked::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: #bc8cff;
+      box-shadow: 0 0 6px rgba(188,140,255,0.6), 0 0 14px rgba(188,140,255,0.3);
+    }
+    .font-name {
+      width: 180px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #8b949e;
+      white-space: nowrap;
+    }
+    .font-preview {
+      flex: 1;
+      color: #e6e6e6;
+      white-space: nowrap;
+      font-kerning: auto;
+      font-feature-settings: 'kern' 1, 'liga' 1;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-pick, .font-remove {
+      font-size: 11px;
+      color: #8b949e;
+      opacity: 0;
+      transition: opacity 0.1s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: inherit;
+    }
+    .font-row:hover .font-pick,
+    .font-row:hover .font-remove { opacity: 1; }
+    .font-row.picked .font-pick { opacity: 1; color: #bc8cff; }
+    .font-remove:hover { color: #f85149; background: rgba(248,81,73,0.1); }
+    .rank {
+      width: 24px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #484f58;
+      text-align: right;
+    }
+    .sys { color: #d49562; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Mono Font Picker</h2>
+    <div class="controls">
+      <label>Text:</label>
+      <input type="text" id="text" value="3h 21m  const x = 42;  0O1lI">
+      <label>Size:</label>
+      <input type="range" id="size" min="10" max="24" value="13">
+      <span id="size-val" style="font-size:11px;color:#8b949e;width:30px">13px</span>
+      <label>Weight:</label>
+      <select id="weight">
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400" selected>400</option>
+        <option value="500">500</option>
+        <option value="600">600</option>
+      </select>
+    </div>
+    <div class="picked-bar" id="picked-bar"></div>
+  </div>
+  <div class="list" id="list"></div>
+
+  <script>
+    const fonts = [
+      // System mono (baseline)
+      { name: 'SF Mono (system)', family: "'SF Mono', monospace", sys: true },
+      { name: 'Menlo (system)', family: "'Menlo', monospace", sys: true },
+      { name: 'Consolas (system)', family: "'Consolas', monospace", sys: true },
+      { name: 'Monaco (system)', family: "'Monaco', monospace", sys: true },
+      // Popular coding fonts
+      { name: 'JetBrains Mono', family: "'JetBrains Mono', monospace" },
+      { name: 'Fira Code', family: "'Fira Code', monospace" },
+      { name: 'Source Code Pro', family: "'Source Code Pro', monospace" },
+      { name: 'IBM Plex Mono', family: "'IBM Plex Mono', monospace" },
+      { name: 'Roboto Mono', family: "'Roboto Mono', monospace" },
+      { name: 'Inconsolata', family: "'Inconsolata', monospace" },
+      { name: 'Ubuntu Mono', family: "'Ubuntu Mono', monospace" },
+      { name: 'Space Mono', family: "'Space Mono', monospace" },
+      // Modern / trendy
+      { name: 'Geist Mono', family: "'Geist Mono', monospace" },
+      { name: 'Martian Mono', family: "'Martian Mono', monospace" },
+      { name: 'Red Hat Mono', family: "'Red Hat Mono', monospace" },
+      { name: 'DM Mono', family: "'DM Mono', monospace" },
+      { name: 'Overpass Mono', family: "'Overpass Mono', monospace" },
+      { name: 'Azeret Mono', family: "'Azeret Mono', monospace" },
+      { name: 'Spline Sans Mono', family: "'Spline Sans Mono', monospace" },
+      { name: 'Chivo Mono', family: "'Chivo Mono', monospace" },
+      { name: 'Sometype Mono', family: "'Sometype Mono', monospace" },
+      { name: 'Fragment Mono', family: "'Fragment Mono', monospace" },
+      { name: 'Noto Sans Mono', family: "'Noto Sans Mono', monospace" },
+      // Character / stylish
+      { name: 'Courier Prime', family: "'Courier Prime', monospace" },
+      { name: 'Anonymous Pro', family: "'Anonymous Pro', monospace" },
+      { name: 'PT Mono', family: "'PT Mono', monospace" },
+      { name: 'Share Tech Mono', family: "'Share Tech Mono', monospace" },
+      { name: 'Cutive Mono', family: "'Cutive Mono', monospace" },
+      { name: 'Syne Mono', family: "'Syne Mono', monospace" },
+      { name: 'Xanh Mono', family: "'Xanh Mono', monospace" },
+      // Display mono
+      { name: 'Major Mono Display', family: "'Major Mono Display', monospace" },
+    ];
+
+    const picked = new Set();
+    const removed = new Set();
+    const list = document.getElementById('list');
+    const textInput = document.getElementById('text');
+    const sizeInput = document.getElementById('size');
+    const sizeVal = document.getElementById('size-val');
+    const weightInput = document.getElementById('weight');
+    const pickedBar = document.getElementById('picked-bar');
+
+    function render() {
+      const text = textInput.value || '3h 21m  const x = 42;';
+      const size = sizeInput.value + 'px';
+      const weight = weightInput.value;
+
+      sizeVal.textContent = size;
+
+      const visible = fonts.filter(f => !removed.has(f.name));
+      list.innerHTML = visible.map((f, i) => `
+        <div class="font-row ${picked.has(f.name) ? 'picked' : ''}" data-name="${f.name}">
+          <span class="rank">${i + 1}</span>
+          <span class="font-name">${f.name}${f.sys ? ' <span class="sys">local</span>' : ''}</span>
+          <span class="font-preview" style="font-family:${f.family};font-size:${size};font-weight:${weight}">${text}</span>
+          <span class="font-pick">${picked.has(f.name) ? '\u2605' : 'pick'}</span>
+          <button class="font-remove" data-remove="${f.name}">\u2715</button>
+        </div>
+      `).join('');
+
+      const remaining = visible.length;
+      pickedBar.textContent = (picked.size ? `Picked: ${[...picked].join(', ')} \u00b7 ` : '') + `${remaining} remaining`;
+    }
+
+    list.addEventListener('click', e => {
+      const removeBtn = e.target.closest('.font-remove');
+      if (removeBtn) {
+        e.stopPropagation();
+        removed.add(removeBtn.dataset.remove);
+        picked.delete(removeBtn.dataset.remove);
+        render();
+        return;
+      }
+      const row = e.target.closest('.font-row');
+      if (!row) return;
+      const name = row.dataset.name;
+      if (picked.has(name)) picked.delete(name);
+      else picked.add(name);
+      render();
+    });
+
+    textInput.addEventListener('input', render);
+    sizeInput.addEventListener('input', render);
+    weightInput.addEventListener('change', render);
+
+    render();
+  </script>
+</body>
+</html>

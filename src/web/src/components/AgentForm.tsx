@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { api } from '../api';
 import { ToolPicker } from './ToolPicker';
 import type { Agent } from '../types';
@@ -111,34 +112,58 @@ export function AgentForm({ initial, onSubmit, onCancel, submitLabel = 'Create' 
           <button type="button" className="label-action-btn" onClick={() => setMounts([...mounts, { host: '', container: '', readonly: false }])}>+ Add</button>
         </span>
       </label>
-      {mounts.length === 0 && (
-        <div className="field-hint">No host directories mounted</div>
-      )}
-      {mounts.map((m, i) => (
-        <div key={i} className="mount-row">
-          <input
-            type="text"
-            value={m.host}
-            onChange={e => { const next = [...mounts]; next[i] = { ...m, host: e.target.value }; setMounts(next); }}
-            placeholder="Host path"
-          />
-          <input
-            type="text"
-            value={m.container}
-            onChange={e => { const next = [...mounts]; next[i] = { ...m, container: e.target.value }; setMounts(next); }}
-            placeholder="Container path"
-          />
-          <label className="mount-ro">
-            <input
-              type="checkbox"
-              checked={m.readonly ?? false}
-              onChange={e => { const next = [...mounts]; next[i] = { ...m, readonly: e.target.checked }; setMounts(next); }}
-            />
-            ro
-          </label>
-          <button type="button" className="label-action-btn" onClick={() => setMounts(mounts.filter((_, j) => j !== i))}>x</button>
-        </div>
-      ))}
+      <div className="mounts-group">
+        {mounts.length === 0 ? (
+          <div className="field-hint">No host directories mounted</div>
+        ) : (
+          <table className="mounts-table">
+            <thead className="mounts-table__head">
+              <tr>
+                <th>Host path</th>
+                <th>Container path</th>
+                <th>RO</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {mounts.map((m, i) => (
+                <tr key={i}>
+                  <td>
+                    <input
+                      type="text"
+                      value={m.host}
+                      onChange={e => { const next = [...mounts]; next[i] = { ...m, host: e.target.value }; setMounts(next); }}
+                      placeholder="/host/path"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={m.container}
+                      onChange={e => { const next = [...mounts]; next[i] = { ...m, container: e.target.value }; setMounts(next); }}
+                      placeholder="/container/path"
+                    />
+                  </td>
+                  <td>
+                    <label className="mount-ro">
+                      <input
+                        type="checkbox"
+                        checked={m.readonly ?? false}
+                        onChange={e => { const next = [...mounts]; next[i] = { ...m, readonly: e.target.checked }; setMounts(next); }}
+                      />
+                    </label>
+                  </td>
+                  <td>
+                    <button type="button" className="mount-delete" onClick={() => setMounts(mounts.filter((_, j) => j !== i))}>
+                      <Trash2 />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       <label>Max Turns</label>
       <input
