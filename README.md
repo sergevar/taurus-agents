@@ -5,11 +5,13 @@ Self-hosted multi-agent platform. Each agent runs in an isolated Docker containe
 ## Features
 
 - **Isolated execution** — each agent gets its own Docker container with a persistent shell session
-- **Web UI** — real-time streaming of LLM thinking/text/tool output, file editor (Monaco), interactive terminal (xterm.js), agent configuration
-- **12 built-in tools** — file ops (Read, Write, Edit, Glob, Grep), shell (Bash), web (WebFetch, WebSearch, Browser), control (Pause, Spawn)
+- **Agent hierarchies** — parent/child agent trees with Delegate and Supervisor tools for orchestrating teams of agents
+- **Shared volumes** — child agents automatically mount the parent's `/shared` volume for inter-agent file sharing
+- **Web UI** — real-time streaming of LLM thinking/text/tool output, file editor (Monaco) with data table and markdown views, interactive terminal (xterm.js), agent configuration
+- **14 built-in tools** — file ops (Read, Write, Edit, Glob, Grep), shell (Bash), web (WebFetch, WebSearch, Browser), control (Pause, Spawn, Delegate, Supervisor)
 - **Multi-provider** — Anthropic (default), OpenAI, OpenRouter (access to DeepSeek, Llama, etc.)
 - **Scheduling** — cron-based with overlap modes (skip, queue, kill)
-- **Sub-agents** — spawn child agents for parallel work
+- **Composable prompts** — `{{include:path}}` directive to include reusable prompt fragments from `prompts/`
 - **Blocking API** — `POST /api/ask` sends a message and waits for the response, making it easy to script
 - **SSE streaming** — real-time events for building custom frontends
 - **SQLite storage** — agents, runs, messages, logs all persisted locally
@@ -88,6 +90,8 @@ Set the corresponding API key in `.env` for each provider you use.
 | Bash | exec | Run shell commands in the persistent container shell |
 | Pause | control | Pause execution, wait for human input |
 | Spawn | control | Spawn sub-agents for parallel work |
+| Delegate | control | Delegate a task to a child agent and wait for the result |
+| Supervisor | control | Manage child agents: create, update, delete, inspect, inject messages, stop runs |
 | WebSearch | web | Search via Brave Search API |
 | WebFetch | web | Fetch and extract web page content |
 | Browser | web | Control a headless Chromium browser (Playwright) |
@@ -116,6 +120,24 @@ curl -s localhost:7777/api/ask \
   -d '{"agent": "my-agent", "message": "What files are in /workspace?"}'
 ```
 
+## Agent hierarchies
+
+Agents can form parent/child trees. A supervisor agent manages its team using the Delegate and Supervisor tools:
+
+```
+agency                          (supervisor)
+├── researcher                  (child agent)
+├── writer                      (child agent)
+└── editor                      (child agent)
+```
+
+- **Delegate** — send a task to a child agent and block until it completes
+- **Supervisor** — create, update, delete, inspect, and control child agents
+- **Shared volumes** — all agents in a tree share a `/shared` volume for passing files between agents
+- **Scoped access** — agents can only manage their direct children, not siblings or ancestors
+
+Children can themselves be supervisors with their own children — hierarchies nest to arbitrary depth.
+
 ## Scheduling
 
 Agents can have a cron schedule. Set `schedule` to a cron expression and `schedule_overlap` to control behavior when a trigger fires while the agent is already running:
@@ -126,7 +148,7 @@ Agents can have a cron schedule. Set `schedule` to a cron expression and `schedu
 
 ## System prompt templates
 
-Agent system prompts support placeholders:
+Agent system prompts support placeholders and includes:
 
 | Placeholder | Value |
 |-------------|-------|
@@ -135,6 +157,38 @@ Agent system prompts support placeholders:
 | `{{time}}` | HH:MM:SS |
 | `{{year}}` | Current year |
 | `{{timezone}}` | System timezone |
+| `{{include:path}}` | Contents of `prompts/<path>` (recursive, up to 5 levels) |
+
+Place reusable prompt fragments in the `prompts/` directory and reference them with `{{include:filename.md}}`.
+
+## HottestLang
+
+> "The hottest new programming language is English" — [Andrej Karpathy](https://x.com/karpathy/status/1617979122625712128)
+
+Natural-language programs for agents. Write a `.hottest.md` file describing your team, workflows, and triggers — the LLM interprets it directly. No compilation, no DSL — just English.
+
+```markdown
+# Program: acme-content-production.hottest.md
+
+## Team
+- researcher: research topics using web search, save findings
+- writer: write articles from research briefs
+- editor: polish drafts for publication
+
+## On new content order
+1. Add to /workspace/orders.json with status "pending"
+2. Delegate to researcher with the topic
+3. Delegate to writer with the research summary
+4. Delegate to editor with the draft
+5. Update order status to "complete"
+
+## On wake (scheduled)
+- Check orders.json for pending work
+- Check team status — restart stuck agents
+- Process next pending order
+```
+
+Pair with a runtime prompt (via `{{include:...}}`) that teaches the agent how to interpret the program, manage state, and coordinate its team. See `prompts/hottest/` for examples.
 
 ## Project structure
 
@@ -149,6 +203,7 @@ src/
   server/               # HTTP server, routes, WebSocket terminal
   db/                   # Sequelize + SQLite models and migrations
   web/                  # React frontend (Vite, Monaco, xterm.js)
+prompts/                # Reusable prompt fragments for {{include:...}}
 docker/
   Dockerfile            # Custom agent container image
 data/
