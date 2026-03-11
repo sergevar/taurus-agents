@@ -95,12 +95,11 @@ export class ShellReadTool extends Tool {
       ? `\n[Showing lines ${offset}-${offset + contentLines.length - 1} of ${totalLines}]`
       : '';
 
-    // Track mtime for freshness enforcement
+    // Track mtime for freshness enforcement (mtime 0 = stat unavailable, still allows edits)
     if (this.tracker) {
       const stat = await this.shell.exec(`stat -c %Y ${JSON.stringify(fp)} 2>/dev/null || stat -f %m ${JSON.stringify(fp)} 2>/dev/null`);
-      if (stat.exitCode === 0) {
-        this.tracker.markRead(fp, parseInt(stat.stdout.trim(), 10));
-      }
+      const mtime = stat.exitCode === 0 ? parseInt(stat.stdout.trim(), 10) : 0;
+      this.tracker.markRead(fp, mtime);
     }
 
     return { output: `${header}${showing}\n${numbered}`, isError: false, durationMs: result.durationMs };
