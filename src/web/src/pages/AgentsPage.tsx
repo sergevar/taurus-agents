@@ -71,6 +71,10 @@ export function AgentsPage() {
   const [runActivity, setRunActivity] = useState<Record<string, string>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('runs');
+  // Lazy-mount: Terminal and FileBrowser trigger container startup on mount,
+  // so only mount them once the user actually clicks their tab.
+  const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(new Set(['runs']));
+  const mountedForAgent = useRef<string | null>(null);
   const { toasts, showToast, dismiss } = useToast();
   const { theme, cycleTheme } = useTheme();
   const conn = useConnectionStatus();
@@ -143,9 +147,21 @@ export function AgentsPage() {
 
   // ── Reset tab when agent changes ──
 
+  // Reset mounted tabs synchronously when agent changes (ref updates before render)
+  if (agentId !== mountedForAgent.current) {
+    mountedForAgent.current = agentId ?? null;
+    mountedTabs.clear();
+    mountedTabs.add('runs');
+  }
+
   useEffect(() => {
     setActiveTab('runs');
   }, [agentId]);
+
+  function activateTab(tab: Tab) {
+    setActiveTab(tab);
+    setMountedTabs(prev => prev.has(tab) ? prev : new Set(prev).add(tab));
+  }
 
   // ── Optimistic user message helper ──
 
@@ -496,16 +512,16 @@ export function AgentsPage() {
 
             {/* Tab bar */}
             <div className="tab-bar">
-              <button className={`tab-bar__tab ${activeTab === 'runs' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('runs')}>
+              <button className={`tab-bar__tab ${activeTab === 'runs' ? 'tab-bar__tab--active' : ''}`} onClick={() => activateTab('runs')}>
                 <MessageSquare size={13} /> Runs
               </button>
-              <button className={`tab-bar__tab ${activeTab === 'editor' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('editor')}>
+              <button className={`tab-bar__tab ${activeTab === 'editor' ? 'tab-bar__tab--active' : ''}`} onClick={() => activateTab('editor')}>
                 <FileCode size={13} /> Editor
               </button>
-              <button className={`tab-bar__tab ${activeTab === 'terminal' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('terminal')}>
+              <button className={`tab-bar__tab ${activeTab === 'terminal' ? 'tab-bar__tab--active' : ''}`} onClick={() => activateTab('terminal')}>
                 <TerminalSquare size={13} /> Terminal
               </button>
-              <button className={`tab-bar__tab ${activeTab === 'settings' ? 'tab-bar__tab--active' : ''}`} onClick={() => setActiveTab('settings')}>
+              <button className={`tab-bar__tab ${activeTab === 'settings' ? 'tab-bar__tab--active' : ''}`} onClick={() => activateTab('settings')}>
                 <Settings size={13} /> Settings
               </button>
             </div>
@@ -569,13 +585,17 @@ export function AgentsPage() {
               </div>
             </div>
 
-            <div style={{ display: activeTab === 'editor' ? 'flex' : 'none', flex: 1, overflow: 'hidden', minHeight: 0 }}>
-              <FileBrowser agentId={selectedAgent.id} />
-            </div>
+            {mountedTabs.has('editor') && (
+              <div style={{ display: activeTab === 'editor' ? 'flex' : 'none', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+                <FileBrowser agentId={selectedAgent.id} />
+              </div>
+            )}
 
-            <div className="terminal-fullpane" style={{ display: activeTab === 'terminal' ? undefined : 'none' }}>
-              <Terminal agentId={selectedAgent.id} focused={activeTab === 'terminal'} />
-            </div>
+            {mountedTabs.has('terminal') && (
+              <div className="terminal-fullpane" style={{ display: activeTab === 'terminal' ? undefined : 'none' }}>
+                <Terminal agentId={selectedAgent.id} focused={activeTab === 'terminal'} />
+              </div>
+            )}
           </>
         )}
       </div>
