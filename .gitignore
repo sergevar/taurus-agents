@@ -6,4 +6,5 @@ data/
 *.sqlite-journal
 .env
 .env.local
+.claude/
 doc/todo.txt
