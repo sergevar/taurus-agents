@@ -198,6 +198,7 @@ async function handleConnection(ws: WebSocket, agentId: string, daemon: Daemon):
         AttachStderr: true,
         Tty: true,
         Cmd: ['/bin/bash'],
+        Env: ['TERM=xterm-256color'],
       });
 
       const stream = await dockerExecAttach(exec.Id);
