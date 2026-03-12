@@ -1,6 +1,7 @@
 import { InferenceProvider } from './base.js';
 import { AnthropicProvider } from './anthropic.js';
 import { OpenAIProvider } from './openai.js';
+import { OpenAICompatProvider } from './openai-compat.js';
 
 /**
  * Resolve a provider from a model string.
@@ -8,8 +9,8 @@ import { OpenAIProvider } from './openai.js';
  * Model format: [backend/]model-id
  *   - "claude-sonnet-4-20250514"           → anthropic (default)
  *   - "anthropic/claude-sonnet-4-20250514" → anthropic
- *   - "openai/gpt-4o"                     → openai direct
- *   - "openrouter/deepseek/deepseek-r1"   → openrouter (openai-compatible)
+ *   - "openai/gpt-4o"                     → openai (Responses API)
+ *   - "openrouter/deepseek/deepseek-r1"   → openrouter (Chat Completions)
  *   - "openrouter/anthropic/claude-..."    → openrouter
  *
  * Returns { provider, model } where model is the string to send to the API
@@ -24,7 +25,7 @@ export function resolveProvider(model: string): { provider: InferenceProvider; m
       const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) throw new Error('OPENAI_API_KEY is required for openai/ models');
       return {
-        provider: new OpenAIProvider({ apiKey, name: 'openai', defaultModel: 'gpt-4o' }),
+        provider: new OpenAIProvider({ apiKey, defaultModel: 'gpt-4o' }),
         model: model.slice(firstSlash + 1),
       };
     }
@@ -33,7 +34,7 @@ export function resolveProvider(model: string): { provider: InferenceProvider; m
       const apiKey = process.env.OPENROUTER_API_KEY;
       if (!apiKey) throw new Error('OPENROUTER_API_KEY is required for openrouter/ models');
       return {
-        provider: new OpenAIProvider({
+        provider: new OpenAICompatProvider({
           apiKey,
           baseURL: 'https://openrouter.ai/api/v1',
           name: 'openrouter',

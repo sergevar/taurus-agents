@@ -1,113 +1,98 @@
 import OpenAI from 'openai';
+import type { Responses } from 'openai/resources/responses/responses';
 import type { InferenceRequest, StreamEvent, ChatMessage, ContentBlock, ToolDef } from '../../core/types.js';
 import { InferenceProvider } from './base.js';
-
-type OAIMessage = OpenAI.ChatCompletionMessageParam;
-type OAITool = OpenAI.ChatCompletionTool;
+import { assembleContent, estimateTokens } from './openai-helpers.js';
 
 /**
- * OpenAI-compatible provider.
+ * OpenAI Responses API provider.
  *
- * Works with OpenAI, OpenRouter, DeepSeek, vLLM, and any OpenAI-compatible API.
- * Translates between our Anthropic-shaped internal format and the OpenAI Chat Completions API.
+ * Used for direct OpenAI access. Supports reasoning summaries (thinking),
+ * which are only available through the Responses API (not Chat Completions).
  */
 export class OpenAIProvider extends InferenceProvider {
-  readonly name: string;
+  readonly name = 'openai';
   private client: OpenAI;
   private defaultModel: string;
 
-  constructor(opts: { apiKey: string; baseURL?: string; name?: string; defaultModel?: string; defaultHeaders?: Record<string, string> }) {
+  constructor(opts: { apiKey: string; defaultModel?: string }) {
     super();
-    this.name = opts.name ?? 'openai';
     this.defaultModel = opts.defaultModel ?? 'gpt-4o';
-    this.client = new OpenAI({
-      apiKey: opts.apiKey,
-      baseURL: opts.baseURL,
-      defaultHeaders: opts.defaultHeaders,
-    });
+    this.client = new OpenAI({ apiKey: opts.apiKey });
   }
 
   async *stream(params: InferenceRequest): AsyncGenerator<StreamEvent> {
     const model = params.model || this.defaultModel;
-    const messages = this.convertMessages(params.system, params.messages);
+    const input = this.convertInput(params.messages);
     const tools = params.tools?.length ? this.convertTools(params.tools) : undefined;
-
     const maxTokens = params.maxTokens ?? 16000;
-    const requestBody: Record<string, any> = {
+
+    const stream = await this.client.responses.create({
       model,
-      messages,
+      instructions: params.system || undefined,
+      input,
       tools,
-      // Newer OpenAI models (gpt-4o-2024-11+, gpt-5, o-series) require
-      // max_completion_tokens; older ones use max_tokens. Use the new param
-      // for OpenAI, fall back to max_tokens for other OpenAI-compatible APIs.
-      ...(this.name === 'openai'
-        ? { max_completion_tokens: maxTokens }
-        : { max_tokens: maxTokens }),
+      max_output_tokens: maxTokens,
+      reasoning: { summary: 'auto' },
       stream: true,
-      stream_options: { include_usage: true },
-    };
+    });
 
-    // OpenRouter: request reasoning/thinking output for models that support it.
-    // Note: reasoning summaries for gpt-5 are only available via the Responses API,
-    // not Chat Completions. We'd need to migrate to Responses API to get them.
-    if (this.name === 'openrouter') {
-      requestBody.reasoning = { effort: 'high' };
-    }
-
-    const stream = await this.client.chat.completions.create(requestBody as OpenAI.ChatCompletionCreateParamsStreaming);
-
-    // Track tool calls being assembled across chunks
-    const toolCalls = new Map<number, { id: string; name: string; arguments: string }>();
+    // Track state across streaming events
+    const toolCalls = new Map<string, { id: string; name: string; arguments: string }>();
     let textContent = '';
     let reasoningContent = '';
-    let finishReason = '';
-    let usage: any = null; // full usage object — shape varies (OpenAI vs OpenRouter)
+    let usage: any = null;
+    let hasToolCalls = false;
 
-    for await (const chunk of stream) {
-      // Usage arrives in the final chunk with empty choices
-      if (chunk.usage) {
-        usage = chunk.usage;
-      }
+    for await (const event of stream) {
+      switch (event.type) {
+        // ── Reasoning summary (thinking) ──
+        case 'response.reasoning_summary_text.delta':
+          reasoningContent += event.delta;
+          yield { type: 'thinking_delta', text: event.delta };
+          break;
 
-      const choice = chunk.choices?.[0];
-      if (!choice) continue;
+        // ── Text output ──
+        case 'response.output_text.delta':
+          textContent += event.delta;
+          yield { type: 'text_delta', text: event.delta };
+          break;
 
-      const delta = choice.delta;
-
-      // Reasoning and text are mutually exclusive per chunk.
-      // OpenRouter sends the same text on multiple fields simultaneously,
-      // so we pick one: reasoning_content > reasoning > content.
-      const rc = (delta as any)?.reasoning_content ?? (delta as any)?.reasoning;
-      if (rc) {
-        reasoningContent += rc;
-        yield { type: 'thinking_delta', text: rc };
-      } else if (delta?.content) {
-        textContent += delta.content;
-        yield { type: 'text_delta', text: delta.content };
-      }
-
-      // Tool calls
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls) {
-          const idx = tc.index;
-
-          if (tc.id && tc.function?.name) {
-            // New tool call starting
-            toolCalls.set(idx, { id: tc.id, name: tc.function.name, arguments: tc.function.arguments ?? '' });
-            yield { type: 'tool_use_start', id: tc.id, name: tc.function.name };
-          } else if (tc.function?.arguments) {
-            // Argument fragment
-            const existing = toolCalls.get(idx);
-            if (existing) {
-              existing.arguments += tc.function.arguments;
-              yield { type: 'tool_input_delta', id: existing.id, partialJson: tc.function.arguments };
-            }
+        // ── Function calls ──
+        case 'response.function_call_arguments.delta': {
+          const tc = toolCalls.get(event.item_id);
+          if (tc) {
+            tc.arguments += event.delta;
+            yield { type: 'tool_input_delta', id: tc.id, partialJson: event.delta };
           }
+          break;
         }
-      }
 
-      if (choice.finish_reason) {
-        finishReason = choice.finish_reason;
+        case 'response.function_call_arguments.done': {
+          const tc = toolCalls.get(event.item_id);
+          if (tc) {
+            tc.arguments = event.arguments;
+          }
+          break;
+        }
+
+        // ── Output item lifecycle ──
+        case 'response.output_item.added': {
+          const item = event.item as any;
+          if (item.type === 'function_call') {
+            hasToolCalls = true;
+            const callId = item.call_id || item.id;
+            toolCalls.set(item.id, { id: callId, name: item.name, arguments: '' });
+            yield { type: 'tool_use_start', id: callId, name: item.name };
+          }
+          break;
+        }
+
+        // ── Completion ──
+        case 'response.completed': {
+          usage = event.response.usage;
+          break;
+        }
       }
     }
 
@@ -118,183 +103,105 @@ export class OpenAIProvider extends InferenceProvider {
       yield { type: 'tool_use_end', id: tc.id, input };
     }
 
-    // Assemble the final message in our canonical ContentBlock[] format
-    const content = this.assembleContent(textContent, reasoningContent, toolCalls);
+    // Assemble the final message
+    const content = assembleContent(textContent, reasoningContent, toolCalls);
+    const stopReason = hasToolCalls ? 'tool_use' : 'end_turn';
 
-    // Map finish_reason to our stop_reason
-    const stopReason = finishReason === 'tool_calls' ? 'tool_use' : 'end_turn';
-
-    // Normalize usage — inputTokens is always the TOTAL (see TokenUsage docs in types.ts).
-    // OpenAI: prompt_tokens is already total (includes cached). Cache details are in sub-objects.
-    // OpenRouter: same shape, plus inline `cost` field and `cache_write_tokens`.
-    const promptTokens = usage?.prompt_tokens ?? 0;
-    const completionTokens = usage?.completion_tokens ?? 0;
-    const cacheRead = usage?.prompt_tokens_details?.cached_tokens ?? 0;
-    const cacheWrite = usage?.prompt_tokens_details?.cache_write_tokens ?? 0; // OpenRouter only
-    const reasoningTokens = usage?.completion_tokens_details?.reasoning_tokens ?? 0;
-    const nativeCost = typeof usage?.cost === 'number' ? usage.cost : undefined; // OpenRouter only
+    // Normalize usage
+    const inputTokens = usage?.input_tokens ?? 0;
+    const outputTokens = usage?.output_tokens ?? 0;
+    const cacheRead = usage?.input_tokens_details?.cached_tokens ?? 0;
+    const reasoningTokens = usage?.output_tokens_details?.reasoning_tokens ?? 0;
 
     yield {
       type: 'message_complete',
       message: { role: 'assistant', content } as ChatMessage,
       usage: {
-        inputTokens: promptTokens,
-        outputTokens: completionTokens,
+        inputTokens,
+        outputTokens,
         cacheRead: cacheRead || undefined,
-        cacheWrite: cacheWrite || undefined,
         reasoningTokens: reasoningTokens || undefined,
-        nativeCost,
       },
       stopReason,
     };
   }
 
   async countTokens(params: InferenceRequest): Promise<number> {
-    // No token counting API for OpenAI-compatible providers — rough estimate
-    const json = JSON.stringify(params.messages);
-    return Math.ceil(json.length / 4);
+    return estimateTokens(params.messages);
   }
 
-  // ── Format conversion: our internal (Anthropic-shaped) → OpenAI ──
+  // ── Format conversion: our internal (Anthropic-shaped) → Responses API ──
 
-  private convertMessages(system: string, messages: ChatMessage[]): OAIMessage[] {
-    const result: OAIMessage[] = [];
-
-    if (system) {
-      result.push({ role: 'system', content: system });
-    }
+  private convertInput(messages: ChatMessage[]): Responses.ResponseInput {
+    const input: Responses.ResponseInput = [];
 
     for (const msg of messages) {
       if (msg.role === 'user') {
         if (typeof msg.content === 'string') {
-          result.push({ role: 'user', content: msg.content });
+          input.push({ role: 'user', content: msg.content });
         } else {
-          // Content blocks — may contain tool_results, text, and images
-          const toolResults: ContentBlock[] = [];
-          const otherBlocks: ContentBlock[] = [];
-
           for (const block of msg.content) {
             if (block.type === 'tool_result') {
-              toolResults.push(block);
-            } else {
-              otherBlocks.push(block);
-            }
-          }
-
-          // Emit tool result messages (role: "tool")
-          for (const block of toolResults) {
-            if (block.type === 'tool_result') {
-              let content: string;
+              let outputStr: string;
               if (typeof block.content === 'string') {
-                content = block.content;
+                outputStr = block.content;
               } else {
-                content = block.content
+                outputStr = block.content
                   .filter((b): b is { type: 'text'; text: string } => b.type === 'text')
                   .map(b => b.text)
                   .join('\n');
               }
-              result.push({ role: 'tool', tool_call_id: block.tool_use_id, content });
+              input.push({
+                type: 'function_call_output',
+                call_id: block.tool_use_id,
+                output: outputStr,
+              });
+            } else if (block.type === 'text') {
+              input.push({ role: 'user', content: block.text });
             }
-          }
-
-          // Emit remaining content as a user message (if any)
-          if (otherBlocks.length > 0) {
-            const parts = this.convertContentParts(otherBlocks);
-            if (parts.length > 0) {
-              result.push({ role: 'user', content: parts });
-            }
+            // Skip images for now — Responses API handles them differently
           }
         }
       } else if (msg.role === 'assistant') {
         if (typeof msg.content === 'string') {
-          result.push({ role: 'assistant', content: msg.content });
+          input.push({ role: 'assistant', content: msg.content });
         } else {
-          // Extract tool_use blocks into tool_calls, text into content
           const textParts: string[] = [];
-          const toolCalls: OpenAI.ChatCompletionMessageToolCall[] = [];
-
           for (const block of msg.content) {
             if (block.type === 'text') {
               textParts.push(block.text);
             } else if (block.type === 'tool_use') {
-              toolCalls.push({
-                id: block.id,
-                type: 'function',
-                function: { name: block.name, arguments: JSON.stringify(block.input) },
+              // Flush accumulated text first
+              if (textParts.length > 0) {
+                input.push({ role: 'assistant', content: textParts.join('\n') });
+                textParts.length = 0;
+              }
+              input.push({
+                type: 'function_call',
+                call_id: block.id,
+                name: block.name,
+                arguments: JSON.stringify(block.input),
               });
             }
             // Skip thinking blocks — OpenAI doesn't accept them back
           }
-
-          const assistantMsg: OpenAI.ChatCompletionAssistantMessageParam = {
-            role: 'assistant',
-            content: textParts.join('\n') || null,
-          };
-          if (toolCalls.length > 0) {
-            assistantMsg.tool_calls = toolCalls;
+          if (textParts.length > 0) {
+            input.push({ role: 'assistant', content: textParts.join('\n') });
           }
-          result.push(assistantMsg);
         }
       }
     }
 
-    return result;
+    return input;
   }
 
-  private convertContentParts(blocks: ContentBlock[]): OpenAI.ChatCompletionContentPart[] {
-    const parts: OpenAI.ChatCompletionContentPart[] = [];
-    for (const block of blocks) {
-      if (block.type === 'text') {
-        parts.push({ type: 'text', text: block.text });
-      } else if (block.type === 'image') {
-        parts.push({
-          type: 'image_url',
-          image_url: { url: `data:${block.source.media_type};base64,${block.source.data}` },
-        });
-      }
-    }
-    return parts;
-  }
-
-  private convertTools(tools: ToolDef[]): OAITool[] {
+  private convertTools(tools: ToolDef[]): Responses.Tool[] {
     return tools.map(t => ({
       type: 'function' as const,
-      function: {
-        name: t.name,
-        description: t.description,
-        parameters: t.input_schema as OpenAI.FunctionParameters,
-      },
+      name: t.name,
+      description: t.description ?? undefined,
+      parameters: t.input_schema as Record<string, unknown>,
+      strict: false,
     }));
-  }
-
-  // ── Format conversion: OpenAI response → our internal ContentBlock[] ──
-
-  private assembleContent(
-    text: string,
-    reasoning: string,
-    toolCalls: Map<number, { id: string; name: string; arguments: string }>,
-  ): ContentBlock[] {
-    const content: ContentBlock[] = [];
-
-    if (reasoning) {
-      content.push({ type: 'thinking', thinking: reasoning });
-    }
-
-    if (text) {
-      content.push({ type: 'text', text });
-    }
-
-    for (const [, tc] of toolCalls) {
-      let input: any;
-      try { input = JSON.parse(tc.arguments); } catch { input = tc.arguments; }
-      content.push({ type: 'tool_use', id: tc.id, name: tc.name, input });
-    }
-
-    // If no content at all, add empty text to avoid empty content array
-    if (content.length === 0) {
-      content.push({ type: 'text', text: '' });
-    }
-
-    return content;
   }
 }
