@@ -216,12 +216,11 @@ interface MessageViewProps {
   streamingToolOutput?: string;
   runStatus?: string;
   showMetadata?: boolean;
-  systemPrompt?: string;
   onInspect?: (message: MessageRecord) => void;
   children?: React.ReactNode;
 }
 
-export function MessageView({ messages, streamingText, streamingThinking, streamingToolOutput, runStatus, showMetadata, systemPrompt, onInspect, children }: MessageViewProps) {
+export function MessageView({ messages, streamingText, streamingThinking, streamingToolOutput, runStatus, showMetadata, onInspect, children }: MessageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const toolOutputRef = useRef<HTMLPreElement>(null);
   const wasNearBottom = useRef(true);
@@ -268,17 +267,20 @@ export function MessageView({ messages, streamingText, streamingThinking, stream
 
   return (
     <div className="message-list" ref={containerRef} onScroll={handleScroll}>
-      {systemPrompt && (
-        <div className="message message--system">
-          <div className="message__header">
-            <span className="message__role">system</span>
-          </div>
-          <div className="message__body">
-            <SystemPromptBlock text={systemPrompt} />
-          </div>
-        </div>
-      )}
       {messages.map(msg => {
+        if (msg.role === 'system') {
+          const text = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+          return (
+            <div key={msg.id} className="message message--system">
+              <div className="message__header">
+                <span className="message__role">system</span>
+              </div>
+              <div className="message__body">
+                <SystemPromptBlock text={text} />
+              </div>
+            </div>
+          );
+        }
         const isOptimistic = msg.id.startsWith('_optimistic_');
         return (
         <div key={msg.id} className={`message message--${msg.role}${isOptimistic ? ' message--optimistic' : ''}`}>

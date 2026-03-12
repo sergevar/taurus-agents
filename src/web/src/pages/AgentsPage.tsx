@@ -570,7 +570,7 @@ export function AgentsPage() {
                   <RunControls run={selectedRun} onResume={handleResume} onStop={handleStopSelectedRun} />
                 )}
                 {selectedRun ? (
-                  <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} streamingToolOutput={streamingToolOutput} runStatus={selectedRun.status} showMetadata={showMetadata} systemPrompt={selectedAgent?.system_prompt} onInspect={setInspectMessage}>
+                  <MessageView messages={messages} streamingText={streamingText} streamingThinking={streamingThinking} streamingToolOutput={streamingToolOutput} runStatus={selectedRun.status} showMetadata={showMetadata} onInspect={setInspectMessage}>
                     <RunFooter
                       run={selectedRun}
                       messages={messages}

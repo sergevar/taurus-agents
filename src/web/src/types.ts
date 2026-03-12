@@ -56,7 +56,7 @@ export interface MessageRecord {
   id: string;
   run_id: string;
   seq: number;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: unknown;
   stop_reason: string | null;
   input_tokens: number;

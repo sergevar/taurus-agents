@@ -332,21 +332,8 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
   const toolNames = [...new Set([...baseTools, ...ALWAYS_ON_TOOLS])];
   const fileTracker = registerTools(tools, toolNames, shell);
 
-  // 4. Build ChatML — inject children list into system prompt if any exist
-  // On resume, use run.created_at so the system prompt stays identical to the original run.
-  // This preserves prompt cache prefixes (system changes invalidate the messages cache).
-  let systemPrompt = expandSystemPrompt(agent.system_prompt, resume ? run.created_at : undefined);
-  const children = await Agent.findAll({ where: { parent_agent_id: agentId } });
-  if (children.length > 0) {
-    const childList = children.map(c => {
-      const firstLine = c.system_prompt.split('\n')[0].slice(0, 120);
-      return `- ${c.name}: ${firstLine}`;
-    }).join('\n');
-    systemPrompt += `\n\n## Your Team\nYou have ${children.length} child agent(s) you can delegate to using the Delegate tool:\n${childList}`;
-  }
-
+  // 4. Build ChatML — system prompt comes from DB on resume, freshly rendered on new runs
   const chatml = new ChatML();
-  chatml.setSystem(systemPrompt);
 
   // Helper: build user content from text + optional images
   function buildUserContent(text: string, imgs?: IpcImage[]): string | ContentBlock[] {
@@ -363,12 +350,21 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
   }
 
   if (resume) {
-    // Restore conversation from this run's persisted messages
+    // Restore conversation from this run's persisted messages.
+    // The system prompt is loaded from the persisted 'system' message — exact match to original run.
     const history = await loadRunHistory(runId);
-    if (history.length > 0) {
-      const chatHistory = history.map(m => m.toChatMLMessage());
+    const systemMsg = history.find(m => m.role === 'system');
+    if (systemMsg) {
+      chatml.setSystem(typeof systemMsg.content === 'string' ? systemMsg.content : JSON.stringify(systemMsg.content));
+    } else {
+      // Fallback for runs created before system message persistence
+      chatml.setSystem(expandSystemPrompt(agent.system_prompt));
+    }
+    const conversationHistory = history.filter(m => m.role !== 'system');
+    if (conversationHistory.length > 0) {
+      const chatHistory = conversationHistory.map(m => m.toChatMLMessage());
       patchIncompleteToolCalls(chatHistory);
-      hydrateTrackerFromMessages(fileTracker, history);
+      hydrateTrackerFromMessages(fileTracker, conversationHistory);
       for (const msg of chatHistory) {
         if (msg.role === 'user') chatml.addUser(msg.content);
         else chatml.addAssistant(msg.content);
@@ -407,7 +403,19 @@ async function runAgent(agentId: string, runId: string, trigger: TriggerType, in
 
     log('info', 'run.resumed', `Loaded ${history.length} messages, resuming run`);
   } else {
-    // Fresh run
+    // Fresh run — render system prompt, inject children list, persist it
+    let systemPrompt = expandSystemPrompt(agent.system_prompt);
+    const children = await Agent.findAll({ where: { parent_agent_id: agentId } });
+    if (children.length > 0) {
+      const childList = children.map(c => {
+        const firstLine = c.system_prompt.split('\n')[0].slice(0, 120);
+        return `- ${c.name}: ${firstLine}`;
+      }).join('\n');
+      systemPrompt += `\n\n## Your Team\nYou have ${children.length} child agent(s) you can delegate to using the Delegate tool:\n${childList}`;
+    }
+    chatml.setSystem(systemPrompt);
+    await persistMessage(run, 'system', systemPrompt);
+
     const content = buildUserContent(buildInputMessage(trigger, input), images);
     chatml.addUser(content);
     await persistMessage(run, 'user', content);
