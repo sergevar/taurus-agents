@@ -28,7 +28,7 @@ Internal reference for contributors. For the public overview, see the root [READ
 - **Daemon** (parent process): manages agent lifecycle, coordinates via IPC, broadcasts SSE events.
 - **Workers** (forked child processes): one per running agent. Owns the agent loop, persists messages to SQLite, talks to the LLM.
 - **Docker containers**: one per agent. Persistent shell session across commands. Tools execute inside the container.
-- **SQLite**: stores agents, runs, messages, logs, folders. Located at `data/taurus.db`.
+- **SQLite**: stores agents, runs, messages, logs, folders. Located at `data/taurus.sqlite`.
 
 ## Concepts
 
@@ -124,7 +124,7 @@ src/
 docker/
   Dockerfile            # Custom agent container image (taurus-base)
 data/
-  taurus.db             # SQLite database (auto-created)
+  taurus.sqlite          # SQLite database (auto-created)
 doc/
   api.md                # API reference
   todo.txt              # Development backlog

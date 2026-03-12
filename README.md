@@ -64,7 +64,7 @@ Open `http://localhost:7777` in your browser.
 - **Daemon** — parent process managing agent lifecycle, IPC coordination, SSE broadcasting
 - **Workers** — one forked child process per running agent, owns the TAOR loop (Think-Act-Observe-Repeat), persists messages to SQLite
 - **Docker containers** — one per agent, persistent shell session across commands, tools execute inside
-- **SQLite** — stores agents, runs, messages, logs, folders at `data/taurus.db`
+- **SQLite** — stores agents, runs, messages, logs, folders at `data/taurus.sqlite`
 
 ## Multi-provider models
 
@@ -207,7 +207,7 @@ prompts/                # Reusable prompt fragments for {{include:...}}
 docker/
   Dockerfile            # Custom agent container image
 data/
-  taurus.db             # SQLite database (auto-created)
+  taurus.sqlite          # SQLite database (auto-created)
 doc/
   api.md                # API reference
 ```
