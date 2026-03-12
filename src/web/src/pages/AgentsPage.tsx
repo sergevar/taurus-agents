@@ -101,6 +101,19 @@ export function AgentsPage() {
   }, [agentId, runId]);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
+  // ── Model context windows (fetched once) ──
+
+  const modelContextRef = useRef<Record<string, number>>({});
+  useEffect(() => {
+    api.listModels().then(grouped => {
+      const map: Record<string, number> = {};
+      for (const models of Object.values(grouped)) {
+        for (const m of models) map[m.id] = m.contextTokens;
+      }
+      modelContextRef.current = map;
+    }).catch(() => {});
+  }, []);
+
   // ── Load agents ──
 
   const loadAgents = useCallback(async () => {
@@ -574,6 +587,7 @@ export function AgentsPage() {
                     <RunFooter
                       run={selectedRun}
                       messages={messages}
+                      contextLimit={modelContextRef.current[selectedRun.model] ?? 0}
                       showMetadata={showMetadata}
                       onToggleMetadata={() => setShowMetadata(v => !v)}
                     />

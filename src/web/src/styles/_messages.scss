@@ -704,6 +704,24 @@
   50% { opacity: 0.5; }
 }
 
+// ── Context Ring ──
+
+.context-ring {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: default;
+  white-space: pre-line; // tooltip line breaks
+
+  svg { display: block; }
+
+  &__label {
+    font-size: 10px;
+    color: rgba($text2, 0.5);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 // ── Usage Summary (segmented pill) ──
 
 .usage-summary {
@@ -734,6 +752,23 @@
     border-right: 1px solid rgba($border, 0.6);
 
     &:last-child { border-right: none; }
+
+    &--ring {
+      display: inline-flex;
+      align-items: center;
+      // Pin ring's left edge to the pill's left edge, then scale from center
+      // so the ring curve nests concentrically inside the pill's border-radius
+      padding: 0 5px 0 0;
+
+      .context-ring {
+        gap: 5px; // match right padding for consistent spacing
+      }
+
+      .context-ring svg {
+        transform: scale(0.82);
+        transform-origin: center;
+      }
+    }
 
     &--cache {
       color: rgba($amber, 0.55);

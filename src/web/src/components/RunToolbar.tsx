@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { PlayCircle, Square, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { StatusDot } from './StatusDot';
-import { UsageSummary } from './UsageSummary';
+import { ContextRing } from './ContextRing';
+import { fmtTokens, fmtCost } from '../utils/format';
 import type { Run, MessageRecord } from '../types';
 
 // ── Floating run controls (Running / Stop / Resume) ──
@@ -34,24 +35,53 @@ export function RunControls({ run, onResume, onStop }: RunControlsProps) {
   );
 }
 
-// ── Run footer (usage summary + dropup menu, inside scroll area) ──
+// ── Run footer (usage summary + context ring + dropup menu) ──
 
 interface RunFooterProps {
   run: Run;
   messages: MessageRecord[];
+  contextLimit: number;
   showMetadata: boolean;
   onToggleMetadata: () => void;
 }
 
-export function RunFooter({ run, messages, showMetadata, onToggleMetadata }: RunFooterProps) {
+/**
+ * Estimate current context window usage from the last assistant message.
+ *
+ * Context used = inputTokens + visibleOutputTokens of the last turn.
+ * The input_tokens already includes the full conversation history sent to the LLM.
+ * The output becomes part of history for the next turn, minus thinking/reasoning
+ * tokens which are discarded between turns.
+ *
+ * Token semantics by provider:
+ *   Anthropic:  outputTokens = visible only (thinking excluded) → no subtraction needed
+ *   OpenAI:     outputTokens = total including reasoning → subtract reasoningTokens
+ *   OpenRouter:  same as OpenAI
+ *
+ * Unified: contextUsed = input + output - (reasoningTokens ?? 0)
+ */
+function estimateContextUsed(messages: MessageRecord[]): number {
+  // Find the last assistant message (has token counts)
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role === 'assistant' && m.input_tokens > 0) {
+      const visibleOutput = m.output_tokens - (m.usage?.reasoningTokens ?? 0);
+      return m.input_tokens + visibleOutput;
+    }
+  }
+  return 0;
+}
+
+export function RunFooter({ run, messages, contextLimit, showMetadata, onToggleMetadata }: RunFooterProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const totalIn = messages.reduce((s, m) => s + m.input_tokens, 0);
-  const totalOut = messages.reduce((s, m) => s + m.output_tokens, 0);
   const totalCost = messages.reduce((s, m) => s + (m.cost ?? 0), 0);
+  const totalIn = messages.reduce((s, m) => s + m.input_tokens, 0);
   const totalCacheRead = messages.reduce((s, m) => s + (m.usage?.cacheRead ?? 0), 0);
-  const totalCacheWrite = messages.reduce((s, m) => s + (m.usage?.cacheWrite ?? 0), 0);
+  const cachePct = totalIn > 0 && totalCacheRead > 0 ? Math.round((totalCacheRead / totalIn) * 100) : 0;
+
+  const contextUsed = estimateContextUsed(messages);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -69,13 +99,30 @@ export function RunFooter({ run, messages, showMetadata, onToggleMetadata }: Run
         <button className="run-footer__menu-trigger" tabIndex={-1}><ChevronDown size={12} /></button>
       </div>
 
-      {/* Usage summary */}
+      {/* Context + cost + cache pill */}
       {totalIn > 0 && (
-        <UsageSummary
-          label="Total"
-          usage={{ input: totalIn, output: totalOut, cacheRead: totalCacheRead || undefined, cacheWrite: totalCacheWrite || undefined }}
-          cost={totalCost || undefined}
-        />
+        <div className="usage-summary">
+          {contextLimit > 0 && contextUsed > 0 && (
+            <span className="usage-summary__item usage-summary__item--ring">
+              <ContextRing used={contextUsed} limit={contextLimit} />
+            </span>
+          )}
+          {contextLimit > 0 && contextUsed > 0 && (
+            <span className="usage-summary__item">
+              {fmtTokens(contextUsed)} / {fmtTokens(contextLimit)}
+            </span>
+          )}
+          {totalCost > 0 && (
+            <span className="usage-summary__item usage-summary__item--cost">
+              {fmtCost(totalCost)}
+            </span>
+          )}
+          {cachePct > 0 && (
+            <span className="usage-summary__item usage-summary__item--cache">
+              {cachePct}% cached
+            </span>
+          )}
+        </div>
       )}
 
       {/* Dropup chevron */}
