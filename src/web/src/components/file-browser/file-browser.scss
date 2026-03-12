@@ -21,26 +21,102 @@
   }
 
   &__tree-header {
-    padding: 4px 6px;
+    position: relative;
+    display: flex;
     border-bottom: 1px solid var(--c-border);
     flex-shrink: 0;
   }
 
   &__path-input {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: var(--c-bg);
-    border: 1px solid var(--c-border);
-    border-radius: 4px;
-    padding: 3px 8px;
+    border: none;
+    padding: 6px 24px 6px 10px;
     font-size: 11px;
     font-family: $font-mono;
     color: var(--c-muted);
     outline: none;
 
     &:focus {
-      border-color: var(--c-accent);
       color: var(--c-text);
     }
+  }
+
+  &__places-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: var(--c-muted);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.12s ease;
+
+    &:hover {
+      opacity: 1;
+      color: var(--c-text);
+      background: var(--c-hover);
+    }
+  }
+
+  &__places-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #161b22;
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    min-width: 180px;
+    overflow: hidden;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #161b22;
+      border: none;
+      color: var(--c-text);
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.1s ease;
+
+      &:hover {
+        background-color: #21262d;
+      }
+
+      &.active {
+        background-color: rgba(188, 140, 255, 0.15);
+        color: var(--c-purple);
+
+        .fb__places-path {
+          color: var(--c-purple);
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+
+  &__places-label {
+    flex: 1;
+  }
+
+  &__places-path {
+    font-family: $font-mono;
+    font-size: 10px;
+    color: var(--c-muted);
   }
 
   // ── Right pane (editor) ──
