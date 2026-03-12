@@ -79,7 +79,7 @@ export function AgentsPage() {
   // so only mount them once the user actually clicks their tab.
   const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(new Set(['runs']));
   const mountedForAgent = useRef<string | null>(null);
-  const { toasts, showToast, dismiss } = useToast();
+  const { toasts, showToast, dismiss, pause, resume } = useToast();
   const { theme, cycleTheme } = useTheme();
   const conn = useConnectionStatus();
 
@@ -614,7 +614,7 @@ export function AgentsPage() {
         )}
       </div>
 
-      <ToastContainer toasts={toasts} onDismiss={dismiss} />
+      <ToastContainer toasts={toasts} onDismiss={dismiss} onPause={pause} onResume={resume} />
 
       {showCreateModal && (
         <CreateAgentModal

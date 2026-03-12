@@ -432,18 +432,31 @@
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 14px;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
   opacity: 0;
   transform: translateX(20px);
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s, transform 0.2s, background 0.15s;
   word-break: break-word;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
 
   &--visible {
     opacity: 1;
     transform: translateX(0);
+  }
+
+  &--copied {
+    background: var(--c-status-success) !important;
+    border-color: var(--c-green) !important;
+    color: var(--c-green) !important;
   }
 
   &--error {
@@ -456,6 +469,28 @@
     background: var(--c-bg3);
     border: 1px solid var(--c-border);
     color: var(--c-text);
+  }
+
+  &__message {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
