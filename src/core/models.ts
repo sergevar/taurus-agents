@@ -68,8 +68,6 @@ const OPUS_46: ModelPricing = { input: 5, output: 25, cacheWrite: 6.25, cacheRea
 const OPUS_4: ModelPricing = { input: 15, output: 75, cacheWrite: 18.75, cacheRead: 1.50 };
 const SONNET: ModelPricing = { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.30 };
 const HAIKU_45: ModelPricing = { input: 1, output: 5, cacheWrite: 1.25, cacheRead: 0.10 };
-const HAIKU_35: ModelPricing = { input: 0.80, output: 4, cacheWrite: 1, cacheRead: 0.08 };
-
 // OpenAI
 const GPT4O: ModelPricing = { input: 2.50, output: 10, cacheWrite: 2.50, cacheRead: 1.25 };
 const GPT4O_MINI: ModelPricing = { input: 0.15, output: 0.60, cacheWrite: 0.15, cacheRead: 0.075 };
@@ -117,19 +115,14 @@ export const MODEL_REGISTRY: ModelDef[] = [
     contextTokens: 200_000, maxOutputTokens: 64_000, pricing: HAIKU_45,
   },
   {
-    id: 'anthropic/claude-3-5-haiku-20241022',
-    title: 'Claude 3.5 Haiku', description: 'Fast model with strong capabilities.',
-    contextTokens: 200_000, maxOutputTokens: 8_192, limitOutputTokens: 8_192, pricing: HAIKU_35,
-  },
-  {
     id: 'anthropic/claude-opus-4-1-20250805',
     title: 'Claude Opus 4.1', description: 'Enhanced agentic tasks, reasoning, and coding.',
-    contextTokens: 200_000, maxOutputTokens: 32_000, pricing: OPUS_4,
+    contextTokens: 200_000, maxOutputTokens: 64_000, pricing: OPUS_4,
   },
   {
     id: 'anthropic/claude-opus-4-20250514',
     title: 'Claude Opus 4', description: 'Complex reasoning and advanced coding.',
-    contextTokens: 200_000, maxOutputTokens: 32_000, pricing: OPUS_4,
+    contextTokens: 200_000, maxOutputTokens: 64_000, pricing: OPUS_4,
   },
 
   // ── OpenAI ──
@@ -168,23 +161,49 @@ export const MODEL_REGISTRY: ModelDef[] = [
   {
     id: 'openai/gpt-5-nano',
     title: 'GPT-5 Nano', description: 'Cheapest reasoning model.',
-    contextTokens: 200_000, maxOutputTokens: 128_000, pricing: GPT5_NANO,
+    contextTokens: 400_000, maxOutputTokens: 128_000, pricing: GPT5_NANO,
     // context lengths numbers confirmed: https://openai.com/gpt-5/
   },
   {
     id: 'openai/gpt-5.1',
     title: 'GPT-5.1', description: 'Improved GPT-5 with better coding.',
-    contextTokens: 1_048_576, maxOutputTokens: 32_768, pricing: GPT5_1,
+    contextTokens: 400_000, maxOutputTokens: 128_000, pricing: GPT5_1,
   },
   {
     id: 'openai/gpt-5.2',
     title: 'GPT-5.2', description: 'Enhanced reasoning and tool use.',
-    contextTokens: 1_048_576, maxOutputTokens: 32_768, pricing: GPT5_2,
+    contextTokens: 400_000, maxOutputTokens: 128_000, pricing: GPT5_2,
   },
   {
     id: 'openai/gpt-5.4',
     title: 'GPT-5.4', description: 'Most capable OpenAI model, 1M context.',
-    contextTokens: 1_048_576, maxOutputTokens: 32_768, pricing: GPT5_4,
+    contextTokens: 1_050_000, maxOutputTokens: 128_000, pricing: GPT5_4,
+  },
+
+  // ── Groq (fast inference, OpenAI-compatible API) ──
+  {
+    id: 'groq/llama-3.1-8b-instant',
+    title: 'Llama 3.1 8B', description: 'Ultra-fast small model, 131K context.',
+    contextTokens: 131_072, maxOutputTokens: 131_072,
+    pricing: { input: 0.05, output: 0.08, cacheWrite: 0.05, cacheRead: 0.05 },
+  },
+  {
+    id: 'groq/llama-3.3-70b-versatile',
+    title: 'Llama 3.3 70B', description: 'Fast and versatile, 131K context.',
+    contextTokens: 131_072, maxOutputTokens: 32_768,
+    pricing: { input: 0.59, output: 0.79, cacheWrite: 0.59, cacheRead: 0.59 },
+  },
+  {
+    id: 'groq/openai/gpt-oss-120b',
+    title: 'GPT OSS 120B', description: 'Large open-source GPT, 131K context.',
+    contextTokens: 131_072, maxOutputTokens: 65_536,
+    pricing: { input: 0.15, output: 0.60, cacheWrite: 0.15, cacheRead: 0.15 },
+  },
+  {
+    id: 'groq/openai/gpt-oss-20b',
+    title: 'GPT OSS 20B', description: 'Fast open-source GPT, 131K context.',
+    contextTokens: 131_072, maxOutputTokens: 65_536,
+    pricing: { input: 0.075, output: 0.30, cacheWrite: 0.075, cacheRead: 0.075 },
   },
 
   // ── OpenRouter (pricing varies — leave undefined, computed by OR) ──
@@ -201,12 +220,12 @@ export const MODEL_REGISTRY: ModelDef[] = [
   {
     id: 'openrouter/meta-llama/llama-4-scout',
     title: 'Llama 4 Scout', description: '17B active, 10M context.',
-    contextTokens: 10_000_000, maxOutputTokens: 65_536,
+    contextTokens: 327_680, maxOutputTokens: 65_536,
   },
   {
     id: 'openrouter/meta-llama/llama-4-maverick',
     title: 'Llama 4 Maverick', description: '400B MoE, 512K context.',
-    contextTokens: 512_000, maxOutputTokens: 65_536,
+    contextTokens: 1_048_576, maxOutputTokens: 65_536,
   },
   {
     id: 'openrouter/google/gemini-2.5-pro',

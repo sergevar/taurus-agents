@@ -49,6 +49,16 @@ export function resolveProvider(model: string): InferenceProvider {
     case 'anthropic':
       return new AnthropicProvider();
 
+    case 'groq': {
+      const apiKey = process.env.GROQ_API_KEY;
+      if (!apiKey) throw new Error('GROQ_API_KEY is required for groq/ models');
+      return new OpenAICompatProvider({
+        apiKey,
+        baseURL: 'https://api.groq.com/openai/v1',
+        name: 'groq',
+      });
+    }
+
     case 'custom': {
       const apiKey = process.env.CUSTOM_PROVIDER_API_KEY;
       const baseURL = process.env.CUSTOM_PROVIDER_BASE_URL;
@@ -63,7 +73,7 @@ export function resolveProvider(model: string): InferenceProvider {
 
     default:
       throw new Error(
-        `Unknown provider "${backend}" in model "${model}". Supported: anthropic, openai, openrouter, custom.`,
+        `Unknown provider "${backend}" in model "${model}". Supported: anthropic, openai, openrouter, groq, custom.`,
       );
   }
 }
