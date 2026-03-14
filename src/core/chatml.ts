@@ -112,6 +112,7 @@ export class ChatML {
       } else {
         for (const block of msg.content) {
           if (block.type === 'text') chars += block.text.length;
+          else if (block.type === 'compaction') chars += (block.content?.length ?? 0);
           else if (block.type === 'tool_use') chars += JSON.stringify(block.input).length;
           else if (block.type === 'tool_result') {
             if (typeof block.content === 'string') {

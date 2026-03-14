@@ -2,6 +2,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { InferenceRequest, StreamEvent, ChatMessage, ContentBlock } from '../../core/types.js';
 import { InferenceProvider } from './base.js';
 import { DEFAULT_MODEL } from '../../core/defaults.js';
+import { getModel } from '../../core/models.js';
+
+// Models that support server-side context management betas.
+const COMPACTION_MODELS = new Set(['claude-opus-4-6', 'claude-sonnet-4-6']);
+const COMPACTION_BETA = 'compact-2026-01-12';
+const CONTEXT_EDIT_BETA = 'context-management-2025-06-27';
 
 export class AnthropicProvider extends InferenceProvider {
   readonly name = 'anthropic';
@@ -16,8 +22,11 @@ export class AnthropicProvider extends InferenceProvider {
 
   async *stream(params: InferenceRequest): AsyncGenerator<StreamEvent> {
     const model = params.model || DEFAULT_MODEL;
+    const modelDef = getModel(model);
+    const useContextMgmt = COMPACTION_MODELS.has(model);
 
-    const response = this.client.messages.stream({
+    // Base request params shared by both regular and beta API
+    const baseParams: any = {
       model,
       system: params.system,
       messages: params.messages as Anthropic.MessageParam[],
@@ -29,7 +38,41 @@ export class AnthropicProvider extends InferenceProvider {
       // cacheable block and moves it forward as the conversation grows.
       // Cache read = 10% of input price; write = 1.25x. Pays for itself after 1 hit.
       cache_control: { type: 'ephemeral' },
-    });
+    };
+
+    let response: any;
+
+    if (useContextMgmt && modelDef) {
+      // Server-side context management (two separate betas):
+      //   - compact: summarize old messages when approaching context limit
+      //   - clear_thinking: drop thinking blocks from older turns (signatures expire anyway)
+      //   - clear_tool_uses: trim old tool results to save context space
+      const triggerTokens = Math.round(modelDef.contextTokens * 0.75);
+
+      response = this.client.beta.messages.stream({
+        ...baseParams,
+        betas: [COMPACTION_BETA, CONTEXT_EDIT_BETA],
+        context_management: {
+          edits: [
+            {
+              type: 'clear_thinking_20251015' as const,
+              keep: { type: 'thinking_turns' as const, value: 2 },
+            },
+            {
+              type: 'clear_tool_uses_20250919' as const,
+              keep: { type: 'tool_uses' as const, value: 10 },
+              trigger: { type: 'input_tokens' as const, value: Math.round(triggerTokens * 0.6) },
+            },
+            {
+              type: 'compact_20260112' as const,
+              trigger: { type: 'input_tokens' as const, value: triggerTokens },
+            },
+          ],
+        },
+      });
+    } else {
+      response = this.client.messages.stream(baseParams);
+    }
 
     // Track tool state for streaming tool_use_end events
     let currentToolId = '';
@@ -84,6 +127,7 @@ export class AnthropicProvider extends InferenceProvider {
         case 'thinking': return { type: 'thinking', thinking: block.thinking, signature: block.signature };
         case 'text': return { type: 'text', text: block.text };
         case 'tool_use': return { type: 'tool_use', id: block.id, name: block.name, input: block.input };
+        case 'compaction': return { type: 'compaction', content: block.content };
         default: return block;
       }
     });

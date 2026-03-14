@@ -5,7 +5,8 @@ export type TextBlock = { type: 'text'; text: string };
 export type ImageBlock = { type: 'image'; source: { type: 'base64'; media_type: string; data: string } };
 export type ToolUseBlock = { type: 'tool_use'; id: string; name: string; input: any };
 export type ToolResultBlock = { type: 'tool_result'; tool_use_id: string; content: string | (TextBlock | ImageBlock)[]; is_error?: boolean };
-export type ContentBlock = ThinkingBlock | TextBlock | ImageBlock | ToolUseBlock | ToolResultBlock;
+export type CompactionBlock = { type: 'compaction'; content: string };
+export type ContentBlock = ThinkingBlock | TextBlock | ImageBlock | ToolUseBlock | ToolResultBlock | CompactionBlock;
 
 export type ChatMessage = {
   role: 'user' | 'assistant';
