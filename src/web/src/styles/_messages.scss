@@ -14,35 +14,35 @@
   padding: 2px 16px;
   font-family: $font-mono;
 
-  &:hover { background: $bg2; }
+  &:hover { background: var(--c-bg2); }
 
   &__ts {
-    color: $text2;
+    color: var(--c-muted);
     margin-right: 8px;
   }
 
   &__event {
-    color: $purple;
+    color: var(--c-purple);
     margin-right: 8px;
     min-width: 120px;
     display: inline-block;
   }
 
-  &.warn  { color: $yellow; }
-  &.error { color: $red; }
-  &.debug { color: $text2; }
+  &.warn  { color: var(--c-yellow); }
+  &.error { color: var(--c-red); }
+  &.debug { color: var(--c-muted); }
 }
 
 // ── Streaming Text ──
 
 .llm-stream {
   padding: 6px 16px;
-  color: $text;
+  color: var(--c-text);
   white-space: pre-wrap;
   word-break: break-word;
   border-left: 2px solid var(--c-marker);
   margin: 4px 16px;
-  background: $bg2;
+  background: var(--c-bg2);
   border-radius: 0 4px 4px 0;
   font-family: $font-sans;
   font-size: 13px;
@@ -55,12 +55,12 @@
   flex: 1;
   overflow-y: auto;
   padding: 8px 0 0;
-  background: $bg;
+  background: var(--c-bg);
 
   &__footer {
     padding: 12px 16px;
     font-size: 11px;
-    color: $text2;
+    color: var(--c-muted);
     font-family: $font-mono;
     text-align: center;
     opacity: 0.5;
@@ -69,14 +69,14 @@
 
 .message {
   padding: 8px 16px;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--c-border);
 
   &--user {
-    background: $bg;
+    background: var(--c-bg);
   }
 
   &--assistant {
-    background: $bg2;
+    background: var(--c-bg2);
   }
 
   &__header {
@@ -94,15 +94,15 @@
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    color: $accent;
+    color: var(--c-accent);
 
-    .message--user & { color: $green; }
+    .message--user & { color: var(--c-green); }
     .message--system & { color: #7b8fa3; }
   }
 
   &__meta {
     font-size: 10px;
-    color: $text2;
+    color: var(--c-muted);
     font-family: $font-mono;
     display: flex;
     align-items: center;
@@ -115,33 +115,33 @@
     display: inline-block;
     padding: 1px 6px;
     border-radius: 8px;
-    background: $bg3;
+    background: var(--c-bg3);
     font-size: 10px;
-    color: $text2;
+    color: var(--c-muted);
 
     &--stop {
-      background: rgba($purple, 0.15);
-      color: $purple;
+      background: color-mix(in srgb, var(--c-purple) 15%, transparent);
+      color: var(--c-purple);
       font-weight: 500;
     }
 
     &--streaming {
-      background: rgba($accent, 0.15);
-      color: $accent;
+      background: color-mix(in srgb, var(--c-accent) 15%, transparent);
+      color: var(--c-accent);
       font-weight: 500;
       animation: pulse-streaming 1.5s ease-in-out infinite;
     }
 
     &--sending {
-      background: rgba($amber, 0.15);
-      color: $amber;
+      background: color-mix(in srgb, var(--c-amber) 15%, transparent);
+      color: var(--c-amber);
       font-weight: 500;
       animation: pulse-streaming 1.5s ease-in-out infinite;
     }
 
     &--cost {
-      background: rgba($green, 0.12);
-      color: $green;
+      background: color-mix(in srgb, var(--c-green) 12%, transparent);
+      color: var(--c-green);
       font-weight: 500;
     }
   }
@@ -184,13 +184,13 @@
   h4, h5, h6 { font-size: 1em; }
 
   a {
-    color: $accent;
+    color: var(--c-accent);
     text-decoration: none;
     &:hover { text-decoration: underline; }
   }
 
   :not(pre) > code {
-    background: $bg3;
+    background: var(--c-bg3);
     padding: 0.15em 0.4em;
     border-radius: 4px;
     font-family: $font-mono;
@@ -199,8 +199,8 @@
 
   pre {
     position: relative;
-    background: $bg;
-    border: 1px solid $border;
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
     border-radius: 6px;
     padding: 12px 16px;
     margin: 0.75em 0;
@@ -223,9 +223,9 @@
       width: 26px;
       height: 26px;
       border-radius: 4px;
-      border: 1px solid $border;
-      background: $bg2;
-      color: $text2;
+      border: 1px solid var(--c-border);
+      background: var(--c-bg2);
+      color: var(--c-muted);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -234,7 +234,7 @@
       opacity: 0;
       transition: opacity 0.15s, color 0.1s;
 
-      &:hover { color: $text; }
+      &:hover { color: var(--c-text); }
     }
 
     &:hover .code-copy { opacity: 1; }
@@ -243,8 +243,8 @@
   blockquote {
     margin: 0.75em 0;
     padding: 0.25em 1em;
-    border-left: 3px solid $border;
-    color: $text2;
+    border-left: 3px solid var(--c-border);
+    color: var(--c-muted);
 
     > :first-child { margin-top: 0; }
     > :last-child { margin-bottom: 0; }
@@ -280,23 +280,23 @@
   }
 
   th, td {
-    border: 1px solid $border;
+    border: 1px solid var(--c-border);
     padding: 6px 12px;
     text-align: left;
   }
 
   th {
-    background: $bg3;
+    background: var(--c-bg3);
     font-weight: 600;
   }
 
   tr:nth-child(even) td {
-    background: rgba($bg3, 0.3);
+    background: color-mix(in srgb, var(--c-bg3) 30%, transparent);
   }
 
   hr {
     border: none;
-    border-top: 1px solid $border;
+    border-top: 1px solid var(--c-border);
     margin: 1em 0;
   }
 
@@ -325,7 +325,7 @@
     cursor: pointer;
     user-select: none;
     font-size: 12px;
-    color: $text2;
+    color: var(--c-muted);
     transition: background 0.1s;
 
     &:hover { background: rgba(#7b8fa3, 0.1); }
@@ -333,7 +333,7 @@
 
   &__toggle {
     font-size: 9px;
-    color: $text2;
+    color: var(--c-muted);
     width: 10px;
     flex-shrink: 0;
   }
@@ -345,7 +345,7 @@
   }
 
   &__preview {
-    color: $text2;
+    color: var(--c-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -358,7 +358,7 @@
     border-top: 1px solid rgba(#7b8fa3, 0.15);
     font-size: 12px;
     line-height: 1.5;
-    color: $text2;
+    color: var(--c-muted);
     max-height: 500px;
     overflow-y: auto;
   }
@@ -369,8 +369,8 @@
 .thinking-block {
   margin: 4px 0;
   border-radius: 4px;
-  border: 1px solid rgba($amber, 0.2);
-  background: rgba($amber, 0.04);
+  border: 1px solid color-mix(in srgb, var(--c-amber) 20%, transparent);
+  background: color-mix(in srgb, var(--c-amber) 4%, transparent);
   overflow: hidden;
 
   &__header {
@@ -381,27 +381,27 @@
     cursor: pointer;
     user-select: none;
     font-size: 12px;
-    color: $text2;
+    color: var(--c-muted);
     transition: background 0.1s;
 
-    &:hover { background: rgba($amber, 0.08); }
+    &:hover { background: color-mix(in srgb, var(--c-amber) 8%, transparent); }
   }
 
   &__toggle {
     font-size: 9px;
-    color: $text2;
+    color: var(--c-muted);
     width: 10px;
     flex-shrink: 0;
   }
 
   &__label {
-    color: $amber;
+    color: var(--c-amber);
     font-weight: 500;
     flex-shrink: 0;
   }
 
   &__preview {
-    color: $text2;
+    color: var(--c-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -411,10 +411,10 @@
 
   &__content {
     padding: 8px 10px;
-    border-top: 1px solid rgba($amber, 0.1);
+    border-top: 1px solid color-mix(in srgb, var(--c-amber) 10%, transparent);
     font-size: 12px;
     line-height: 1.5;
-    color: $text2;
+    color: var(--c-muted);
     max-height: 400px;
     overflow-y: auto;
   }
@@ -437,7 +437,7 @@
   }
 
   &__key {
-    color: $accent;
+    color: var(--c-accent);
     white-space: nowrap;
     padding-right: 10px !important;
     width: 1%;
@@ -445,20 +445,20 @@
 
     &::after {
       content: ':';
-      color: $text2;
+      color: var(--c-muted);
       margin-left: 2px;
     }
   }
 
   &__val {
-    color: $text;
+    color: var(--c-text);
     word-break: break-word;
   }
 
-  &__str    { color: $green; }
-  &__num    { color: $yellow; }
-  &__bool   { color: $yellow; }
-  &__null   { color: $text2; font-style: italic; }
+  &__str    { color: var(--c-green); }
+  &__num    { color: var(--c-yellow); }
+  &__bool   { color: var(--c-yellow); }
+  &__null   { color: var(--c-muted); font-style: italic; }
 
   &__pre {
     margin: 0;
@@ -472,13 +472,13 @@
   }
 
   &__inline-array {
-    color: $text;
+    color: var(--c-text);
   }
 }
 
 .msg-tool-use {
   margin: 8px 0 4px;
-  border: 1px solid $border;
+  border: 1px solid var(--c-border);
   border-radius: 4px;
   overflow: hidden;
 
@@ -487,16 +487,16 @@
     align-items: center;
     gap: 6px;
     padding: 4px 8px;
-    background: $bg3;
+    background: var(--c-bg3);
     font-size: 12px;
     font-weight: 500;
-    color: $purple;
+    color: var(--c-purple);
   }
 
   &__desc {
     font-weight: 400;
     font-size: 10px;
-    color: $text2;
+    color: var(--c-muted);
     opacity: 0.5;
     margin-left: 6px;
     overflow: hidden;
@@ -506,7 +506,7 @@
 
   &__input {
     padding: 6px 8px;
-    background: $bg;
+    background: var(--c-bg);
     overflow-x: auto;
     max-height: 300px;
     overflow-y: auto;
@@ -514,12 +514,12 @@
 
   &__cmd {
     padding: 6px 8px;
-    background: $bg;
+    background: var(--c-bg);
     font-family: $font-mono;
     font-size: 12px;
     line-height: 1.5;
     overflow-x: auto;
-    color: $green;
+    color: var(--c-green);
 
     code {
       white-space: pre-wrap;
@@ -541,7 +541,7 @@
   }
 
   &__file {
-    color: $accent;
+    color: var(--c-accent);
     font-weight: 500;
   }
 
@@ -549,8 +549,8 @@
     font-size: 10px;
     padding: 1px 5px;
     border-radius: 8px;
-    background: rgba($yellow, 0.15);
-    color: $yellow;
+    background: color-mix(in srgb, var(--c-yellow) 15%, transparent);
+    color: var(--c-yellow);
     font-weight: 500;
   }
 
@@ -567,31 +567,31 @@
     min-height: 1.5em;
 
     &--added {
-      background: rgba($green, 0.12);
-      color: $green;
+      background: color-mix(in srgb, var(--c-green) 12%, transparent);
+      color: var(--c-green);
     }
 
     &--removed {
-      background: rgba($red, 0.12);
-      color: $red;
+      background: color-mix(in srgb, var(--c-red) 12%, transparent);
+      color: var(--c-red);
     }
 
     &--context {
-      color: $text2;
+      color: var(--c-muted);
     }
   }
 
   &__lns {
     flex-shrink: 0;
     display: inline-flex;
-    border-right: 1px solid rgba($border, 0.5);
+    border-right: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
     margin-right: 4px;
     padding-right: 4px;
   }
 
   &__ln {
     text-align: right;
-    color: $text2;
+    color: var(--c-muted);
     opacity: 0.4;
     user-select: none;
     font-size: 11px;
@@ -617,21 +617,21 @@
 
 .msg-tool-result {
   margin: 8px 0 4px;
-  border: 1px solid $border;
+  border: 1px solid var(--c-border);
   border-radius: 4px;
   overflow: hidden;
 
-  &.error { border-color: $red; }
+  &.error { border-color: var(--c-red); }
 
   &__header {
     padding: 4px 8px;
-    background: $bg3;
+    background: var(--c-bg3);
     font-size: 12px;
-    color: $text2;
+    color: var(--c-muted);
   }
 
   &__error {
-    color: $red;
+    color: var(--c-red);
     font-weight: 600;
   }
 
@@ -639,7 +639,7 @@
     padding: 6px 8px;
     font-size: 12px;
     font-family: $font-mono;
-    background: $bg;
+    background: var(--c-bg);
     margin: 0;
     overflow-x: auto;
     max-height: 400px;
@@ -654,7 +654,7 @@
     object-fit: contain;
     border-radius: 4px;
     margin-top: 8px;
-    border: 1px solid $border;
+    border: 1px solid var(--c-border);
     cursor: pointer;
     transition: opacity 0.15s;
 
@@ -666,7 +666,7 @@
   padding: 6px 8px;
   font-size: 12px;
   font-family: $font-mono;
-  background: $bg;
+  background: var(--c-bg);
   border-radius: 4px;
   overflow-x: auto;
   margin: 4px 0;
@@ -717,7 +717,7 @@
 
   &__label {
     font-size: 10px;
-    color: rgba($text2, 0.5);
+    color: color-mix(in srgb, var(--c-muted) 50%, transparent);
     font-variant-numeric: tabular-nums;
   }
 }
@@ -728,28 +728,28 @@
   display: inline-flex;
   align-items: center;
   font-size: 10px;
-  color: rgba($text2, 0.6);
-  background: $bg3;
-  border: 1px solid rgba($border, 0.6);
+  color: color-mix(in srgb, var(--c-muted) 60%, transparent);
+  background: var(--c-bg3);
+  border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
   border-radius: 10px;
   overflow: hidden;
 
   &__label {
     padding: 0 8px;
     white-space: nowrap;
-    border-right: 1px solid rgba($border, 0.6);
+    border-right: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     line-height: 16px;
-    color: rgba($text2, 0.35);
+    color: color-mix(in srgb, var(--c-muted) 35%, transparent);
   }
 
   &__item {
     padding: 0 8px;
     white-space: nowrap;
     line-height: 16px;
-    border-right: 1px solid rgba($border, 0.6);
+    border-right: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
 
     &:last-child { border-right: none; }
 
@@ -771,11 +771,11 @@
     }
 
     &--cache {
-      color: rgba($amber, 0.55);
+      color: color-mix(in srgb, var(--c-amber) 55%, transparent);
     }
 
     &--cost {
-      color: rgba($green, 0.55);
+      color: color-mix(in srgb, var(--c-green) 55%, transparent);
       font-weight: 500;
     }
   }
@@ -786,7 +786,7 @@
 .message__footer {
   margin-top: 6px;
   padding-top: 4px;
-  border-top: 1px solid rgba($border, 0.4);
+  border-top: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
 }
 
 // ── Message Menu (hover dropdown) ──
@@ -802,7 +802,7 @@
     border: 1px solid transparent;
     border-radius: 3px;
     background: transparent;
-    color: $text2;
+    color: var(--c-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -811,9 +811,9 @@
     transition: all 0.12s ease;
 
     &:hover {
-      color: $text;
-      border-color: $border;
-      background: $bg3;
+      color: var(--c-text);
+      border-color: var(--c-border);
+      background: var(--c-bg3);
     }
   }
 
@@ -824,8 +824,8 @@
     z-index: 50;
     min-width: 180px;
     margin-top: 4px;
-    background: $bg2;
-    border: 1px solid $border;
+    background: var(--c-bg2);
+    border: 1px solid var(--c-border);
     border-radius: 6px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     padding: 4px 0;
@@ -840,18 +840,18 @@
     padding: 6px 12px;
     border: none;
     background: none;
-    color: $text;
+    color: var(--c-text);
     cursor: pointer;
     font-size: 12px;
     font-family: $font-sans;
     text-align: left;
 
-    &:hover { background: $bg3; }
+    &:hover { background: var(--c-bg3); }
   }
 
   &__sep {
     height: 1px;
-    background: $border;
+    background: var(--c-border);
     margin: 4px 0;
   }
 
@@ -866,7 +866,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 2px 0;
-    color: $text2;
+    color: var(--c-muted);
 
     &--sub {
       padding-left: 8px;
@@ -874,9 +874,9 @@
     }
 
     &--cost {
-      color: $green;
+      color: var(--c-green);
       font-weight: 500;
-      border-top: 1px solid $border;
+      border-top: 1px solid var(--c-border);
       margin-top: 2px;
       padding-top: 4px;
     }
