@@ -71,9 +71,26 @@ export function AgentForm({ initial, agents, onSubmit, onCancel, submitLabel = '
     }).catch(() => {});
   }, [initial]);
 
+  function validateMounts(): string | null {
+    for (let i = 0; i < mounts.length; i++) {
+      const m = mounts[i];
+      if (!m.host && !m.container) continue; // empty row — will be stripped
+      if (!m.host || !m.container) return `Bind mount row ${i + 1}: both host and container paths are required`;
+      if (!m.host.startsWith('/')) return `Bind mount row ${i + 1}: host path must start with /`;
+      if (!m.container.startsWith('/')) return `Bind mount row ${i + 1}: container path must start with /`;
+    }
+    return null;
+  }
+
   function handleSubmit() {
     if (!name || !systemPrompt) {
       alert('Name and system prompt are required');
+      return;
+    }
+
+    const mountError = validateMounts();
+    if (mountError) {
+      alert(mountError);
       return;
     }
 
@@ -158,11 +175,16 @@ export function AgentForm({ initial, agents, onSubmit, onCancel, submitLabel = '
               </tr>
             </thead>
             <tbody>
-              {mounts.map((m, i) => (
+              {mounts.map((m, i) => {
+                const hasContent = m.host || m.container;
+                const hostBad = hasContent && (!m.host || !m.host.startsWith('/'));
+                const containerBad = hasContent && (!m.container || !m.container.startsWith('/'));
+                return (
                 <tr key={i}>
                   <td>
                     <input
                       type="text"
+                      className={hostBad ? 'mount-invalid' : ''}
                       value={m.host}
                       onChange={e => { const next = [...mounts]; next[i] = { ...m, host: e.target.value }; setMounts(next); }}
                       placeholder="/host/path"
@@ -171,6 +193,7 @@ export function AgentForm({ initial, agents, onSubmit, onCancel, submitLabel = '
                   <td>
                     <input
                       type="text"
+                      className={containerBad ? 'mount-invalid' : ''}
                       value={m.container}
                       onChange={e => { const next = [...mounts]; next[i] = { ...m, container: e.target.value }; setMounts(next); }}
                       placeholder="/container/path"
@@ -191,7 +214,8 @@ export function AgentForm({ initial, agents, onSubmit, onCancel, submitLabel = '
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         )}

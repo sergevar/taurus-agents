@@ -252,6 +252,11 @@
       height: 14px;
     }
   }
+
+  .mount-invalid {
+    background: color-mix(in srgb, var(--c-red) 8%, transparent) !important;
+    box-shadow: inset 2px 0 0 var(--c-red);
+  }
 }
 
 // ── Tool Picker ──
