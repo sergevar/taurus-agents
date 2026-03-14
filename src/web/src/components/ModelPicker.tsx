@@ -168,6 +168,7 @@ export function ModelPicker({ value, onChange, placeholder }: ModelPickerProps) 
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      e.stopPropagation();
       onChange(valueOnOpenRef.current);
       setFilter('');
       setOpen(false);
@@ -188,7 +189,7 @@ export function ModelPicker({ value, onChange, placeholder }: ModelPickerProps) 
           className="model-picker__input"
           value={open ? (filter || value) : value}
           onChange={handleInputChange}
-          onFocus={() => !open && handleOpen()}
+          onBlur={() => setTimeout(() => { if (!ref.current?.contains(document.activeElement)) { setOpen(false); setFilter(''); } }, 0)}
           onKeyDown={handleKeyDown}
           placeholder={placeholderText}
         />
@@ -203,7 +204,7 @@ export function ModelPicker({ value, onChange, placeholder }: ModelPickerProps) 
       </div>
 
       {open && (
-        <div className="model-picker__dropdown" ref={dropdownRef}>
+        <div className="model-picker__dropdown" ref={dropdownRef} tabIndex={-1}>
           {Object.keys(filtered).length === 0 && (
             <div className="model-picker__empty">No models match</div>
           )}

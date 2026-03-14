@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { api } from '../api';
 import { AgentForm, type AgentFormData } from './AgentForm';
 import type { Agent } from '../types';
@@ -9,6 +10,13 @@ interface CreateAgentModalProps {
 }
 
 export function CreateAgentModal({ agents, onClose, onCreated }: CreateAgentModalProps) {
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onClose]);
   async function handleSubmit(data: AgentFormData) {
     const result = await api.createAgent({
       name: data.name,
